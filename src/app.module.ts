@@ -5,9 +5,17 @@ import { UserModule } from './user/user.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { OperatorModule } from './operator/operator.module';
 import { StatisticModule } from './statistic/statistic.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { typeORMConfig } from './configs/typeorm.config';
 
 @Module({
-  imports: [UserModule, AttendanceModule, OperatorModule, StatisticModule],
+  imports: [
+    TypeOrmModule.forRoot(typeORMConfig), 
+    UserModule, 
+    AttendanceModule, 
+    OperatorModule, 
+    StatisticModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
