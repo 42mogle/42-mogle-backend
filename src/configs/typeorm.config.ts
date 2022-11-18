@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { User } from "src/dbmanager/entities/user.entity";
 
 export const typeORMConfig : TypeOrmModuleOptions = {
 	type: 'postgres',
@@ -7,6 +8,7 @@ export const typeORMConfig : TypeOrmModuleOptions = {
 	username: 'postgres',
 	password: 'postgres',
 	database: 'mogle-app',
-	entities: [__dirname + '/../**/*.entity.{js,ts}'],
+	//entities: [__dirname + '/../**/*.entity.{js,ts}'],
+	entities: [User],
 	synchronize: true
 }

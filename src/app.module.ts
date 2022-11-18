@@ -7,6 +7,7 @@ import { OperatorModule } from './operator/operator.module';
 import { StatisticModule } from './statistic/statistic.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
+import { DbmanagerModule } from './dbmanager/dbmanager.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { typeORMConfig } from './configs/typeorm.config';
     UserModule, 
     AttendanceModule, 
     OperatorModule, 
-    StatisticModule
+    StatisticModule,
+    DbmanagerModule
   ],
   controllers: [AppController],
   providers: [AppService],
