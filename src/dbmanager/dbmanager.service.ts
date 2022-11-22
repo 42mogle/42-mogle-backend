@@ -13,11 +13,17 @@ export class DbmanagerService {
     private usersRepository: Repository<User>,
   ) {}
 
-  createUser(createDbmanagerDto: CreateUserDto) {
-    console.log(createDbmanagerDto);
+  async findUser(intraId: string) {
+    const found = await this.usersRepository.findOne({where: { intraId }});
+
+    return found;
+  }
+
+  createUser(createUserDto: CreateUserDto) {
+    console.log(createUserDto);
     const user = new User();
-    user.intraId = createDbmanagerDto.intraId;
-    user.password = createDbmanagerDto.password;
+    user.intraId = createUserDto.intraId;
+    user.password = createUserDto.password;
     user.isAdmin = false;
     user.photoURL = "abc";
     this.usersRepository.create(user);
@@ -28,8 +34,8 @@ export class DbmanagerService {
     return 'This action adds a new dbmanager';
   }
 
-  findAll() {
-    return this.usersRepository.find();
+  async findAll(): Promise<User[]> {
+    return await this.usersRepository.find();
   }
 
   findOne(id: number) {
