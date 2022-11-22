@@ -8,6 +8,6 @@ import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [UserController],
-  providers: [UserService, DbmanagerService]
+  providers: [UserService, DbmanagerService, ]
 })
 export class UserModule {}

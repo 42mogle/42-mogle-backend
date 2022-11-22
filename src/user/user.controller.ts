@@ -1,8 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { stringify } from 'querystring';
 import { User } from 'src/dbmanager/entities/user.entity';
 import { UserService } from './user.service';
 
-interface TestingUserInfo {
+class TestingUserInfo {
 	intraId: string;
 	isAdmin: boolean;
 }

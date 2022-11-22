@@ -7,12 +7,12 @@ export class UserService {
 	@Inject(DbmanagerService)
 	private readonly dbmanagerService: DbmanagerService;
 
-	async getUserInfoByIntraId(intraId: string): Promise<User> {
-		const ret = await this.dbmanagerService.findUser(intraId);
+	async getUserInfoByIntraId(inputtedintraId: string): Promise<any> {
+		const {userId, intraId, isAdmin, photoURL}  = await this.dbmanagerService.findUser(inputtedintraId);
 
 		console.log("In UserService.getUserInfoByIntraId()");
-		console.log(ret);
-		return ret;
+		console.log(`intraId: ${intraId}, isAdmin: ${isAdmin}`);
+		return {intraId, isAdmin};
 	}
 
 	async findAll(): Promise<User[]> {
