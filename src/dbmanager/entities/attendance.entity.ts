@@ -2,7 +2,7 @@ import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Unique } from "type
 
 @Entity()
 export class Attendance extends BaseEntity {
-	@Column()
+	@PrimaryGeneratedColumn() // 서버 테스트 오류해결용 임시 PK
 	timelog: string; // todo: using datetime
 
 	@Column()

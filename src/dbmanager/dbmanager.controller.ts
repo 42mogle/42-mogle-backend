@@ -18,4 +18,15 @@ export class DbmanagerController {
     console.log("in DbmanagerController.findAll()");
     return this.dbmanagerService.findAll();
   }
+
+  @Post('/test/month') 
+  testMonthSet() {
+    return this.dbmanagerService.setMonthInfo();
+  }
+
+  @Post('/test/day')
+  testDaySet() {
+	return this.dbmanagerService.setDayInfo();
+  }
+  
 }
