@@ -1,1 +1,5 @@
-export class CreateAuthDto {}
+export class CreateAuthDto {
+    intraId : string;
+    password: string;
+    imageURL: string;
+}

@@ -1,12 +1,14 @@
 import { Column, Entity, PrimaryColumn, Unique } from "typeorm";
 
 @Entity('User')
-@Unique(['id'])
+// @Unique(['intraId'])
 export class User {
     @PrimaryColumn()
-    id: string;
+    intraId: string;
     
     @Column({ length: 30 })
     password: string;
   
+    @Column()
+    imageURL: string;
 }

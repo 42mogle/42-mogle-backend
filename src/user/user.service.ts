@@ -15,9 +15,9 @@ export class UserService {
 
   create(createUserDto: CreateUserDto) {
     const user = new User();
-    user.id = createUserDto.id;
+    user.intraId = createUserDto.intraId;
     user.password = createUserDto.password;
-    
+    user.imageURL  = "testImageURL";
     this.usersRepository.save(user);
     return 'create서비스가 호출되었습니다';
   }

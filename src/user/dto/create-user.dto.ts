@@ -1,4 +1,4 @@
 export class CreateUserDto {
-    id: string;
+    intraId: string;
     password: string;
 }
