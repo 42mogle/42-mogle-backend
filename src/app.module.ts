@@ -8,6 +8,7 @@ import { StatisticModule } from './statistic/statistic.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
 import { DbmanagerModule } from './dbmanager/dbmanager.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { DbmanagerModule } from './dbmanager/dbmanager.module';
     AttendanceModule, 
     OperatorModule, 
     StatisticModule,
-    DbmanagerModule
+    DbmanagerModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
