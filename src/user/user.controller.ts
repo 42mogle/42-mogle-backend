@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { stringify } from 'querystring';
 import { User } from 'src/dbmanager/entities/user.entity';
 import { UserService } from './user.service';
@@ -25,5 +25,10 @@ export class UserController {
 	getUserInfo(@Param('intra_id') intra_id: string) {
 		return this.userService.getUserInfoByIntraId(intra_id);
 	}
+
+	// @Post('/user/:intraId/attendence/buttonPushed')
+	// pushButton(@Param("intraId") intraId: string) {
+	// 	return this.
+	// }
 	
 }

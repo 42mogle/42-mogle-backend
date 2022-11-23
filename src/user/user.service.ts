@@ -22,4 +22,8 @@ export class UserService {
 		console.log(ret);
 		return ret;
 	}
+
+	// async buttonPushed(intraId: string): Promise<any> {
+	// 	const find = this.dbmanagerService.attendancecheck(intraId);
+	// }
 }

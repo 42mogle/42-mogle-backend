@@ -1,19 +1,23 @@
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity()
-export class MonthlyUsers extends BaseEntity {
-	@Column()
-	monthId: number; // todo: FK
+//@Unique([])
+export class MonthInfo extends BaseEntity {
+	@PrimaryGeneratedColumn()
+	monthId: number; // todo: PK
 
 	@Column()
-	userId: number; // todo: FK
+	month: number; // todo: FK
 
 	@Column()
-	attendanceCount: number;
+	Year: number;
 
 	@Column()
-	isPerfect: boolean;
+	totalAttendance: number;
 
 	@Column()
-	totalPerfectCount: number;
+	perfcetUserCount: number;
+
+	@Column()
+	failUserCount: number;
 }
