@@ -10,7 +10,7 @@ export class MonthInfo extends BaseEntity {
 	month: number; // todo: FK
 
 	@Column()
-	Year: number;
+	year: number;
 
 	@Column()
 	totalAttendance: number;

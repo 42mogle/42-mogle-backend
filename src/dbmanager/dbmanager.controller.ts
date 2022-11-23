@@ -20,8 +20,13 @@ export class DbmanagerController {
   }
 
   @Post('/test/month') 
-  testDaySet() {
+  testMonthSet() {
     return this.dbmanagerService.setMonthInfo();
+  }
+
+  @Post('/test/day')
+  testDaySet() {
+	return this.dbmanagerService.setDayInfo();
   }
   
 }
