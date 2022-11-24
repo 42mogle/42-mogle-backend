@@ -13,7 +13,7 @@ export class AttendanceService {
 		2: 출석체크 시간이 아님
 		3: 서버 오류
 	*/
-	getUserButtonStatus(argIntraId: string): any {
+	async getUserButtonStatus(argIntraId: string) {
 		let retButtonStatus = 3;
 		console.log("In AttendanceService.getUserButtonStatus()")
 
@@ -39,7 +39,9 @@ export class AttendanceService {
 		if ((datetimeOne < datetimeCurr) && (datetimeCurr < datetimeTwo)) {
 			// 출석체크 유무 검증
 			//  -> DB Attendance table에 오늘 유저의 출석 데이터가 있는지 확인
-			this.dbmanagerService.findUser(argIntraId);
+			const todayUserAttendance = this.dbmanagerService.getUserDailyAttendance(argIntraId, 
+				datetimeCurr.getDay(), datetimeCurr.getMonth(), datetimeCurr.getFullYear());
+			return todayUserAttendance;
 		} else {
 			retButtonStatus = 2;
 			if ((datetimeCurr < datetimeOne)) {
