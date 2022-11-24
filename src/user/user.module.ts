@@ -10,6 +10,10 @@ import { DayInfo } from '../dbmanager/entities/day.info.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([User, MonthInfo, DayInfo])],
   controllers: [UserController],
+<<<<<<< HEAD
   providers: [UserService, DbmanagerService,]
+=======
+  providers: [UserService, DbmanagerService]
+>>>>>>> refs/remotes/origin/minsukan_test
 })
 export class UserModule {}
