@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { userInfo } from 'os';
 import { endWith, NotFoundError } from 'rxjs';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
+import { DayInfo } from '../dbmanager/entities/day_info.entity';
+import { UserInfo } from '../dbmanager/entities/user_info.entity';
 
 @Injectable()
 export class AttendanceService {
@@ -9,64 +11,18 @@ export class AttendanceService {
 
 
 	getUserButtonStatus(intraId: string): number {
-		var status: number = 0;
 		if (!this.isCurrentTime()) {
-			return 1;
+			return (1);
 		}
-		/*if (!this.isAttendance(intraId)) {
-
-		}*/
-
-		return status;
+		else if (this.isAttendance(intraId)) {
+			return (2);
+		}
+		else if (!this.isSetToDayWord()) {
+			return (3)
+		}
+		return (0);
 	}
 
-	/*
-		버튼 상태
-		0: 출석체크 가능
-		1: 이미 출석체크 함
-		2: 출석체크 시간이 아님
-		3: 서버 오류
-	*/
-
-
-
-	// getUserButtonStatus(argIntraId: string): any {
-	// 	let retButtonStatus = 3;
-	// 	console.log("In AttendanceService.getUserButtonStatus()")
-
-	// 	console.log("argIntraId:", argIntraId);
-		
-	// 	// 출석 체크 시간 체크
-	// 	const datetimeOne = new Date();
-	// 	datetimeOne.setHours(8, 30, 0);
-	// 	console.log("datetimeOne", datetimeOne);
-	// 	console.log("datetimeOne(KST)", datetimeOne.toLocaleString());
-
-	// 	const datetimeTwo = new Date();
-	// 	datetimeTwo.setHours(9, 0, 0);
-	// 	console.log("datetimeTwo", datetimeTwo);
-	// 	console.log("datetimeTwo(KST)", datetimeTwo.toLocaleString());
-	// 	console.log();
-
-	// 	// to get current time
-	// 	const datetimeCurr = new Date();
-	// 	console.log("datetimeCurr", datetimeCurr);
-	// 	console.log("datetimeCurr(KST)", datetimeCurr.toLocaleString());
-		
-	// 	if ((datetimeOne < datetimeCurr) && (datetimeCurr < datetimeTwo)) {
-	// 		// 출석체크 유무 검증
-	// 		//  -> DB Attendance table에 오늘 유저의 출석 데이터가 있는지 확인
-	// 		this.dbmanagerService.findUser(argIntraId);
-	// 	} else {
-	// 		retButtonStatus = 2;
-	// 		if ((datetimeCurr < datetimeOne)) {
-	// 			console.log("Refuse: The current time is too early!");
-	// 		} else if (datetimeCurr > datetimeTwo) {
-	// 			console.log("Refuse: The current time is too late!")
-	// 		}
-	// 	}
-	// 	return { retButtonStatus };
-	// }
 
 	/***********************************
      * 			util function list     *
@@ -85,10 +41,21 @@ export class AttendanceService {
 	}
 
 	async isAttendance(intra_id: string): Promise<boolean> {
-		const dayId = await this.dbmanagerService.getDayId();
-		const userId = await this.dbmanagerService.getUserId(intra_id)
-		const found = await this.dbmanagerService.getAttendanceUserInfo(userId, dayId);
-		return true
+		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo();
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intra_id)
+		const found = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
+		if (found)
+			return true;
+		else
+			return false;
+	}
+
+	async isSetToDayWord(): Promise<boolean> {
+		const found: DayInfo = await this.dbmanagerService.getDayInfo();
+		if (found.todayWord === "뀨?")
+			return (false);
+		else
+			return (true);
 	}
 
 	

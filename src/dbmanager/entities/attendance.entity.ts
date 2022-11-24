@@ -14,7 +14,7 @@ export class Attendance {
 
 	@ManyToOne(() => UserInfo, (user: UserInfo) => user.attendances)
 	@JoinColumn({ name: "userInfoId", referencedColumnName: 'id' })
-	userInfo: number;
+	userInfo: UserInfo;
 
 	@ManyToOne(() => DayInfo, (day_info: DayInfo) => day_info.attendances)
 	@JoinColumn({ name: "dayInfoId", referencedColumnName: 'id' })

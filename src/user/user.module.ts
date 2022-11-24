@@ -8,6 +8,7 @@ import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 import { MonthlyUsers } from 'src/dbmanager/entities/monthly_users.entity';
+import { AttendanceService } from '../attendance/attendance.service';
 
 @Module({
   imports: [
@@ -16,6 +17,6 @@ import { MonthlyUsers } from 'src/dbmanager/entities/monthly_users.entity';
     )
   ],
   controllers: [UserController],
-  providers: [UserService, DbmanagerService]
+  providers: [UserService, DbmanagerService, AttendanceService]
 })
 export class UserModule {}

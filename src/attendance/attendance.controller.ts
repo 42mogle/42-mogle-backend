@@ -18,6 +18,5 @@ export class AttendanceController {
 	@Get('/:intraId/buttonStatus')
 	getUserButtonStatus(@Param('intraId') intraId: string) {
 		return this.attendanceService.getUserButtonStatus(intraId);
-		//return this.attendanceService.isCurrentTime();
 	}
 }

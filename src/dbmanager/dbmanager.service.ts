@@ -20,29 +20,14 @@ export class DbmanagerService {
 	  @InjectRepository(DayInfo) private dayInfoRepository: Repository<DayInfo>
   ) {}
 
-  /* Examples
-  findOne(id: number) {
-    return `This action returns a #${id} dbmanager`;
-  }
-
-  update(id: number, updateDbmanagerDto: UpdateDbmanagerDto) {
-    return `This action updates a #${id} dbmanager`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} dbmanager`;
-  }
-  */
-
   // DB table: User
-  async findUser(intraId: string): Promise<UserInfo> {
+  async getUserInfo(intraId: string): Promise<UserInfo> {
     const found = await this.usersRepository.findOne({where: { intraId }});
 
     return found;
   }
 
   createUser(createUserDto: CreateUserDto) {
-    console.log(createUserDto);
     const user = new UserInfo();
     //user.intraId = createUserDto.intraId;
     user.password = createUserDto.password;
@@ -64,87 +49,86 @@ export class DbmanagerService {
   //findMonthInfo(year: number, month: number)
   
   // DB table: MonthInfo
-  async setMonthInfo(): Promise<any> {
+  async setMonthInfo(): Promise<MonthInfo> {
     const	now = new Date();
     const	year = now.getFullYear();
     const	month = now.getMonth() + 1;
     const	found = await this.monthRepository.findOne({where: {year, month}});
     if (found)
       throw new NotFoundException("이미 있슴;;");
-    const monthinfo = new MonthInfo();
-    monthinfo.year = year
-    monthinfo.month = month;
-    //monthinfo.failUserCount = 0;
-    //monthinfo.totalAttendance = 0;
-    //monthinfo.perfcetUserCount = 0;
-    this.monthRepository.create(monthinfo);
-    return this.monthRepository.save(monthinfo);
+	const monthInfo = this.monthRepository.create({
+		year: year,
+		month: month,
+		failUserCount: 0,
+		totalAttendance: 0,
+		perfectUserCount: 0,
+	})
+    return this.monthRepository.save(monthInfo);
   }
 
-  async getMonthId(month: number, year: number): Promise<number> {
-    const monthinfo = await this.monthRepository.findOne({where: {month, year}});
+  async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
+    const monthInfo = await this.monthRepository.findOne({where: {month, year}});
   
-    return monthinfo.id;
+    return monthInfo;
   }
 
   // DB table: DayInfo
   async setDayInfo() {
-	  const now: Date = new Date();
-	  const day: number = now.getDate();
-	  const monthId: number = await this.getMonthId(now.getMonth() + 1, now.getFullYear());
+	const now: Date = new Date();
+	const day: number = now.getDate();
+	const monthInfo: MonthInfo = await this.getMonthInfo(now.getMonth() + 1, now.getFullYear());
 
-	  const found = await this.dayInfoRepository.findOne({ where: { day, id: monthId } });
-	  if (found)
-		  throw new GatewayTimeoutException("일일 데이터가 이미 있습니다");
+	const found = await this.dayInfoRepository.findOneBy({
+		day, 
+		monthInfo
+	});
+	if (found)
+		throw new GatewayTimeoutException("일일 데이터가 이미 있습니다");
 
-	  const dayinfo = this.dayInfoRepository.create({
-		  day: day,
-		  type: this.getDayType(now),
-		  todayWord: "뀨?",
-		  attendUserCount: 0,
-		  perfectUserCount: 0
-		  // todo: set monthInfo
-	  });
-	  return this.dayInfoRepository.save(dayinfo);
+	const dayInfo = this.dayInfoRepository.create({
+		day: day,
+		type: this.getDayType(now),
+		todayWord: "뀨?",
+		attendUserCount: 0,
+		perfectUserCount: 0,
+		monthInfo,
+	});
+	return this.dayInfoRepository.save(dayInfo);
   }
 
-  async getDayInfo(day: number, month: number, year: number) {
-	const monthId: number = await this.getMonthId(month + 1, year);
-	return await this.dayInfoRepository.findOne({where: {day, id: monthId}})
+  async getDayInfo() {
+	const now = new Date();
+	const day = now.getDate();
+	const month = now.getMonth() + 1;
+	const year = now.getFullYear();
+	const monthInfo: MonthInfo = await this.getMonthInfo(month + 1, year);
+	return await this.dayInfoRepository.findOneBy( {day, monthInfo} )
   }
 
   async setToDayWord(toDayWord: string) {
 	const now = new Date();
-	const dayInfo = await this.getDayInfo(now.getDate(), now.getMonth(), now.getFullYear());
+	const dayInfo = await this.getDayInfo();
 	dayInfo.todayWord = toDayWord;
 	await this.dayInfoRepository.save(dayInfo)
   }
 
 
-	async getDayId() {
-		const now = new Date();
-		const day = now.getDate();
-		const monthId: number = await this.getMonthId(now.getMonth() + 1, now.getFullYear());
-		const dayInfo: DayInfo = await this.dayInfoRepository.findOne({where: {day, id: monthId}}); // todo: monthInfo를 사용해야함
-		return dayInfo.id;
-	}
-
 	async	attendanceRegistration(attendinfo: CreateAttendanceDto) {
 		const now = new Date();
-		const userId = await this.getUserId(attendinfo.intraId);
-		const dayId = await this.getDayId();
+		const userInfo: UserInfo = await this.getUserInfo(attendinfo.intraId);
+		const dayInfo: DayInfo = await this.getDayInfo();
 		const attendanceinfo = this.attendanceRepository.create(
 			{
 				timelog: now,
-				// userInfo
-				// dayInfo
+				userInfo,
+				dayInfo
 			}
 		)
 		return await this.attendanceRepository.save(attendanceinfo);
   }
 
-  async getAttendanceUserInfo(user_id: number, day_id: number): Promise<Attendance> {
-	return await this.attendanceRepository.findOne({where: {user_id, day_id}}); // using userInfo, dayInfo
+  async getAttendanceUserInfo(userInfo: UserInfo, dayInfo: DayInfo): Promise<Attendance> {
+	return await this.attendanceRepository.findOneBy({userInfo, dayInfo}); // using userInfo, dayInfo
   }
 
   /**************************************
@@ -159,14 +143,4 @@ export class DbmanagerService {
 			return (1);
 	}
 
-  // DB table: Attendance
-  async getUserDailyAttendance(intraId: string, day: number, month: number, year: number) {
-    const userId: number = await this.getUserId(intraId);
-    const dayId: number = await this.getDayId();
-
-    return dayId; //tmp
-
-    //const found: Attendance = await this.attendanceRepository.findOne({where: { id: dayId, userId: userId }});
-    //return found;
-  }
 }
