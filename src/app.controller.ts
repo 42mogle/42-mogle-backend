@@ -9,9 +9,9 @@ export class AppController {
     	private dbm_serv: DbmanagerService
     ) {}
 
-  @Get()
-  async getHello(): Promise<any> {
-    await this.appService.testDBTables();
-    return 'Complete: Test DB Tables';
-  }
+  // @Get()
+  // async getHello(): Promise<any> {
+  //   //await this.appService.testDBTables();
+  //   return 'Complete: Test DB Tables';
+  // }
 }
