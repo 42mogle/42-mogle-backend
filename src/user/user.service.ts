@@ -40,8 +40,4 @@ export class UserService {
 		}
 		return this.dbmanagerService.attendanceRegistration(attendanceinfo);
 	}
-
-	// async buttonPushed(intraId: string): Promise<any> {
-	// 	const find = this.dbmanagerService.attendancecheck(intraId);
-	// }
 }
