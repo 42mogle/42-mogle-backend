@@ -1,41 +1,43 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
+import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
+import { AttendanceService } from '../attendance/attendance.service';
+import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-  ) {}
+	@Inject(DbmanagerService)
+	private readonly dbmanagerService: DbmanagerService;
+	@Inject(AttendanceService)
+	private readonly attendanceService: AttendanceService;
 
+	async getUserInfoByIntraId(inputtedintraId: string) {
+		/*
+		const user: UserInfo  = await this.dbmanagerService.findUser(inputtedintraId);
+		const retIntraId: string = user.intra_id;
+		const retIsAdmin: boolean = user.is_admin;
+		console.log("In UserService.getUserInfoByIntraId()");
+		console.log(`intraId: ${retIntraId}, isAdmin: ${retIsAdmin}`);
+		*/
+		return ;
+	}
 
-  create(createUserDto: CreateUserDto) {
-    const user = new User();
-    user.intraId = createUserDto.intraId;
-    user.password = createUserDto.password;
-    user.imageURL  = "testImageURL";
-    this.usersRepository.save(user);
-    return 'create서비스가 호출되었습니다';
-  }
+	async findAll(): Promise<UserInfo[]> {
+		const ret = await this.dbmanagerService.findAll();
 
-  findAll() {
+		console.log("In UserService.findAll()");
+		console.log(ret);
+		return ret;
+	}
 
-    return this.usersRepository.find();
-  }
+	AttendanceCertification(attendanceinfo: CreateAttendanceDto) {
+		if (this.attendanceService.isAttendance(attendanceinfo.intraId)) {
+			throw new NotFoundException("이미 출석체크 했습니다.");
+		}
+		return this.dbmanagerService.attendanceRegistration(attendanceinfo);
+	}
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+	// async buttonPushed(intraId: string): Promise<any> {
+	// 	const find = this.dbmanagerService.attendancecheck(intraId);
+	// }
 }
