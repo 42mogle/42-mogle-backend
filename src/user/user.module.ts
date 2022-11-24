@@ -6,14 +6,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { MonthInfo } from '../dbmanager/entities/month.info.entity';
 import { DayInfo } from '../dbmanager/entities/day.info.entity';
+import { Attendance } from '../dbmanager/entities/attendance.entity';
+import { AttendanceService } from '../attendance/attendance.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, MonthInfo, DayInfo])],
+  imports: [TypeOrmModule.forFeature([
+      User,
+      MonthInfo,
+      DayInfo,
+      Attendance
+    ])],
   controllers: [UserController],
-<<<<<<< HEAD
-  providers: [UserService, DbmanagerService,]
-=======
-  providers: [UserService, DbmanagerService]
->>>>>>> refs/remotes/origin/minsukan_test
+  providers: [UserService, DbmanagerService, AttendanceService]
 })
 export class UserModule {}

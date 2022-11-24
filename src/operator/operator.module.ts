@@ -6,6 +6,7 @@ import { User } from '../dbmanager/entities/user.entity';
 import { MonthInfo } from '../dbmanager/entities/month.info.entity';
 import { DayInfo } from '../dbmanager/entities/day.info.entity';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
+import { Attendance } from '../dbmanager/entities/attendance.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature(
@@ -13,6 +14,7 @@ import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
       User, 
       MonthInfo, 
       DayInfo,
+      Attendance
     ])
   ],
   controllers: [OperatorController],

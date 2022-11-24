@@ -2,12 +2,15 @@ import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Unique } from "type
 
 @Entity()
 export class Attendance extends BaseEntity {
-	@PrimaryGeneratedColumn() // 서버 테스트 오류해결용 임시 PK
-	timelog: string; // todo: using datetime
+	@PrimaryGeneratedColumn() // 서버 테스트를 위한 임시 PK
+	test_pk: number;
+	
+	@Column() 
+	time_log: Date; // todo: using datetime
 
 	@Column()
-	dayId: number; // todo: FK
+	day_id: number; // todo: FK
 
 	@Column()
-	userId: number; // todo: FK
+	user_id: number; // todo: FK
 }
