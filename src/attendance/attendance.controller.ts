@@ -5,9 +5,7 @@ import { AttendanceService } from './attendance.service';
 @ApiTags('attendance')
 @Controller('attendance')
 export class AttendanceController {
-	constructor(private attendanceService: AttendanceService) {
-		this.attendanceService = attendanceService;
-	}
+	constructor(private attendanceService: AttendanceService) {}
 
 	@ApiOperation({summary: 'get the attendance button status of the user'})
 	@ApiParam({
@@ -20,5 +18,6 @@ export class AttendanceController {
 	@Get('/:intraId/buttonStatus')
 	getUserButtonStatus(@Param('intraId') intraId: string) {
 		return this.attendanceService.getUserButtonStatus(intraId);
+		//return this.attendanceService.isCurrentTime();
 	}
 }

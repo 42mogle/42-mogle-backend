@@ -7,7 +7,9 @@ import { Attendance } from './entities/attendance.entity';
 import { Cron, Interval } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
 import { NotFoundError, sample } from 'rxjs';
+import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { DayInfo } from './entities/day_info.entity';
+import { userInfo } from 'os';
 
 @Injectable()
 export class DbmanagerService {
@@ -90,18 +92,19 @@ export class DbmanagerService {
 	  const now: Date = new Date();
 	  const day: number = now.getDate();
 	  const monthId: number = await this.getMonthId(now.getMonth() + 1, now.getFullYear());
-	  
-	  const found = await this.dayInfoRepository.findOne({where: {day, id: monthId}}); 
-	  if(found)
-	  	throw new GatewayTimeoutException("일일 데이터가 이미 있습니다");
-	  const dayinfo = new DayInfo();
-	  dayinfo.day = day;
-	  //dayinfo.monthId = monthId;
-	  dayinfo.type = this.getDayType(now);
-	  dayinfo.todayWord = "뀨?";
-	  dayinfo.attendUserCount = 0;
-	  dayinfo.perfectUserCount = 0;
-	  this.dayInfoRepository.create(dayinfo);
+
+	  const found = await this.dayInfoRepository.findOne({ where: { day, id: monthId } });
+	  if (found)
+		  throw new GatewayTimeoutException("일일 데이터가 이미 있습니다");
+
+	  const dayinfo = this.dayInfoRepository.create({
+		  day: day,
+		  type: this.getDayType(now),
+		  todayWord: "뀨?",
+		  attendUserCount: 0,
+		  perfectUserCount: 0
+		  // todo: set monthInfo
+	  });
 	  return this.dayInfoRepository.save(dayinfo);
   }
 
@@ -117,10 +120,31 @@ export class DbmanagerService {
 	await this.dayInfoRepository.save(dayInfo)
   }
 
-  async getDayId(day: number, month: number, year: number): Promise<number> {
-    const monthId: number = await this.getMonthId(month, year);
-    const dayInfo: DayInfo = await this.dayInfoRepository.findOne({where: {day, id: monthId}});
-    return dayInfo.id;
+
+	async getDayId() {
+		const now = new Date();
+		const day = now.getDate();
+		const monthId: number = await this.getMonthId(now.getMonth() + 1, now.getFullYear());
+		const dayInfo: DayInfo = await this.dayInfoRepository.findOne({where: {day, id: monthId}}); // todo: monthInfo를 사용해야함
+		return dayInfo.id;
+	}
+
+	async	attendanceRegistration(attendinfo: CreateAttendanceDto) {
+		const now = new Date();
+		const userId = await this.getUserId(attendinfo.intraId);
+		const dayId = await this.getDayId();
+		const attendanceinfo = this.attendanceRepository.create(
+			{
+				timelog: now,
+				// userInfo
+				// dayInfo
+			}
+		)
+		return await this.attendanceRepository.save(attendanceinfo);
+  }
+
+  async getAttendanceUserInfo(user_id: number, day_id: number): Promise<Attendance> {
+	return await this.attendanceRepository.findOne({where: {user_id, day_id}}); // using userInfo, dayInfo
   }
 
   /**************************************
@@ -138,7 +162,7 @@ export class DbmanagerService {
   // DB table: Attendance
   async getUserDailyAttendance(intraId: string, day: number, month: number, year: number) {
     const userId: number = await this.getUserId(intraId);
-    const dayId: number = await this.getDayId(day, month, year);
+    const dayId: number = await this.getDayId();
 
     return dayId; //tmp
 

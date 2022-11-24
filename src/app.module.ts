@@ -14,6 +14,7 @@ import { Attendance } from './dbmanager/entities/attendance.entity';
 import { DayInfo } from './dbmanager/entities/day_info.entity';
 import { MonthInfo } from './dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from './dbmanager/entities/monthly_users.entity';
+import { DbmanagerService } from './dbmanager/dbmanager.service';
 
 @Module({
   imports: [
@@ -21,14 +22,14 @@ import { MonthlyUsers } from './dbmanager/entities/monthly_users.entity';
     TypeOrmModule.forFeature(
       [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
     ),
-    //UserModule, 
-    //AttendanceModule, 
-    //OperatorModule, 
-    //StatisticModule,
+    UserModule, 
+    AttendanceModule, 
+    OperatorModule, 
+    StatisticModule,
     DbmanagerModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DbmanagerService],
 })
 export class AppModule {}

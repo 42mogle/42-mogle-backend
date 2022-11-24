@@ -1,8 +1,10 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { stringify } from 'querystring';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { UserService } from './user.service';
 import { ApiParam, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { CreateAttendanceDto } from 'src/dbmanager/dto/create-attendance.dto';
+import { Certificate } from 'crypto';
 
 @ApiTags('user')
 @Controller('user')
@@ -32,9 +34,11 @@ export class UserController {
 		return this.userService.getUserInfoByIntraId(intraId);
 	}
 
-	// @Post('/user/:intraId/attendence/buttonPushed')
-	// pushButton(@Param("intraId") intraId: string) {
-	// 	return this.
-	// }
+	@Post('/attendance')
+	pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
+		console.log(createAttendanceDto.intraId);
+		console.log(createAttendanceDto.todayWord);
+		return this.userService.AttendanceCertification(createAttendanceDto);
+	}
 	
 }
