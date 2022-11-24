@@ -1,4 +1,5 @@
 export class LoginAuthDto {
     intraId : string;
-    password: string;
+    passWord : string;
+    imageURL: string;
 }

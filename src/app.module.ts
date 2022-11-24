@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { Auth } from './auth/entities/auth.entity';
 // import { HttpModule } from '@nestjs/axios';
 
 @Module({
@@ -18,7 +19,7 @@ import { AuthModule } from './auth/auth.module';
       password: 'postgres',
       database: 'test',
       // entities: [__dirname + '/../s**/*.entity.{js,ts}'],
-      entities: [User],
+      entities: [User, Auth],
       synchronize: true
     }),
     UserModule,
