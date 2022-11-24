@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { OperatorModule } from './operator/operator.module';
 import { StatisticModule } from './statistic/statistic.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
 import { DbmanagerModule } from './dbmanager/dbmanager.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -16,11 +14,18 @@ import { MonthInfo } from './dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from './dbmanager/entities/monthly_users.entity';
 import { DbmanagerService } from './dbmanager/dbmanager.service';
 
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
+import { AuthModule } from './auth/auth.module';
+import { Auth } from './auth/entities/auth.entity';
+// import { HttpModule } from '@nestjs/axios';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeORMConfig), 
     TypeOrmModule.forFeature(
-      [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
+      [Auth, UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
     ),
     UserModule, 
     AttendanceModule, 
