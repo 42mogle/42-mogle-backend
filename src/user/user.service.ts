@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
-import { User } from 'src/dbmanager/entities/user.entity';
 import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
 import { AttendanceService } from '../attendance/attendance.service';
+import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 
 @Injectable()
 export class UserService {
@@ -11,15 +11,18 @@ export class UserService {
 	@Inject(AttendanceService)
 	private readonly attendanceService: AttendanceService;
 
-	async getUserInfoByIntraId(inputtedintraId: string): Promise<any> {
-		const {userId, intraId, isAdmin, photoURL}  = await this.dbmanagerService.findUser(inputtedintraId);
-
+	async getUserInfoByIntraId(inputtedintraId: string) {
+		/*
+		const user: UserInfo  = await this.dbmanagerService.findUser(inputtedintraId);
+		const retIntraId: string = user.intra_id;
+		const retIsAdmin: boolean = user.is_admin;
 		console.log("In UserService.getUserInfoByIntraId()");
-		console.log(`intraId: ${intraId}, isAdmin: ${isAdmin}`);
-		return {intraId, isAdmin};
+		console.log(`intraId: ${retIntraId}, isAdmin: ${retIsAdmin}`);
+		*/
+		return ;
 	}
 
-	async findAll(): Promise<User[]> {
+	async findAll(): Promise<UserInfo[]> {
 		const ret = await this.dbmanagerService.findAll();
 
 		console.log("In UserService.findAll()");

@@ -1,16 +1,22 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { DayInfo } from "./day_info.entity";
+import { UserInfo } from "./user_info.entity";
 
 @Entity()
-export class Attendance extends BaseEntity {
-	@PrimaryGeneratedColumn() // 서버 테스트를 위한 임시 PK
-	test_pk: number;
-	
-	@Column() 
-	time_log: Date; // todo: using datetime
+@Unique(['userInfo', 'dayInfo'])
+export class Attendance {
+	@PrimaryGeneratedColumn({ name: "id" })
+	id: number;
 
-	@Column()
-	day_id: number; // todo: FK
+	// link: https://stackoverflow.com/questions/62696628/how-can-i-create-columns-with-type-date-and-type-datetime-in-nestjs-with-typeorm
+	@Column({ name: "timelog", type: 'timestamptz' })
+	timelog: Date;
 
-	@Column()
-	user_id: number; // todo: FK
+	@ManyToOne(() => UserInfo, (user: UserInfo) => user.attendances)
+	@JoinColumn({ name: "userInfoId", referencedColumnName: 'id' })
+	userInfo: number;
+
+	@ManyToOne(() => DayInfo, (day_info: DayInfo) => day_info.attendances)
+	@JoinColumn({ name: "dayInfoId", referencedColumnName: 'id' })
+	dayInfo: DayInfo;
 }
