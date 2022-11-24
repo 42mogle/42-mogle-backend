@@ -36,8 +36,6 @@ export class UserController {
 
 	@Post('/attendance')
 	pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
-		console.log(createAttendanceDto.intraId);
-		console.log(createAttendanceDto.todayWord);
 		return this.userService.AttendanceCertification(createAttendanceDto);
 	}
 	
