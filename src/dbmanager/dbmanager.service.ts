@@ -77,14 +77,14 @@ async setMonthInfo(): Promise<any> {
   }
 
   async getMonthId(month: number, year: number): Promise<number> {
-	var monthinfo = await this.monthRepository.findOne({where: {month, year}});
-	
-	return monthinfo.monthId;
+	const monthinfo = await this.monthRepository.findOne({where: {month, year}});
+	console.log(month, year);
+	return await monthinfo.monthId;
   }
 
   async setDayInfo() {
 	  const now: Date = new Date();
-	  const day: number = now.getDate() + 1;
+	  const day: number = now.getDate();
 	  const monthId: number = await this.getMonthId(now.getMonth() + 1, now.getFullYear());
 	  
 	  const found = await this.dayInfoRepository.findOne({where: {day, monthId}}); 
@@ -94,10 +94,23 @@ async setMonthInfo(): Promise<any> {
 	  dayinfo.day = day;
 	  dayinfo.monthId = monthId;
 	  dayinfo.type = this.getDayType(now);
+	  dayinfo.today_word = "뀨?";
 	  dayinfo.attendUserCount = 0;
 	  dayinfo.perfectUserCount = 0;
 	  this.dayInfoRepository.create(dayinfo);
 	  return this.dayInfoRepository.save(dayinfo);
+  }
+
+  async getDayInfo(day: number, month: number, year: number) {
+	const monthId: number = await this.getMonthId(month + 1, year);
+	return await this.dayInfoRepository.findOne({where: {day, monthId}})
+  }
+
+  async setToDayWord(toDayWord: string) {
+	const now = new Date();
+	const dayInfo = await this.getDayInfo(now.getDate(), now.getMonth(), now.getFullYear());
+	dayInfo.today_word = toDayWord;
+	await this.dayInfoRepository.save(dayInfo)
   }
 
   /**************************************

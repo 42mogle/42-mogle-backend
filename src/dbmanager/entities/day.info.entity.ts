@@ -5,7 +5,7 @@ export class DayInfo extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	dayId: number;
 
-	@Column()
+	@Column({name: "day"})
 	day: number;
 
 	@Column()
@@ -19,4 +19,7 @@ export class DayInfo extends BaseEntity {
 
 	@Column()
 	perfectUserCount: number;
+
+	@Column()
+	today_word: string;
 }
