@@ -5,7 +5,7 @@ export class Auth {
     @PrimaryColumn()
     intraId: string;
     
-    @Column({ length: 30 })
+    @Column()
     password: string;
   
     @Column()
