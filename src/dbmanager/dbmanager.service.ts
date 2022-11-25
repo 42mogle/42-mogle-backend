@@ -2,13 +2,14 @@ import { GatewayTimeoutException, Injectable, NotFoundException } from '@nestjs/
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Repository } from 'typeorm';
+import { Repository, ReturningStatementNotSupportedError } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron, Interval } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { DayInfo } from './entities/day_info.entity';
 import { userInfo } from 'os';
+import * as request from 'supertest';
 
 @Injectable()
 export class DbmanagerService {
@@ -48,10 +49,11 @@ export class DbmanagerService {
 	//findMonthInfo(year: number, month: number)
 
 	// DB table: MonthInfo
-	async setMonthInfo(): Promise<MonthInfo> {
+	async setMonthInfo() {
 		const now = new Date();
 		const year = now.getFullYear();
 		const month = now.getMonth() + 1;
+		const totalAttendance = new Date(year, month, 0).getDate();
 		const found = await this.monthRepository.findOne({ where: { year, month } });
 		if (found)
 			throw new NotFoundException("이미 있슴;;");
@@ -59,10 +61,27 @@ export class DbmanagerService {
 			year: year,
 			month: month,
 			failUserCount: 0,
-			totalAttendance: 0,
+			totalAttendance,
 			perfectUserCount: 0,
 		})
-		return this.monthRepository.save(monthInfo);
+		await this.monthRepository.save(monthInfo);
+		this.setAllDayInfo(monthInfo);
+		//return this.monthRepository.save(monthInfo);
+	}
+
+	async setAllDayInfo(monthInfo: MonthInfo) {
+		for(let i = 1; i <= monthInfo.totalAttendance; i++) {
+			const type = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, i));
+			const dayInfo = this.dayInfoRepository.create({
+				day: i,
+				monthInfo: monthInfo,
+				attendUserCount: 0,
+				type: type,
+				perfectUserCount: 0,
+				todayWord: "뀨?",
+			})
+			await this.dayInfoRepository.save(dayInfo);
+		}
 	}
 
 	async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
@@ -72,28 +91,28 @@ export class DbmanagerService {
 	}
 
 	// DB table: DayInfo
-	async setDayInfo() {
-		const now: Date = new Date();
-		const day: number = now.getDate();
-		const monthInfo: MonthInfo = await this.getMonthInfo(now.getMonth() + 1, now.getFullYear());
+	// async setDayInfo() {
+	// 	const now: Date = new Date();
+	// 	const day: number = now.getDate();
+	// 	const monthInfo: MonthInfo = await this.getMonthInfo(now.getMonth() + 1, now.getFullYear());
 
-		const found = await this.dayInfoRepository.findOneBy({
-			day,
-			monthInfo
-		});
-		if (found)
-			throw new GatewayTimeoutException("일일 데이터가 이미 있습니다");
+	// 	const found = await this.dayInfoRepository.findOneBy({
+	// 		day,
+	// 		monthInfo
+	// 	});
+	// 	if (found)
+	// 		throw new GatewayTimeoutException("일일 데이터가 이미 있습니다");
 
-		const dayInfo = this.dayInfoRepository.create({
-			day: day,
-			type: this.getDayType(now),
-			todayWord: "뀨?",
-			attendUserCount: 0,
-			perfectUserCount: 0,
-			monthInfo,
-		});
-		return this.dayInfoRepository.save(dayInfo);
-	}
+	// 	const dayInfo = this.dayInfoRepository.create({
+	// 		day: day,
+	// 		type: this.getDayType(now),
+	// 		todayWord: "뀨?",
+	// 		attendUserCount: 0,
+	// 		perfectUserCount: 0,
+	// 		monthInfo,
+	// 	});
+	// 	return this.dayInfoRepository.save(dayInfo);
+	// }
 
 	async getDayInfo() {
 		const now = new Date();
@@ -134,17 +153,31 @@ export class DbmanagerService {
 		return found.todayWord;
 	}
 
+	//setTotalMonthInfo
+	async setTotalMonthInfo(intra_id: string) {
+		if (!this.isAdmin(intra_id)) {
+			return "permission denied";
+		}
+		this.setMonthInfo();
+	}
+
 	/**************************************
 	 * 			util 함수 목록            *
 	 * ********************************* */
 
+ 	async isAdmin(intraId: string): Promise<boolean> {
+		const user: UserInfo = await this.usersRepository.findOneBy({intraId});
+		if(user.isAdmin)
+			return (true);
+		else
+			return (false);
+	}
+
 	getDayType(now: Date): number {
 		const day: number = now.getDay();
-		if (day <= 5)
+		if (day !== 0 && day !== 6)
 			return (0);
 		else
 			return (1);
 	}
-	
-
 }

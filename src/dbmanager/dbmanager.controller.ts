@@ -4,29 +4,34 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('dbmanager')
 export class DbmanagerController {
-  constructor(private readonly dbmanagerService: DbmanagerService) {}
+	constructor(private readonly dbmanagerService: DbmanagerService) { }
 
-  @Post('/user')
-  createUser(@Body() createUserDto: CreateUserDto) {
-    console.log("in DbmanagerController.createUser()");
-    console.log(createUserDto);
-    return this.dbmanagerService.createUser(createUserDto);
-  }
+	@Post('/user')
+	createUser(@Body() createUserDto: CreateUserDto) {
+		console.log("in DbmanagerController.createUser()");
+		console.log(createUserDto);
+		return this.dbmanagerService.createUser(createUserDto);
+	}
 
-  @Get()
-  findAll() {
-    console.log("in DbmanagerController.findAll()");
-    return this.dbmanagerService.findAll();
-  }
+	@Get()
+	findAll() {
+		console.log("in DbmanagerController.findAll()");
+		return this.dbmanagerService.findAll();
+	}
 
-  @Post('/test/month') 
-  testMonthSet() {
-    return this.dbmanagerService.setMonthInfo();
-  }
+	@Post('/set/totalMonthInfo/:intraId')
+	setTotalMonthInfo(@Param("intraId") intraId: string) {
+		return this.dbmanagerService.setTotalMonthInfo(intraId);
+	}
 
-  @Post('/test/day')
-  testDaySet() {
-	return this.dbmanagerService.setDayInfo();
-  }
-  
+	@Post('/test/month')
+	testMonthSet() {
+		return this.dbmanagerService.setMonthInfo();
+	}
+
+	// @Post('/test/day')
+	// testDaySet() {
+	// 	return this.dbmanagerService.setDayInfo();
+	// }
+
 }
