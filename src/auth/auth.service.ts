@@ -69,7 +69,7 @@ export class AuthService {
         loginAuthDto =
         {
           intraId,
-          passWord: "1234",
+          password: "1234",
           imageURL,
         }
         console.log("getUserData 성공");
@@ -106,8 +106,13 @@ export class AuthService {
     if (userInfo) {
       //로그인
       //토큰 발행
-      // if (userInfo.intraId == loginAuthDto.intraId && await bcrypt.compare(loginAuthDto.passWord, userInfo.password))
+      const isMatch = await bcrypt.compare(loginAuthDto.password, userInfo.password);
+
+      if ((userInfo.intraId == loginAuthDto.intraId) && isMatch)
+      {
+        console.log("유저 확인 : " + userInfo.intraId);
         return(this.createrAcessToken(loginAuthDto));
+      }
       // return (accessToken);
       // response.cookie("accessToken", accessToken);
     }
@@ -139,8 +144,8 @@ export class AuthService {
         console.log("회원가입");
         user.intraId = createAuthDto.intraId;
         //해시 처리해야함
-        // user.password = await bcrypt.hash(createAuthDto.password, saltOrRounds);
-        user.password = createAuthDto.password;
+        user.password = await bcrypt.hash(createAuthDto.password, saltOrRounds);
+        // user.password = createAuthDto.password;
         user.imageURL = "imageURL";
         await this.usersRepository.save(user);
       return createAuthDto.intraId;

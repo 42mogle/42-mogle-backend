@@ -27,6 +27,7 @@ import { Auth } from './auth/entities/auth.entity';
     TypeOrmModule.forFeature(
       [Auth, UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
     ),
+    AuthModule,
     UserModule, 
     AttendanceModule, 
     OperatorModule, 
