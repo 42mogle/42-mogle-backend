@@ -20,6 +20,7 @@ import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { Auth } from './auth/entities/auth.entity';
 // import { HttpModule } from '@nestjs/axios';
+//import { BoardsController } from './boards/boards.controller';
 
 @Module({
   imports: [

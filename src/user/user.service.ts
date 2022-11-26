@@ -29,15 +29,4 @@ export class UserService {
 		console.log(ret);
 		return ret;
 	}
-
- 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto): Promise<Attendance> {
-		const toDayWord: string = await this.dbmanagerService.getToDayWord();
-		if (await this.attendanceService.isAttendance(attendanceinfo.intraId)) {
-			throw new NotFoundException("이미 출석체크 했습니다.");
-		}
-		else if (attendanceinfo.todayWord !== toDayWord) {
-			throw new NotFoundException("오늘의 단어가 다릅니다!");
-		}
-		return this.dbmanagerService.attendanceRegistration(attendanceinfo);
-	}
 }
