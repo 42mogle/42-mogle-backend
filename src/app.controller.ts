@@ -8,10 +8,4 @@ export class AppController {
     	private readonly appService: AppService, 
     	private dbm_serv: DbmanagerService
     ) {}
-
-  // @Get()
-  // async getHello(): Promise<any> {
-  //   //await this.appService.testDBTables();
-  //   return 'Complete: Test DB Tables';
-  // }
 }

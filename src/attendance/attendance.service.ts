@@ -14,7 +14,7 @@ export class AttendanceService {
 
 
 	getUserButtonStatus(intraId: string): number {
-		if (!this.isCurrentTime()) {
+		if (!this.isAvailableTime()) {
 			return (1);
 		}
 		else if (this.isAttendance(intraId)) {
@@ -28,9 +28,9 @@ export class AttendanceService {
 
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto) {
 		const toDayWord: string = await this.dbmanagerService.getToDayWord();
-		// if (await this.isAttendance(attendanceinfo.intraId)) {
-		// 	throw new NotFoundException("이미 출석체크 했습니다.");
-		// }
+		if (await this.isAttendance(attendanceinfo.intraId)) {
+			throw new NotFoundException("이미 출석체크 했습니다.");
+		}
 		if (attendanceinfo.todayWord !== toDayWord) {
 			throw new NotFoundException("오늘의 단어가 다릅니다!");
 		}
@@ -38,7 +38,7 @@ export class AttendanceService {
 		if (!monthlyUser)
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(attendanceinfo.intraId);
 		this.dbmanagerService.attendanceRegistration(attendanceinfo);
-		//this.dbmanagerService.updateMonthlyUser(monthlyUser);
+		this.dbmanagerService.updateMonthlyUser(monthlyUser);
 	}
 
 
@@ -46,12 +46,12 @@ export class AttendanceService {
      * 			util function list     *
      ********************************* */
 	
-	isCurrentTime() {
+	isAvailableTime() {
 		const now = new Date();
 		const start = new Date();
 		const end = new Date();
-		start.setHours(8, 0, 0);
-		end.setHours(8, 30, 0);
+		start.setHours(8, 30, 0);
+		end.setHours(9, 0, 0);
 		if (now < start || now > end)
 			return (0);		
 		else

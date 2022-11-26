@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { StatisticModule } from './statistic.module';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
+import { CreateStatisticDto } from './dto/create-statistic.dto';
 
 @Injectable()
 export class StatisticService {
@@ -15,5 +16,9 @@ export class StatisticService {
 
 	async getAttendanceList(intraId: string) {
 		return await this.dbmanagerService.getAttendanceListByintraId(intraId);
+	}
+
+	async getUserMonthStatus(intraId: string) {
+		this.dbmanagerService.getThisMonthStatus(intraId);
 	}
 }

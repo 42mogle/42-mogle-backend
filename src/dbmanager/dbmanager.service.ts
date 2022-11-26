@@ -57,7 +57,7 @@ export class DbmanagerService {
 		const now = new Date();
 		const year = now.getFullYear();
 		const month = now.getMonth() + 1;
-		const totalAttendance = new Date(year, month, 0).getDate();
+		//const totalAttendance = new Date(year, month, 0).getDate(); //bolck
 		const found = await this.monthInfoRepository.findOne({ where: { year, month } });
 		if (found)
 			throw new NotFoundException("이미 있슴;;");
@@ -65,7 +65,8 @@ export class DbmanagerService {
 			year: year,
 			month: month,
 			failUserCount: 0,
-			totalAttendance,
+			totalAttendance: 20,
+			currentAttendance: 0,
 			perfectUserCount: 0,
 		})
 		await this.monthInfoRepository.save(monthInfo);
@@ -88,35 +89,20 @@ export class DbmanagerService {
 		}
 	}
 
+	async upDateThisMonthCurrentAttendance() {
+		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		monthInfo.currentAttendance += 1;
+		this.monthInfoRepository.update(monthInfo.id, {
+			currentAttendance: monthInfo.currentAttendance,
+		});
+	}
+
 	async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
 		const monthInfo = await this.monthInfoRepository.findOne({ where: { month, year } });
 
 		return monthInfo;
 	}
 
-	// DB table: DayInfo
-	// async setDayInfo() {
-	// 	const now: Date = new Date();
-	// 	const day: number = now.getDate();
-	// 	const monthInfo: MonthInfo = await this.getMonthInfo(now.getMonth() + 1, now.getFullYear());
-
-	// 	const found = await this.dayInfoRepository.findOneBy({
-	// 		day,
-	// 		monthInfo
-	// 	});
-	// 	if (found)
-	// 		throw new GatewayTimeoutException("일일 데이터가 이미 있습니다");
-
-	// 	const dayInfo = this.dayInfoRepository.create({
-	// 		day: day,
-	// 		type: this.getDayType(now),
-	// 		todayWord: "뀨?",
-	// 		attendUserCount: 0,
-	// 		perfectUserCount: 0,
-	// 		monthInfo,
-	// 	});
-	// 	return this.dayInfoRepository.save(dayInfo);
-	// }
 
 	async getDayInfo() {
 		const now = new Date();
@@ -159,9 +145,9 @@ export class DbmanagerService {
 
 	//setTotalMonthInfo
 	async setTotalMonthInfo(intra_id: string) {
-		if (!this.isAdmin(intra_id)) {
-			return "permission denied";
-		}
+		// if (!this.isAdmin(intra_id)) {
+		// 	return "permission denied";
+		// }
 		this.setMonthInfo();
 	}
 
@@ -202,6 +188,29 @@ export class DbmanagerService {
 		return await this.attendanceRepository.findBy({userInfo, dayInfo})
 	}
 
+	updateMonthlyUser(monthlyUser: MonthlyUsers) {
+		this.updateMonthlyUserAttendanceCount(monthlyUser);
+		//this.updateMonthlyUserPerfectInfo(monthlyUser);
+	}
+
+
+
+	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers) {
+
+		if (!this.isWeekend())
+		{
+			monthlyuser.attendanceCount += 1;
+			this.monthlyUsersRepository.update(monthlyuser.id, {
+				attendanceCount: monthlyuser.attendanceCount,
+			});
+		}
+	}
+
+	async getThisMonthStatus(intraId: string) {
+		const { attendanceCount, isPerfect } = await this.getThisMonthlyUser(intraId)
+		return {attendanceCount, isPerfect}
+	}
+
 	/**************************************
 	 * 			util 함수 목록            *
 	 * ********************************* */
@@ -221,4 +230,18 @@ export class DbmanagerService {
 		else
 			return (1);
 	}
+
+	isWeekend(): boolean {
+		const Today = new Date();
+		if (Today.getDay() === 6 || Today.getDay() === 0)
+			return true;
+		else
+			return false;
+	}
+
+	getTodayType(): number {
+		const Today = new Date();
+		return Today.getDay();
+	}
+
 }
