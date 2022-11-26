@@ -1,13 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Redirect, Query, Res, Header, Headers, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Redirect, Query, Res, Header, Headers, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Response, Request } from 'express';
 import { LoginAuthDto } from './dto/login-auth.dto';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { Token } from './auth.decorator';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private jwtService: JwtService
     ) {}
 
   @Get('oauth')
@@ -41,13 +45,14 @@ export class AuthController {
   @Post('logout')
   logout(@Res() response:Response)
   {
+    //쿠키 자용시
     response.cookie("accessToken","",
     {
       httpOnly: true,
       maxAge: 0
     })
     response.send({message:'로그아웃'});
-    
+    //로컬스토리지는 프론트엔드에서 로컬스토리지에 토큰 지우는 방식으로
   }
 
   @Get('firstJoin')
@@ -70,13 +75,25 @@ export class AuthController {
     return(await this.authService.secondJoin(createAuthDto));
   }
 
-
-
-  @Get('test')
-  test(@Headers() h:string, @Res() response: Response, @Req() req: Request)
+  @Post('test')
+  test(@Body() loginAuthDto: LoginAuthDto)
   {
-    console.log("test");
-    console.log(req.headers);
-    response.send({message: "test확인"});
+    return (this.authService.createrAcessToken(loginAuthDto));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('test2')
+  test2(@Token() token:string)
+  {
+    console.log("토큰 " + token);
+    return ("리턴")
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('test3')
+  test3(@Token() token:string)
+  {
+    console.log("토큰 " + token);
+    return ("리턴")
   }
 }
