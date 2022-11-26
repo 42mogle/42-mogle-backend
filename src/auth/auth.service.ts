@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Res } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { HttpService } from '@nestjs/axios'
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,6 +8,7 @@ import { Response } from 'express';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { Auth } from './entities/auth.entity';
 import * as bcrypt from 'bcrypt';
+import { jwtConstants } from './strategy/jwtConstants';
 
 
 @Injectable()
@@ -27,7 +27,7 @@ export class AuthService {
       grant_type: 'authorization_code',
       client_id: 'u-s4t2ud-ffa1eb7dfe8ca1260f9d27ba33051536d23c76cd1ab09f489cb233c7e8e5e065',
       client_secret: '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',
-      redirect_uri: 'http://10.19.210.0:3000/auth',
+      redirect_uri: 'http://10.19.220.34:3000/auth',
       code
     };
     let ret: string;
@@ -81,13 +81,17 @@ export class AuthService {
   }
 
   //JWT 액세스 토큰 발행
-  createrAcessToken(loginAuthDto: LoginAuthDto) {
+  createrAcessToken(loginAuthDto: LoginAuthDto)
+  {
     let intraId: string = loginAuthDto.intraId;
     const payload = { intraId };
     const accessToken = this.jwtService.sign(payload,
       {
-        secret: "42mogle"
+        secret: jwtConstants.secret,
+        expiresIn: 60 * 60 * 60
       });
+    console.log(intraId);
+    console.log(accessToken);
     return (accessToken);
   }
 
@@ -99,7 +103,6 @@ export class AuthService {
       정보 없을시
         에러코드 반환 || 에러 반환
     */
-
     const user = new Auth();
 
     let userInfo = await this.usersRepository.findOneBy({ intraId: loginAuthDto.intraId })
