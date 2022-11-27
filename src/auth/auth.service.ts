@@ -85,17 +85,14 @@ export class AuthService {
   {
     let intraId: string = loginAuthDto.intraId;
     const payload = { intraId };
-    const accessToken = this.jwtService.sign(payload,
-      {
-        secret: jwtConstants.secret,
-        expiresIn: 60 * 60 * 60
-      });
-    console.log(intraId);
-    console.log(accessToken);
+    const accessToken = this.jwtService.sign(payload)
+    // console.log(intraId);
+    // console.log(accessToken);
     return (accessToken);
   }
 
-  async login(response:Response, loginAuthDto:LoginAuthDto) {
+  async login(response:Response, loginAuthDto:LoginAuthDto) 
+  {
     /* 
       디비에 아이디 정보 있는지 확인
       정보 있을시
@@ -105,7 +102,7 @@ export class AuthService {
     */
     const user = new Auth();
 
-    let userInfo = await this.usersRepository.findOneBy({ intraId: loginAuthDto.intraId })
+    let userInfo = await this.usersRepository.findOneBy({ intraId: loginAuthDto.intraId });
     if (userInfo) {
       //로그인
       //토큰 발행
