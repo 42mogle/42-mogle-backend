@@ -3,9 +3,11 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Response, Request } from 'express';
 import { LoginAuthDto } from './dto/login-auth.dto';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
+// import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { Token } from './auth.decorator';
 import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -85,14 +87,15 @@ export class AuthController {
   @Get('test2')
   test2(@Token() token:string)
   {
-    console.log("토큰 " + token);
+    // console.log(this.jwtService.verify(token));
     return ("리턴")
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('test3')
+  @Get('test3')
   test3(@Token() token:string)
   {
+    console.log(this.jwtService.verify(token));
     console.log("토큰 " + token);
     return ("리턴")
   }
