@@ -12,6 +12,8 @@ import { userInfo } from 'os';
 import * as request from 'supertest';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
+import { create } from 'domain';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class DbmanagerService {
@@ -34,7 +36,7 @@ export class DbmanagerService {
 		const user = this.usersRepository.create({
 			intraId: createUserDto.intraId,
 			password: createUserDto.password,
-			isAdmin: false,
+			isOperator: false,
 			photoUrl: "minsu!!",
 		});
 		return this.usersRepository.save(user);
@@ -72,7 +74,6 @@ export class DbmanagerService {
 		})
 		await this.monthInfoRepository.save(monthInfo);
 		this.setAllDayInfo(monthInfo);
-		//return this.monthRepository.save(monthInfo);
 	}
 
 	async setAllDayInfo(monthInfo: MonthInfo) {
@@ -148,9 +149,9 @@ export class DbmanagerService {
 
 	//setTotalMonthInfo
 	async setTotalMonthInfo(intra_id: string) {
-		// if (!this.isAdmin(intra_id)) {
-		// 	return "permission denied";
-		// }
+		if (!this.isAdmin(intra_id)) {
+			return "permission denied";
+		}
 		this.setMonthInfo();
 	}
 
@@ -271,7 +272,7 @@ export class DbmanagerService {
 
  	async isAdmin(intraId: string): Promise<boolean> {
 		const user: UserInfo = await this.usersRepository.findOneBy({intraId});
-		if(user.isAdmin)
+		if(user.isOperator)
 			return (true);
 		else
 			return (false);
@@ -297,5 +298,54 @@ export class DbmanagerService {
 		const Today = new Date();
 		return Today.getDay();
 	}
+
+	/**************************************
+	 * 			test 함수 목록            *
+	 * ********************************* */
+
+	async getAllDayInfo(monthInfo: MonthInfo) {
+		return this.dayInfoRepository.findBy({monthInfo})
+	}
+
+	async createMockUp() {
+		const intraId: string[] = ["minsukan", "joonhan", "samin", "mgo", "susong"]
+		const passWord: string = "42mogle";
+		///
+		intraId.forEach( (user) => {
+			const abc = this.usersRepository.create({
+				intraId: user,
+				password: passWord,
+				isOperator: true,
+			})
+			this.usersRepository.save(abc);
+		})
+		
+
+		this.setTotalMonthInfo("minsuakn");
+		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		const dayinfo: DayInfo[] = await this.getAllDayInfo(monthInfo);
+		const allUserInfo: UserInfo[] = await this.getAllUsersInfo();
+		allUserInfo.forEach((user) => {
+			let i = 1;
+			dayinfo.forEach((dayInfo) => {
+				const date = new Date(2022, 11, i, 8, 30);
+				this.attendanceRepository.create({
+					timelog: date,
+					userInfo: user,
+					dayInfo: dayInfo
+				})
+				i++;
+			})
+		})
+	 }
+
+	 async atc(intraId: string, num: number) {
+		const userInfo: UserInfo = await this.getUserInfo(intraId);
+		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		const monthly: MonthlyUsers = await this.getThisMonthlyUser(intraId);
+		monthly.attendanceCount = num;
+		this.monthlyUsersRepository.save(monthly);
+	 }
+
 
 }

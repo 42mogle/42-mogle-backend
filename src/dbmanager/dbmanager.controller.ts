@@ -34,9 +34,14 @@ export class DbmanagerController {
 		this.dbmanagerService.upDateThisMonthCurrentAttendance();
 	}
 
-	// @Post('/test/day')
-	// testDaySet() {
-	// 	return this.dbmanagerService.setDayInfo();
-	// }
+	@Post('/test/createMockUp')
+	tt() {
+		this.dbmanagerService.createMockUp()
+	}
+
+	@Post('test/:intraId/:num/setatc')
+	ILikeTT(@Param("intraId, num") intraId: string, num: number) {
+		this.dbmanagerService.atc(intraId, num);
+	}
 
 }

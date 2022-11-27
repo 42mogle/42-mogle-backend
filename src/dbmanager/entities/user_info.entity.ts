@@ -13,8 +13,8 @@ export class UserInfo {
 	@Column({name: "password"})
 	password: string;
 
-	@Column({name: "is_admin"})
-	isAdmin: boolean;
+	@Column({name: "is_operator"})
+	isOperator: boolean;
 
 	@Column({name: "photo_url", nullable: true})
 	photoUrl: string;

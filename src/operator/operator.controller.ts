@@ -7,7 +7,7 @@ import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 export class OperatorController {
 	constructor(private readonly operatorService: OperatorService) {}
 	
-	@Patch("/setToDayWord/")
+	@Patch("/setToDayWord")
 	settodayword(@Body() setToDayWordDto: SetToDayWordDto) {
 		this.operatorService.setTodayWord(setToDayWordDto);
 	}
