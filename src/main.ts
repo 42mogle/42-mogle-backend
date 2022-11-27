@@ -6,8 +6,8 @@ import * as fs from 'fs';
 async function bootstrap() {
 
   const httpsOptions = {
-    key: fs.readFileSync('/etc/letsencrypt/live/42mogle.com/privkey.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/42mogle.com/fullchain.pem'),
+    key: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/privkey1.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/fullchain1.pem'),
     //key: fs.readFileSync('./secrets/private-key.pem'),
     //cert: fs.readFileSync('./secrets/public-certificate.pem'),
   };
