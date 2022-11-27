@@ -29,6 +29,11 @@ export class DbmanagerController {
 		return this.dbmanagerService.setMonthInfo();
 	}
 
+	@Post("/test/setcurrent")
+	testSetCurrent() {
+		this.dbmanagerService.upDateThisMonthCurrentAttendance();
+	}
+
 	// @Post('/test/day')
 	// testDaySet() {
 	// 	return this.dbmanagerService.setDayInfo();

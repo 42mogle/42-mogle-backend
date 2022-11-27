@@ -1,12 +1,19 @@
-import { Controller, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
 import { OperatorService } from './operator.service';
+import { SetToDayWordDto } from './dto/toDayWord.dto';
+import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 
 @Controller('operator')
 export class OperatorController {
 	constructor(private readonly operatorService: OperatorService) {}
 	
-	@Patch("/setToDayWord/:today_word")
-	settodayword(@Param("today_word") today_word: string) {
-		this.operatorService.setTodayWord(today_word);
+	@Patch("/setToDayWord/")
+	settodayword(@Body() setToDayWordDto: SetToDayWordDto) {
+		this.operatorService.setTodayWord(setToDayWordDto);
+	}
+
+	@Post("/update/user/attendance")
+	updateUserAttendance(@Body() updateUserAttendanceDto: UpdateUserAttendanceDto) {
+		return this.operatorService.updateUserAttendance(updateUserAttendanceDto);
 	}
 }
