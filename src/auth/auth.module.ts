@@ -4,18 +4,17 @@ import { AuthController } from './auth.controller';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
-import { Auth } from './entities/auth.entity';
 import { PassportModule } from '@nestjs/passport';
 import { jwtConstants } from './strategy/jwtConstants';
 import { JwtStrategy } from './strategy/jwt.strategy';
+import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 
 
 @Module({
   imports: [
-
     HttpModule,
     PassportModule,
-    TypeOrmModule.forFeature([Auth]),
+    TypeOrmModule.forFeature([UserInfo]),
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions:{
