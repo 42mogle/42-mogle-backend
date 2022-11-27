@@ -3,10 +3,13 @@ import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
+import { OperatorService } from '../operator/operator.service';
+import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 
 @Injectable()
 export class AttendanceService {
 	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService;
+	@Inject(OperatorService) private readonly operatorService: OperatorService;
 
 
 	getUserButtonStatus(intraId: string): number {
@@ -24,7 +27,7 @@ export class AttendanceService {
 
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto) {
 		const toDayWord: string = await this.dbmanagerService.getToDayWord();
-		console.log("joonhan say:", attendanceinfo.todayWord);
+		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
 		if (await this.isAttendance(attendanceinfo.intraId)) {
 			return ({
 				statusAttendance: 1,
@@ -42,6 +45,7 @@ export class AttendanceService {
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(attendanceinfo.intraId);
 		this.dbmanagerService.attendanceRegistration(attendanceinfo);
 		this.dbmanagerService.updateMonthlyUser(monthlyUser);
+		this.operatorService.statusUpdate(monthlyUser, monthInto.currentAttendance);
 		return ({
 			statusAttendance: 0,
 			errorMsg: "성공적으로 출석 체크를 완료했습니다."

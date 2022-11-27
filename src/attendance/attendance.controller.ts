@@ -25,4 +25,5 @@ export class AttendanceController {
 	pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
 		return this.attendanceService.AttendanceCertification(createAttendanceDto);
 	}
+
 }

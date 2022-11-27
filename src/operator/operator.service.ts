@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { SetToDayWordDto } from './dto/toDayWord.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -49,5 +49,28 @@ export class OperatorService {
 		else {
 			return "이미 출석체크가 되었습니다."
 		}
+	}
+
+	async updateUsersAttendanceInfo() {
+		const allUsersInfo: UserInfo[] = await this.dbmanagerService.getAllUsersInfo();
+		const monthInfo: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
+		const AllmonthlyUser: MonthlyUsers[] = await this.dbmanagerService.getAllMonthlyUser(allUsersInfo, monthInfo);
+		AllmonthlyUser.forEach((user) => {
+			this.statusUpdate(user, monthInfo.currentAttendance);
+		})
+	}
+
+	statusUpdate(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
+		console.log(monthlyUserInfo.attendanceCount, currentAttendance);
+		if (monthlyUserInfo.attendanceCount < currentAttendance && monthlyUserInfo.isPerfect === true)
+			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, false);
+		else if (monthlyUserInfo.attendanceCount === currentAttendance && monthlyUserInfo.isPerfect === false)
+			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, true);
+	}
+
+	async updateCurrentCount() {
+		const type: number = this.dbmanagerService.getTodayType();
+		if (type !== 0 && type !== 6)
+			this.dbmanagerService.updateThisMonthCurrentCount();
 	}
 }

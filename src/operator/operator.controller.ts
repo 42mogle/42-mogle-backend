@@ -16,4 +16,14 @@ export class OperatorController {
 	updateUserAttendance(@Body() updateUserAttendanceDto: UpdateUserAttendanceDto) {
 		return this.operatorService.updateUserAttendance(updateUserAttendanceDto);
 	}
+
+	@Post("/update/users/attendanceInfo")
+	updateAllusersAttendanceInfo() {
+		this.operatorService.updateUsersAttendanceInfo();
+	}
+
+	@Post("/update/currentAttendanceCount")
+	updateCurrentAttendanceCount() {
+		this.operatorService.updateCurrentCount();
+	}
 }

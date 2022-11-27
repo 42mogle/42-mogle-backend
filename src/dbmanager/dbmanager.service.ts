@@ -1,4 +1,4 @@
-import { BadRequestException, GatewayTimeoutException, Injectable, NotFoundException } from '@nestjs/common';
+import { All, BadRequestException, GatewayTimeoutException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
@@ -227,6 +227,14 @@ export class DbmanagerService {
 		return await this.monthlyUsersRepository.findOneBy({monthInfo, userInfo})
 	}
 
+	async getAllUsersInfo(): Promise<UserInfo[]> {
+		return await this.usersRepository.find();
+	}
+
+	async getAllMonthlyUser(allUserInfo: UserInfo[], monthInfo: MonthInfo) {
+		return await this.monthlyUsersRepository.findBy({userInfo: allUserInfo, monthInfo});
+	}
+
 	updateAttendanceCountThisMonth(monthlyuser: MonthlyUsers) {
 		monthlyuser.attendanceCount += 1;
 		this.monthlyUsersRepository.update(monthlyuser.id, {
@@ -243,6 +251,20 @@ export class DbmanagerService {
 		});
 		this.attendanceRepository.save(userAttendance);
 	}
+
+	changeIsPerfect(monthlyUserInfo: MonthlyUsers, status: boolean) {
+		this.monthlyUsersRepository.update(monthlyUserInfo.id, {
+			isPerfect: status
+		})
+	}
+
+	async updateThisMonthCurrentCount() {
+		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		this.monthInfoRepository.update(monthInfo.id, {
+			currentAttendance: monthInfo.currentAttendance + 1
+		})
+	}
+
 	/**************************************
 	 * 			util 함수 목록            *
 	 * ********************************* */
