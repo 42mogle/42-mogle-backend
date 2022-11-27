@@ -5,15 +5,19 @@ import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { Auth } from './entities/auth.entity';
+import { PassportModule } from '@nestjs/passport';
+import { jwtConstants } from './strategy/jwtConstants';
+import { JwtStrategy } from './strategy/jwt.strategy';
 
 
 @Module({
   imports: [
 
     HttpModule,
+    PassportModule,
     TypeOrmModule.forFeature([Auth]),
     JwtModule.register({
-      secret: "JWT_DEFAULT_SECRET",
+      secret: jwtConstants.secret,
       signOptions:{
         expiresIn: 60 * 60 * 10
       }
@@ -21,6 +25,6 @@ import { Auth } from './entities/auth.entity';
   ],
 
   controllers: [AuthController],
-  providers: [AuthService]
+  providers: [AuthService, JwtStrategy]
 })
 export class AuthModule {}
