@@ -215,15 +215,27 @@ export class DbmanagerService {
 		return {attendanceCount, isPerfect}
 	}
 
-	async getSpecificDayInfo(year: number, month: number, day: number) {
-		const monthInfo: MonthInfo = await this.monthInfoRepository.findOneBy({year, month});
-		if (!monthInfo)
-			throw new BadRequestException("잘못된 정보를 입력했습니다.");
+	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {
 		return await this.dayInfoRepository.findOneBy({monthInfo, day});
 	}
 
+	async getSpecificMonthInfo(year: number, month: number): Promise<MonthInfo> {
+		return await this.monthInfoRepository.findOneBy({year, month});
+	}
+
+	async getSpecificMonthlyuserInfo(monthInfo: MonthInfo, userInfo: UserInfo): Promise<MonthlyUsers> {
+		return await this.monthlyUsersRepository.findOneBy({monthInfo, userInfo})
+	}
+
+	updateAttendanceCountThisMonth(monthlyuser: MonthlyUsers) {
+		monthlyuser.attendanceCount += 1;
+		this.monthlyUsersRepository.update(monthlyuser.id, {
+			attendanceCount: monthlyuser.attendanceCount
+		})
+	}
+
 	updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
-		const timelog = new Date(InfoDto.year, InfoDto.month, InfoDto.day, 8, 30, 0);
+		const timelog = new Date(InfoDto.year, InfoDto.month - 1, InfoDto.day, 8, 30, 0);
 		const userAttendance = this.attendanceRepository.create({
 			userInfo,
 			dayInfo,

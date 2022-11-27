@@ -14,6 +14,6 @@ export class OperatorController {
 
 	@Post("/update/user/attendance")
 	updateUserAttendance(@Body() updateUserAttendanceDto: UpdateUserAttendanceDto) {
-		this.operatorService.updateUserAttendance(updateUserAttendanceDto);
+		return this.operatorService.updateUserAttendance(updateUserAttendanceDto);
 	}
 }
