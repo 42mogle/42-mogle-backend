@@ -3,14 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { jwtConstants } from './jwtConstants';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Auth } from '../entities/auth.entity';
 import { Repository } from 'typeorm';
+import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    @InjectRepository(Auth)
-    private usersRepository: Repository<Auth>,
+    @InjectRepository(UserInfo)
+    private usersRepository: Repository<UserInfo>,
   ) {
     // console.log("확인");
     super({
@@ -22,11 +22,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload:any) {
     //유저 확인
-    let isjoin = await this.usersRepository.findOneBy(
+    let userInfo = await this.usersRepository.findOneBy(
       { intraId: payload.intraId })
       
-      console.log(isjoin);
-    if (isjoin === null)
+      console.log(userInfo);
+    if (userInfo === null)
       throw new HttpException('Invalid User', HttpStatus.FORBIDDEN);
     else
       return (payload);

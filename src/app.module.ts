@@ -16,9 +16,7 @@ import { DbmanagerService } from './dbmanager/dbmanager.service';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
-import { Auth } from './auth/entities/auth.entity';
 // import { HttpModule } from '@nestjs/axios';
 //import { BoardsController } from './boards/boards.controller';
 
@@ -26,7 +24,7 @@ import { Auth } from './auth/entities/auth.entity';
   imports: [
     TypeOrmModule.forRoot(typeORMConfig), 
     TypeOrmModule.forFeature(
-      [Auth, UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
+      [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
     ),
     AuthModule,
     UserModule, 

@@ -1,13 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Redirect, Query, Res, Header, Headers, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
 import { Response, Request } from 'express';
-import { LoginAuthDto } from './dto/login-auth.dto';
-// import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { Token } from './auth.decorator';
 import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { AuthDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,13 +21,13 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Res() response:Response, @Body() loginAuthDto:LoginAuthDto)
+  async login(@Res() response:Response, @Body() authDto:AuthDto)
   {
     console.log('login');
-    console.log(loginAuthDto);
+    console.log(authDto);
 
-    // response.setHeader('Set-cookie', await this.authService.login(response, loginAuthDto));
-    // response.cookie("accessToken", await this.authService.login(response, loginAuthDto),
+    // response.setHeader('Set-cookie', await this.authService.login(response, authDto));
+    // response.cookie("accessToken", await this.authService.login(response, authDto),
     // {
     //   httpOnly: true,
     //   secure: true,
@@ -39,7 +36,7 @@ export class AuthController {
     // }
     // );
     // console.log(response);
-    response.send({accessToken: await this.authService.login(response, loginAuthDto)});
+    response.send({accessToken: await this.authService.login(response, authDto)});
     // return(response.send({message:'로그인 성공'}));
     // return("로그인 확인")
   }
@@ -70,31 +67,24 @@ export class AuthController {
   }
 
   @Post('secondJoin')
-  async secondJoin(@Body() createAuthDto:CreateAuthDto)
+  async secondJoin(@Body() authDto:AuthDto)
   {
     console.log("secondJoin 확인");
-    console.log(createAuthDto);
-    return(await this.authService.secondJoin(createAuthDto));
+    console.log(authDto);
+    return(await this.authService.secondJoin(authDto));
   }
 
   @Post('test')
-  test(@Body() loginAuthDto: LoginAuthDto)
+  test(@Body() authDto: AuthDto)
   {
-    return (this.authService.createrAcessToken(loginAuthDto));
+    return (this.authService.createrAcessToken(authDto));
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('test2')
+  // @UseGuards(JwtAuthGuard)
+  @Post('test2')
   test2(@Token() token:string)
   {
-    // console.log(this.jwtService.verify(token));
-    return ("리턴")
-  }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('test3')
-  test3(@Token() token:string)
-  {
     console.log(this.jwtService.verify(token));
     console.log("토큰 " + token);
     return ("리턴")
