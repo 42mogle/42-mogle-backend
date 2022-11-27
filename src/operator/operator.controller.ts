@@ -1,6 +1,7 @@
 import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
 import { OperatorService } from './operator.service';
 import { SetToDayWordDto } from './dto/toDayWord.dto';
+import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 
 @Controller('operator')
 export class OperatorController {
@@ -9,5 +10,10 @@ export class OperatorController {
 	@Patch("/setToDayWord/")
 	settodayword(@Body() setToDayWordDto: SetToDayWordDto) {
 		this.operatorService.setTodayWord(setToDayWordDto);
+	}
+
+	@Post("/update/user/attendance")
+	updateUserAttendance(@Body() updateUserAttendanceDto: UpdateUserAttendanceDto) {
+		this.operatorService.updateUserAttendance(updateUserAttendanceDto);
 	}
 }

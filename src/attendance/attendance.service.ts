@@ -1,12 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { userInfo } from 'os';
-import { endWith, NotFoundError } from 'rxjs';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
-import { Attendance } from '../dbmanager/entities/attendance.entity';
-import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 
 @Injectable()
 export class AttendanceService {
@@ -28,17 +24,28 @@ export class AttendanceService {
 
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto) {
 		const toDayWord: string = await this.dbmanagerService.getToDayWord();
+		console.log("joonhan say:", attendanceinfo.todayWord);
 		if (await this.isAttendance(attendanceinfo.intraId)) {
-			throw new NotFoundException("이미 출석체크 했습니다.");
+			return ({
+				statusAttendance: 1,
+				errorMsg: "이미 출석 체크 했습니다."
+			});
 		}
 		if (attendanceinfo.todayWord !== toDayWord) {
-			throw new NotFoundException("오늘의 단어가 다릅니다!");
+			return ({
+				statusAttendance: 2,
+				errorMsg: "오늘의 단어가 다릅니다."
+			});
 		}
 		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(attendanceinfo.intraId);
 		if (!monthlyUser)
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(attendanceinfo.intraId);
 		this.dbmanagerService.attendanceRegistration(attendanceinfo);
 		this.dbmanagerService.updateMonthlyUser(monthlyUser);
+		return ({
+			statusAttendance: 0,
+			errorMsg: "성공적으로 출석 체크를 완료했습니다."
+		})
 	}
 
 

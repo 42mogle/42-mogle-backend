@@ -18,7 +18,7 @@ export class StatisticService {
 		return await this.dbmanagerService.getAttendanceListByintraId(intraId);
 	}
 
-	async getUserMonthStatus(intraId: string) {
-		this.dbmanagerService.getThisMonthStatus(intraId);
+	async getUserMonthStatus(intraId: string): Promise<any> {
+		return await this.dbmanagerService.getThisMonthStatus(intraId);
 	}
 }
