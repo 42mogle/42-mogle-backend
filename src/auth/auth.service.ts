@@ -1,10 +1,9 @@
-import { HttpException, HttpStatus, Injectable, Res } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios'
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
-
 import * as bcrypt from 'bcrypt';
 import { AuthDto } from './dto/auth.dto';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
@@ -17,7 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
     @InjectRepository(UserInfo)
     private usersRepository: Repository<UserInfo>,
-  ) { }
+  ) {}
 
 
   //42oauth 엑세스 토큰 받아오기
@@ -26,7 +25,7 @@ export class AuthService {
       grant_type: 'authorization_code',
       client_id: 'u-s4t2ud-ffa1eb7dfe8ca1260f9d27ba33051536d23c76cd1ab09f489cb233c7e8e5e065',
       client_secret: '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',
-      redirect_uri: 'http://10.19.220.34:3000/auth',
+      redirect_uri: 'http://10.19.210.0:3000/auth',
       code
     };
     let ret: string;
@@ -42,6 +41,7 @@ export class AuthService {
       })
       .catch((err) => {
         console.log("getAccessToken 에러");
+        throw new HttpException('oauth인증 코드를 얻는데 실패하였습니다', HttpStatus.FORBIDDEN);
       });
     return (ret);
   }
@@ -67,11 +67,11 @@ export class AuthService {
           photoUrl : res.data.image.link,
           isAdmin: false
         }
-        console.log(res.data.image.link);
         console.log("getUserData 성공");
       })
       .catch((err) => {
         console.log("getUserData 에러");
+        throw new HttpException('42회원 정보가 존재하지 않습니다.', HttpStatus.FORBIDDEN);
       });
     return (authDto);
   }
@@ -97,9 +97,8 @@ export class AuthService {
     const user = new UserInfo();
 
     let userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId });
-    if (userInfo) {
-      //로그인
-      //토큰 발행
+    if (userInfo !== null) {
+
       const isMatch = await bcrypt.compare(authDto.password, userInfo.password);
 
       if ((userInfo.intraId == authDto.intraId) && isMatch)
@@ -111,7 +110,7 @@ export class AuthService {
       // response.cookie("accessToken", accessToken);
     }
     else
-      throw new HttpException('Invalid User', HttpStatus.BAD_REQUEST);
+      throw new HttpException('회원정보가 존재하지 않습니다.', HttpStatus.FORBIDDEN);
   }
 
   //회원가입1 oauth인증
@@ -120,7 +119,10 @@ export class AuthService {
     let userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId })
 
     if (userInfo !== null)
-      throw new HttpException('Invalid User', HttpStatus.FORBIDDEN);
+    {
+      console.log("이미 존재하는 회원");
+      throw new HttpException({errorMessage: "이미 존재하는 회원입니다.",intraId: userInfo.intraId}, HttpStatus.FORBIDDEN);
+    }
     return (authDto);
   }
 
@@ -137,7 +139,6 @@ export class AuthService {
         //회원가입
         console.log("회원가입");
         user.intraId = authDto.intraId;
-        //해시 처리해야함
         user.password = await bcrypt.hash(authDto.password, saltOrRounds);
         // user.password = authDto.password;
         user.photoUrl = authDto.photoUrl;
@@ -148,7 +149,12 @@ export class AuthService {
     }
     else {
       console.log("이미 존재하는 회원");
-      throw new HttpException('Invalid User', HttpStatus.FORBIDDEN);
+      throw new HttpException('이미 존재하는 회원입니다.', HttpStatus.FORBIDDEN);
     }
+  }
+
+  async DeleteUser(intraId:string)
+  {
+    return (await this.usersRepository.delete({ intraId: intraId }));
   }
 }
