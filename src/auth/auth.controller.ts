@@ -5,7 +5,9 @@ import { Token } from './auth.decorator';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { AuthDto } from './dto/auth.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(

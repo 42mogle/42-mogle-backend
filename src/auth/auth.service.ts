@@ -23,9 +23,9 @@ export class AuthService {
   async getOauthToken(code: string) {
     const payload = {
       grant_type: 'authorization_code',
-      client_id: 'u-s4t2ud-ffa1eb7dfe8ca1260f9d27ba33051536d23c76cd1ab09f489cb233c7e8e5e065',
-      client_secret: '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',
-      redirect_uri: 'https://42mogle.com:3000/auth',
+      client_id: 'u-s4t2ud-3c9ba95e114e8674c43068d7eb1f1e02b10f1042ec83abb4254aba971fd2f27e',
+      client_secret: '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',
+      redirect_uri: 'https://42mogle.com/auth',
       code
     };
     let ret: string;

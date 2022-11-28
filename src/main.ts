@@ -15,10 +15,9 @@ async function bootstrap() {
 
   // Setting Swagger
   const config = new DocumentBuilder()
-    .setTitle('42Mogle using swagger')
+    .setTitle('42mogle API docs')
     .setDescription('API description')
-    .setVersion('0.0.1')
-    .addTag('swagger')
+    .setVersion('0.1')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

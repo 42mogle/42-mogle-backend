@@ -2,7 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { DbmanagerService } from './dbmanager.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('dbmanager')
 @Controller('dbmanager')
 export class DbmanagerController {
 	constructor(private readonly dbmanagerService: DbmanagerService) { }

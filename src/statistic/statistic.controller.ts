@@ -2,7 +2,9 @@ import { ConsoleLogger, Controller, Get, Param, UseGuards } from '@nestjs/common
 import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 import { StatisticService } from './statistic.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('statistic')
 @Controller('statistic')
 export class StatisticController {
 	constructor(private readonly statisticService: StatisticService) {}

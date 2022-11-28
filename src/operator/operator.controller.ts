@@ -3,7 +3,9 @@ import { OperatorService } from './operator.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('operator')
 @Controller('operator')
 export class OperatorController {
 	constructor(private readonly operatorService: OperatorService) {}
