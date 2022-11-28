@@ -13,20 +13,19 @@ import { DayInfo } from './dbmanager/entities/day_info.entity';
 import { MonthInfo } from './dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from './dbmanager/entities/monthly_users.entity';
 import { DbmanagerService } from './dbmanager/dbmanager.service';
-
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
-import { Auth } from './auth/entities/auth.entity';
 // import { HttpModule } from '@nestjs/axios';
+//import { BoardsController } from './boards/boards.controller';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeORMConfig), 
     TypeOrmModule.forFeature(
-      [Auth, UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
+      [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
     ),
+    AuthModule,
     UserModule, 
     AttendanceModule, 
     OperatorModule, 

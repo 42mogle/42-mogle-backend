@@ -1,13 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Redirect, Query, Res, Header, Headers, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Redirect, Query, Res, UseGuards, Delete, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { Response, Request } from 'express';
-import { LoginAuthDto } from './dto/login-auth.dto';
+import { Response, Request, query } from 'express';
+import { Token } from './auth.decorator';
+import { JwtService } from '@nestjs/jwt';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { AuthDto } from './dto/auth.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('auth')
+@ApiTags('auth')
+@Controller('serverAuth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private jwtService: JwtService
     ) {}
 
   @Get('oauth')
@@ -18,13 +23,14 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Res() response:Response, @Body() loginAuthDto:LoginAuthDto)
+  async login(@Res() response:Response, @Body() authDto:AuthDto)
   {
     console.log('login');
-    console.log(loginAuthDto);
+    console.log(authDto);
+    response.send({accessToken: await this.authService.login(response, authDto)});
 
-    // response.setHeader('Set-cookie', await this.authService.login(response, loginAuthDto));
-    // response.cookie("accessToken", await this.authService.login(response, loginAuthDto),
+    // response.setHeader('Set-cookie', await this.authService.login(response, authDto));
+    // response.cookie("accessToken", await this.authService.login(response, authDto),
     // {
     //   httpOnly: true,
     //   secure: true,
@@ -33,7 +39,6 @@ export class AuthController {
     // }
     // );
     // console.log(response);
-    response.send({accessToken: await this.authService.login(response, loginAuthDto)});
     // return(response.send({message:'로그인 성공'}));
     // return("로그인 확인")
   }
@@ -41,13 +46,14 @@ export class AuthController {
   @Post('logout')
   logout(@Res() response:Response)
   {
+    //쿠키 자용시
     response.cookie("accessToken","",
     {
       httpOnly: true,
       maxAge: 0
     })
     response.send({message:'로그아웃'});
-    
+    //로컬스토리지는 프론트엔드에서 로컬스토리지에 토큰 지우는 방식으로
   }
 
   @Get('firstJoin')
@@ -63,20 +69,56 @@ export class AuthController {
   }
 
   @Post('secondJoin')
-  async secondJoin(@Body() createAuthDto:CreateAuthDto)
+  async secondJoin(@Body() authDto:AuthDto)
   {
     console.log("secondJoin 확인");
-    console.log(createAuthDto);
-    return(await this.authService.secondJoin(createAuthDto));
+    console.log(authDto);
+    return(await this.authService.secondJoin(authDto));
   }
 
 
-
-  @Get('test')
-  test(@Headers() h:string, @Res() response: Response, @Req() req: Request)
+  @Get('test0')
+  test0()
   {
-    console.log("test");
-    console.log(req.headers);
-    response.send({message: "test확인"});
+    console.log("hello");
+    return("test0")
+  }
+  
+  @Post('test')
+  async test(@Body() authDto: AuthDto)
+  {
+    // response.cookie("accessToken", this.authService.createrAcessToken(authDto),
+    // {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    //   maxAge: 24 * 60 * 60 * 1000 //1 day
+    // })
+    // return(response.send({message:'로그인 성공'}));
+    return (this.authService.createrAcessToken(authDto));
+  }
+
+  @Post('test2')
+  test2(@Token() token:string)
+  {
+    console.log(this.jwtService.verify(token));
+    console.log("토큰 " + token);
+    return ("test2 리턴")
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('test3')
+  test3(@Token() token:string)
+  {
+    console.log(this.jwtService.verify(token));
+    console.log("토큰 " + token);
+    return ("test3 리턴")
+  }
+
+  @Delete('delete')
+  async DeleteUser(@Query('intraId') intraId:string)
+  {
+    console.log(await this.authService.DeleteUser(intraId));
+    console.log(intraId + " 삭제완료");
   }
 }

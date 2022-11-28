@@ -14,12 +14,10 @@ export class UserService {
 
 	async getUserInfoByIntraId(inputtedintraId: string) {
 		const user: UserInfo  = await this.dbmanagerService.getUserInfo(inputtedintraId);
-		const retIntraId: string = user.intraId;
-		const retIsAdmin: boolean = user.isAdmin;
-		const retPhotoUrl: string = user.photoUrl;
-		console.log("In UserService.getUserInfoByIntraId()");
-		console.log(`intraId: ${retIntraId}, isAdmin: ${retIsAdmin}, photoUrl: ${retPhotoUrl}`);
-		return { retIntraId, retIsAdmin, retPhotoUrl };
+		const intraId: string = user.intraId;
+		const isOperator: boolean = user.isOperator;
+		const PhotoUrl: string = user.photoUrl;
+		return { intraId, isOperator, PhotoUrl };
 	}
 
 	async findAll(): Promise<UserInfo[]> {

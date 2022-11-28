@@ -1,10 +1,17 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { stringify } from 'querystring';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { UserService } from './user.service';
 import { ApiParam, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { CreateAttendanceDto } from 'src/dbmanager/dto/create-attendance.dto';
 import { Certificate } from 'crypto';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+
+// 일단 유저 출석, 개근 수치들은 Statistic module에서 처리하는게 맞는 것 같습니다!
+// 유저 정보 관련 -> UserInfo 모듈
+// 출석 로직 관련 -> Attendance 모듈
+// 출석, 개근 수치 관련 -> Statistic 모듈
+// 오퍼레이터 기능 -> Operator 모듈
 
 @ApiTags('user')
 @Controller('user')
@@ -13,8 +20,9 @@ export class UserController {
 		this.userService = userService;
 	}
 
-	// GET /user
+	// GET /user //현재는 사용되지 않음
 	@ApiOperation({summary: 'get all users'})
+	@UseGuards(JwtAuthGuard)
 	@Get('/')
 	getAllUser(): Promise<UserInfo[]> {
 		return this.userService.findAll();
@@ -29,14 +37,9 @@ export class UserController {
 	@ApiOkResponse({
 		description: 'Success'
 	})
-	@Get('/:intraId')
+	@UseGuards(JwtAuthGuard)
+	@Get('/:intraId') // 유저의 정보 1.인트라아이디 2.오퍼레이터 여부 3. photoUrl
 	getUserInfo(@Param('intraId') intraId: string) {
 		return this.userService.getUserInfoByIntraId(intraId);
 	}
-
-	@Post('/attendance')
-	pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
-		return this.userService.AttendanceCertification(createAttendanceDto);
-	}
-	
 }
