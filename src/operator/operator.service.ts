@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
-import { SetTodayWordDto } from './dto/todayWord.dto';
+import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';

@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { OperatorService } from './operator.service';
-import { SetTodayWordDto } from './dto/todayWord.dto';
+import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 
