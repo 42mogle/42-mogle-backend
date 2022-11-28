@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     httpsOptions,
   });
-  
+
   // Setting Swagger
   const config = new DocumentBuilder()
     .setTitle('42Mogle using swagger')
