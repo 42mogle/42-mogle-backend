@@ -12,14 +12,14 @@ export class AttendanceService {
 	@Inject(OperatorService) private readonly operatorService: OperatorService;
 
 
-	getUserButtonStatus(intraId: string): number {
-		if (!this.isAvailableTime()) {
-			return (1);
-		}
-		else if (this.isAttendance(intraId)) {
+	async getUserButtonStatus(intraId: string): Promise<number> {
+		// if (!this.isAvailableTime()) {
+		// 	return (1);
+		// }
+		if (await this.isAttendance(intraId)) {
 			return (2);
 		}
-		else if (!this.isSetToDayWord()) {
+		else if (await !this.isSetToDayWord()) {
 			return (3)
 		}
 		return (0);
@@ -73,10 +73,11 @@ export class AttendanceService {
 		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo();
 		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intra_id)
 		const found = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
-		if (found)
-			return true;
-		else
+		console.log(found);
+		if (found === null)
 			return false;
+		else
+			return true;
 	}
 
 	async isSetToDayWord(): Promise<boolean> {

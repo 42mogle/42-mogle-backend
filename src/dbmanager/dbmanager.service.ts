@@ -32,6 +32,7 @@ export class DbmanagerService {
 		return found;
 	}
 
+	
 	createUser(createUserDto: CreateUserDto) {
 		const user = this.usersRepository.create({
 			intraId: createUserDto.intraId,
@@ -89,6 +90,9 @@ export class DbmanagerService {
 			})
 			await this.dayInfoRepository.save(dayInfo);
 		}
+		this.monthInfoRepository.update(monthInfo.id, {
+			totalAttendance: 20
+		})
 	}
 
 	async upDateThisMonthCurrentAttendance() {
@@ -155,6 +159,11 @@ export class DbmanagerService {
 		this.setMonthInfo();
 	}
 
+	@Cron('0 0 1 1 * *')
+	setTotalMonthcron() {
+		this.setMonthInfo();
+	}
+
 	async getThisMonthInfo() {
 		const now = new Date();
 		return (await this.monthInfoRepository.findOneBy({month: now.getMonth() + 1, year: now.getFullYear()}));
@@ -212,8 +221,7 @@ export class DbmanagerService {
 	}
 
 	async getThisMonthStatus(intraId: string) {
-		const { attendanceCount, isPerfect } = await this.getThisMonthlyUser(intraId)
-		return {attendanceCount, isPerfect}
+		return await this.getThisMonthlyUser(intraId);
 	}
 
 	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {

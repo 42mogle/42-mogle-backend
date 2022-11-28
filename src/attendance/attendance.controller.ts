@@ -16,12 +16,12 @@ export class AttendanceController {
 	@ApiOkResponse({
 		description: 'Success'
 	})
-	@Get('/:intraId/buttonStatus')
+	@Get('/:intraId/buttonStatus') // 유저 출석체크 버튼의 상태
 	getUserButtonStatus(@Param('intraId') intraId: string) {
 		return this.attendanceService.getUserButtonStatus(intraId);
 	}
 
-	@Post('/userAttendance')
+	@Post('/userAttendance') // 유저 출석체크 인증
 	pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
 		return this.attendanceService.AttendanceCertification(createAttendanceDto);
 	}

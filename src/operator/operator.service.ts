@@ -1,24 +1,25 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
-import { SetToDayWordDto } from './dto/toDayWord.dto';
+import { SetTodayWordDto } from './dto/todayWord.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class OperatorService {
 	@Inject(DbmanagerService)
 	private readonly dbmanagerService: DbmanagerService;
 
-	setTodayWord(setToDayWordDto: SetToDayWordDto) {
-		if (this.dbmanagerService.isAdmin(setToDayWordDto.intraId)) {
-			this.dbmanagerService.setToDayWord(setToDayWordDto.toDayWord);
-			return "success"
+	setTodayWord(setTodayWordDto: SetTodayWordDto) {
+		if (this.dbmanagerService.isAdmin(setTodayWordDto.intraId)) {
+			this.dbmanagerService.setToDayWord(setTodayWordDto.todayWord);
+			return "오늘의 단어 설정 성공"
 		}
 		else {
-			return "permission denied"
+			return "권한이 없습니다!!!!!"
 		}
 	}
 
@@ -51,6 +52,7 @@ export class OperatorService {
 		}
 	}
 
+	@Cron('0 10 9 * * 0-6')
 	async updateUsersAttendanceInfo() {
 		const allUsersInfo: UserInfo[] = await this.dbmanagerService.getAllUsersInfo();
 		const monthInfo: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
@@ -68,6 +70,7 @@ export class OperatorService {
 			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, true);
 	}
 
+	@Cron('0 0 1 * * 0-6')
 	async updateCurrentCount() {
 		const type: number = this.dbmanagerService.getTodayType();
 		if (type !== 0 && type !== 6)

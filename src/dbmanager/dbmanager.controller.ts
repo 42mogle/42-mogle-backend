@@ -6,27 +6,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class DbmanagerController {
 	constructor(private readonly dbmanagerService: DbmanagerService) { }
 
-	@Post('/user')
+	@Post('/user') //삭제 예정
 	createUser(@Body() createUserDto: CreateUserDto) {
 		console.log("in DbmanagerController.createUser()");
 		console.log(createUserDto);
 		return this.dbmanagerService.createUser(createUserDto);
 	}
 
-	@Get()
-	findAll() {
-		console.log("in DbmanagerController.findAll()");
-		return this.dbmanagerService.findAll();
-	}
-
-	@Post('/set/totalMonthInfo/:intraId')
+	@Post('/set/totalMonthInfo/:intraId') // 해달 달의 정보와 그달의 모든 일자에 대한 정보를 데이터로 남겨논다 //크론
 	setTotalMonthInfo(@Param("intraId") intraId: string) {
 		return this.dbmanagerService.setTotalMonthInfo(intraId);
-	}
-
-	@Post('/test/month')
-	testMonthSet() {
-		return this.dbmanagerService.setMonthInfo();
 	}
 
 	@Post("/test/setcurrent")
