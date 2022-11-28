@@ -13,10 +13,10 @@ export class AttendanceService {
 
 
 	async getUserButtonStatus(intraId: string): Promise<number> {
-		if (!this.isAvailableTime()) {
-			return (1);
-		}
-		else if (await this.isAttendance(intraId)) {
+		// if (!this.isAvailableTime()) {
+		// 	return (1);
+		// }
+		if (await this.isAttendance(intraId)) {
 			return (2);
 		}
 		else if (await !this.isSetToDayWord()) {
@@ -43,9 +43,10 @@ export class AttendanceService {
 		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(attendanceinfo.intraId);
 		if (!monthlyUser)
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(attendanceinfo.intraId);
-		this.dbmanagerService.attendanceRegistration(attendanceinfo);
-		this.dbmanagerService.updateMonthlyUser(monthlyUser);
-		this.operatorService.statusUpdate(monthlyUser, monthInto.currentAttendance);
+		console.log(monthlyUser);
+		await this.dbmanagerService.attendanceRegistration(attendanceinfo);
+		await this.dbmanagerService.updateMonthlyUser(monthlyUser);
+		await this.operatorService.statusUpdate(monthlyUser, monthInto.currentAttendance);
 		return ({
 			statusAttendance: 0,
 			errorMsg: "성공적으로 출석 체크를 완료했습니다."
@@ -73,7 +74,6 @@ export class AttendanceService {
 		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo();
 		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intra_id)
 		const found = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
-		console.log(found);
 		if (found === null)
 			return false;
 		else

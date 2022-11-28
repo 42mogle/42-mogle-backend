@@ -186,7 +186,7 @@ export class DbmanagerService {
 			monthInfo: monthInfo,
 			userInfo: userInfo
 		})
-		this.monthlyUsersRepository.save(monthlyUser);
+		await this.monthlyUsersRepository.save(monthlyUser);
 		return (monthlyUser)
 	}
 
