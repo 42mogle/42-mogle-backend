@@ -3,6 +3,7 @@ import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { StatisticModule } from './statistic.module';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { CreateStatisticDto } from './dto/create-statistic.dto';
+import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 
 @Injectable()
 export class StatisticService {
@@ -19,6 +20,10 @@ export class StatisticService {
 	}
 
 	async getUserMonthStatus(intraId: string): Promise<any> {
-		return await this.dbmanagerService.getThisMonthStatus(intraId);
+		const monthlyUserInfo: MonthlyUsers = await this.dbmanagerService.getThisMonthStatus(intraId);
+		if (!monthlyUserInfo)
+			return {attendanceCount: 0, isPerfect: false};
+		else
+			return {attendanceCount: monthlyUserInfo.attendanceCount, isPerfect: monthlyUserInfo.isPerfect};
 	}
 }

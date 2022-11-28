@@ -3,20 +3,23 @@ import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
+import { OperatorService } from '../operator/operator.service';
+import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 
 @Injectable()
 export class AttendanceService {
 	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService;
+	@Inject(OperatorService) private readonly operatorService: OperatorService;
 
 
-	getUserButtonStatus(intraId: string): number {
+	async getUserButtonStatus(intraId: string): Promise<number> {
 		if (!this.isAvailableTime()) {
 			return (1);
 		}
-		else if (this.isAttendance(intraId)) {
+		else if (await this.isAttendance(intraId)) {
 			return (2);
 		}
-		else if (!this.isSetToDayWord()) {
+		else if (await !this.isSetToDayWord()) {
 			return (3)
 		}
 		return (0);
@@ -24,7 +27,7 @@ export class AttendanceService {
 
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto) {
 		const toDayWord: string = await this.dbmanagerService.getToDayWord();
-		console.log("joonhan say:", attendanceinfo.todayWord);
+		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
 		if (await this.isAttendance(attendanceinfo.intraId)) {
 			return ({
 				statusAttendance: 1,
@@ -42,6 +45,7 @@ export class AttendanceService {
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(attendanceinfo.intraId);
 		this.dbmanagerService.attendanceRegistration(attendanceinfo);
 		this.dbmanagerService.updateMonthlyUser(monthlyUser);
+		this.operatorService.statusUpdate(monthlyUser, monthInto.currentAttendance);
 		return ({
 			statusAttendance: 0,
 			errorMsg: "성공적으로 출석 체크를 완료했습니다."
@@ -69,10 +73,11 @@ export class AttendanceService {
 		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo();
 		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intra_id)
 		const found = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
-		if (found)
-			return true;
-		else
+		console.log(found);
+		if (found === null)
 			return false;
+		else
+			return true;
 	}
 
 	async isSetToDayWord(): Promise<boolean> {

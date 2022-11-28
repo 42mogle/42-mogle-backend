@@ -19,7 +19,7 @@ export class UserController {
 		this.userService = userService;
 	}
 
-	// GET /user
+	// GET /user //현재는 사용되지 않음
 	@ApiOperation({summary: 'get all users'})
 	@Get('/')
 	getAllUser(): Promise<UserInfo[]> {
@@ -35,7 +35,7 @@ export class UserController {
 	@ApiOkResponse({
 		description: 'Success'
 	})
-	@Get('/:intraId')
+	@Get('/:intraId') // 유저의 정보 1.인트라아이디 2.오퍼레이터 여부 3. photoUrl
 	getUserInfo(@Param('intraId') intraId: string) {
 		return this.userService.getUserInfoByIntraId(intraId);
 	}

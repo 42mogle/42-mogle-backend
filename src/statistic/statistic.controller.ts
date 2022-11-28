@@ -12,8 +12,8 @@ export class StatisticController {
 	}
 
 	//출석 일수
-	//개근 일수
-	@Get(":intraId/userAttendanceState")
+	//개근 여부
+	@Get(":intraId/userAttendanceState") //메인 화면에 띄워줄 출석인수와 개근여부를 반환
 	async getUserAttendanceState(@Param("intraId") intraId: string) {
 		return this.statisticService.getUserMonthStatus(intraId);
 	}

@@ -1,4 +1,4 @@
-export class SetToDayWordDto {
+export class SetTodayWordDto {
 	intraId: string;
-	toDayWord: string;
+	todayWord: string;
 }

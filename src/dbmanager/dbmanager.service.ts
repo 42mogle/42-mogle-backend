@@ -1,4 +1,4 @@
-import { BadRequestException, GatewayTimeoutException, Injectable, NotFoundException } from '@nestjs/common';
+import { All, BadRequestException, GatewayTimeoutException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
@@ -12,6 +12,8 @@ import { userInfo } from 'os';
 import * as request from 'supertest';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
+import { create } from 'domain';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class DbmanagerService {
@@ -30,11 +32,12 @@ export class DbmanagerService {
 		return found;
 	}
 
+	
 	createUser(createUserDto: CreateUserDto) {
 		const user = this.usersRepository.create({
 			intraId: createUserDto.intraId,
 			password: createUserDto.password,
-			isAdmin: false,
+			isOperator: false,
 			photoUrl: "minsu!!",
 		});
 		return this.usersRepository.save(user);
@@ -72,7 +75,6 @@ export class DbmanagerService {
 		})
 		await this.monthInfoRepository.save(monthInfo);
 		this.setAllDayInfo(monthInfo);
-		//return this.monthRepository.save(monthInfo);
 	}
 
 	async setAllDayInfo(monthInfo: MonthInfo) {
@@ -88,6 +90,9 @@ export class DbmanagerService {
 			})
 			await this.dayInfoRepository.save(dayInfo);
 		}
+		this.monthInfoRepository.update(monthInfo.id, {
+			totalAttendance: 20
+		})
 	}
 
 	async upDateThisMonthCurrentAttendance() {
@@ -148,9 +153,14 @@ export class DbmanagerService {
 
 	//setTotalMonthInfo
 	async setTotalMonthInfo(intra_id: string) {
-		// if (!this.isAdmin(intra_id)) {
-		// 	return "permission denied";
-		// }
+		if (!this.isAdmin(intra_id)) {
+			return "permission denied";
+		}
+		this.setMonthInfo();
+	}
+
+	@Cron('0 0 1 1 * *')
+	setTotalMonthcron() {
 		this.setMonthInfo();
 	}
 
@@ -211,8 +221,7 @@ export class DbmanagerService {
 	}
 
 	async getThisMonthStatus(intraId: string) {
-		const { attendanceCount, isPerfect } = await this.getThisMonthlyUser(intraId)
-		return {attendanceCount, isPerfect}
+		return await this.getThisMonthlyUser(intraId);
 	}
 
 	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {
@@ -225,6 +234,14 @@ export class DbmanagerService {
 
 	async getSpecificMonthlyuserInfo(monthInfo: MonthInfo, userInfo: UserInfo): Promise<MonthlyUsers> {
 		return await this.monthlyUsersRepository.findOneBy({monthInfo, userInfo})
+	}
+
+	async getAllUsersInfo(): Promise<UserInfo[]> {
+		return await this.usersRepository.find();
+	}
+
+	async getAllMonthlyUser(allUserInfo: UserInfo[], monthInfo: MonthInfo) {
+		return await this.monthlyUsersRepository.findBy({userInfo: allUserInfo, monthInfo});
 	}
 
 	updateAttendanceCountThisMonth(monthlyuser: MonthlyUsers) {
@@ -243,13 +260,27 @@ export class DbmanagerService {
 		});
 		this.attendanceRepository.save(userAttendance);
 	}
+
+	changeIsPerfect(monthlyUserInfo: MonthlyUsers, status: boolean) {
+		this.monthlyUsersRepository.update(monthlyUserInfo.id, {
+			isPerfect: status
+		})
+	}
+
+	async updateThisMonthCurrentCount() {
+		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		this.monthInfoRepository.update(monthInfo.id, {
+			currentAttendance: monthInfo.currentAttendance + 1
+		})
+	}
+
 	/**************************************
 	 * 			util 함수 목록            *
 	 * ********************************* */
 
  	async isAdmin(intraId: string): Promise<boolean> {
 		const user: UserInfo = await this.usersRepository.findOneBy({intraId});
-		if(user.isAdmin)
+		if(user.isOperator)
 			return (true);
 		else
 			return (false);
@@ -275,5 +306,54 @@ export class DbmanagerService {
 		const Today = new Date();
 		return Today.getDay();
 	}
+
+	/**************************************
+	 * 			test 함수 목록            *
+	 * ********************************* */
+
+	async getAllDayInfo(monthInfo: MonthInfo) {
+		return this.dayInfoRepository.findBy({monthInfo})
+	}
+
+	async createMockUp() {
+		const intraId: string[] = ["minsukan", "joonhan", "samin", "mgo", "susong"]
+		const passWord: string = "42mogle";
+		///
+		intraId.forEach( (user) => {
+			const abc = this.usersRepository.create({
+				intraId: user,
+				password: passWord,
+				isOperator: true,
+			})
+			this.usersRepository.save(abc);
+		})
+		
+
+		this.setTotalMonthInfo("minsuakn");
+		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		const dayinfo: DayInfo[] = await this.getAllDayInfo(monthInfo);
+		const allUserInfo: UserInfo[] = await this.getAllUsersInfo();
+		allUserInfo.forEach((user) => {
+			let i = 1;
+			dayinfo.forEach((dayInfo) => {
+				const date = new Date(2022, 11, i, 8, 30);
+				this.attendanceRepository.create({
+					timelog: date,
+					userInfo: user,
+					dayInfo: dayInfo
+				})
+				i++;
+			})
+		})
+	 }
+
+	 async atc(intraId: string, num: number) {
+		const userInfo: UserInfo = await this.getUserInfo(intraId);
+		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		const monthly: MonthlyUsers = await this.getThisMonthlyUser(intraId);
+		monthly.attendanceCount = num;
+		this.monthlyUsersRepository.save(monthly);
+	 }
+
 
 }
