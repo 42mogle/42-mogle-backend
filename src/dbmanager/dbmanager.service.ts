@@ -13,7 +13,6 @@ import * as request from 'supertest';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
 import { create } from 'domain';
-import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class DbmanagerService {

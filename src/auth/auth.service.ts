@@ -65,7 +65,7 @@ export class AuthService {
           intraId : res.data.login,
           password: "",
           photoUrl : res.data.image.link,
-          isAdmin: false
+          isOperator: false
         }
         console.log("getUserData 성공");
       })
@@ -142,7 +142,7 @@ export class AuthService {
         user.password = await bcrypt.hash(authDto.password, saltOrRounds);
         // user.password = authDto.password;
         user.photoUrl = authDto.photoUrl;
-        user.isAdmin = authDto.isAdmin;
+        user.isOperator = authDto.isOperator;
         console.log(user)
         await this.usersRepository.save(user);
       return authDto.intraId;
