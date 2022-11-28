@@ -12,7 +12,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectRepository(UserInfo)
     private usersRepository: Repository<UserInfo>,
   ) {
-    // console.log("확인");
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
