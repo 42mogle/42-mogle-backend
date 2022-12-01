@@ -16,9 +16,9 @@ export class AttendanceService {
 		// // if (!this.isAvailableTime()) {
 		// // 	return (1);
 		// // }
-		// else if (await this.isAttendance(intraId)) {
-		// 	return (2);
-		// }
+		if (await this.isAttendance(intraId)) {
+			return (2);
+		}
 		// else if (await !this.isSetToDayWord()) {
 		// 	return (3)
 		// }

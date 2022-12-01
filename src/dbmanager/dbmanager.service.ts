@@ -152,9 +152,9 @@ export class DbmanagerService {
 
 	//setTotalMonthInfo
 	async setTotalMonthInfo(intra_id: string) {
-		// if (!this.isAdmin(intra_id)) {
-		// 	return "permission denied";
-		// }
+		if (!this.isAdmin(intra_id)) {
+			return "permission denied";
+		}
 		this.setMonthInfo();
 	}
 
