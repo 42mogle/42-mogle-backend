@@ -13,15 +13,15 @@ export class AttendanceService {
 
 
 	async getUserButtonStatus(intraId: string): Promise<number> {
-		if (!this.isAvailableTime()) {
-			return (1);
-		}
-		else if (await this.isAttendance(intraId)) {
-			return (2);
-		}
-		else if (await !this.isSetToDayWord()) {
-			return (3)
-		}
+		// // if (!this.isAvailableTime()) {
+		// // 	return (1);
+		// // }
+		// else if (await this.isAttendance(intraId)) {
+		// 	return (2);
+		// }
+		// else if (await !this.isSetToDayWord()) {
+		// 	return (3)
+		// }
 		return (0);
 	}
 
