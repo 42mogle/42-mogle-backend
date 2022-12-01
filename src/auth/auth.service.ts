@@ -41,6 +41,7 @@ export class AuthService {
       })
       .catch((err) => {
         console.log("getAccessToken 에러");
+        console.log(err);
         throw new HttpException('oauth인증 코드를 얻는데 실패하였습니다', HttpStatus.FORBIDDEN);
       });
     return (ret);

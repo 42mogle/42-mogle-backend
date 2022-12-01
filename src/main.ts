@@ -4,14 +4,14 @@ import { AppModule } from './app.module';
 import * as fs from 'fs';
 
 async function bootstrap() {
-  //const app = await NestFactory.create(AppModule);
-  const httpsOptions = {
-    key: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/privkey1.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/fullchain1.pem'),
-  };
-  const app = await NestFactory.create(AppModule, {
-    httpsOptions,
-  });
+  const app = await NestFactory.create(AppModule);
+  // const httpsOptions = {
+  //   key: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/privkey1.pem'),
+  //   cert: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/fullchain1.pem'),
+  // };
+  // const app = await NestFactory.create(AppModule, {
+  //   httpsOptions,
+  // });
 
   // Setting Swagger
   const config = new DocumentBuilder()
