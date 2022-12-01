@@ -63,7 +63,7 @@ export class DbmanagerService {
 		const totalAttendance = new Date(year, month, 0).getDate(); //bolck
 		const found = await this.monthInfoRepository.findOne({ where: { year, month } });
 		if (found)
-			throw new NotFoundException("이미 있슴;;");
+			throw "이번달 데이터가 이미 있습니다.";
 		const monthInfo = this.monthInfoRepository.create({
 			year: year,
 			month: month,
@@ -152,9 +152,9 @@ export class DbmanagerService {
 
 	//setTotalMonthInfo
 	async setTotalMonthInfo(intra_id: string) {
-		if (!this.isAdmin(intra_id)) {
-			return "permission denied";
-		}
+		// if (!this.isAdmin(intra_id)) {
+		// 	return "permission denied";
+		// }
 		this.setMonthInfo();
 	}
 
