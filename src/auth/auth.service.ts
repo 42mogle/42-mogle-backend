@@ -99,14 +99,16 @@ export class AuthService {
 
     let userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId });
     if (userInfo !== null) {
-
       const isMatch = await bcrypt.compare(authDto.password, userInfo.password);
-
+      console.log(isMatch);
       if ((userInfo.intraId == authDto.intraId) && isMatch)
       {
         console.log("유저 확인 : " + userInfo.intraId);
         return(this.createrAcessToken(authDto));
       }
+      else
+        throw new HttpException('비밀번호가 틀렸습니다.', HttpStatus.FORBIDDEN);
+
       // return (accessToken);
       // response.cookie("accessToken", accessToken);
     }
