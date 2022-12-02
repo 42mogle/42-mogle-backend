@@ -4,6 +4,7 @@ import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
 import { AttendanceService } from '../attendance/attendance.service';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { Attendance } from '../dbmanager/entities/attendance.entity';
+import { UserInfoDto } from './dto/user-info.dto';
 
 @Injectable()
 export class UserService {
@@ -12,12 +13,14 @@ export class UserService {
 	@Inject(AttendanceService)
 	private readonly attendanceService: AttendanceService;
 
-	async getUserInfoByIntraId(inputtedintraId: string) {
+	async getUserInfoByIntraId(inputtedintraId: string): Promise<UserInfoDto> {
 		const user: UserInfo  = await this.dbmanagerService.getUserInfo(inputtedintraId);
-		const intraId: string = user.intraId;
-		const isOperator: boolean = user.isOperator;
-		const PhotoUrl: string = user.photoUrl;
-		return { intraId, isOperator, PhotoUrl };
+		const userInfoDto: UserInfoDto = {
+			intraId: user.intraId,
+			isOperator: user.isOperator,
+			photoUrl: user.photoUrl
+		};
+		return userInfoDto;
 	}
 
 	async findAll(): Promise<UserInfo[]> {
