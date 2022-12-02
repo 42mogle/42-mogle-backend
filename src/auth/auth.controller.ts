@@ -5,24 +5,15 @@ import { Token } from './auth.decorator';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { AuthDto } from './dto/auth.dto';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Auth')
 @Controller('serverAuth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService,
+    private authService: AuthService,
     private jwtService: JwtService
     ) {}
-
-  // test
-  @Get('oauth')
-  @ApiOperation({summary: 'for testing'})
-  @Redirect('https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-fe0450158bd57a0967d25286f60a880e9dfeaf974652aa249d4b9700a2251a1b&redirect_uri=http%3A%2F%2F10.19.247.186%3A3042%2Fauth%2FfirstJoin&response_type=code', 301)
-  redi()
-  {
-    return("redi");
-  }
 
   // POST /serverAuth/login
   @Post('login')
@@ -37,10 +28,15 @@ export class AuthController {
 	})
   async login(@Res() response: Response, @Body() authDto: AuthDto)
   {
-    console.log('login');
+    console.log("[POST /serverAuth/login] requested.");
+    console.log("[AuthoDto]:")
     console.log(authDto);
-    response.send({accessToken: await this.authService.login(response, authDto)});
-    // todo: specifying returning
+
+    const accessToken = await this.authService.login(response, authDto);
+    console.log("[accessToken]:");
+    console.log(accessToken);
+    response.send({ accessToken });
+    return ;
   }
 
   @Post('logout')
@@ -105,6 +101,7 @@ export class AuthController {
     return(await this.authService.secondJoin(authDto));
   }
 
+  // todo: Remove
   // test
   @Get('test0')
   @ApiOperation({summary: 'for testing'})
@@ -114,8 +111,19 @@ export class AuthController {
     return("test0")
   }
   
+  // todo: Remove
   // test
   @Post('test')
+	@ApiCreatedResponse({
+		description: '테스트',
+		schema: {
+			example: {
+				intraId: 'mgo',
+				isOperator: true,
+				photoUrl: 'https://awesome.photo'
+			}
+		}
+	})
   @ApiOperation({summary: 'for testing'})
   async test(@Body() authDto: AuthDto)
   {
@@ -130,6 +138,7 @@ export class AuthController {
     return (this.authService.createrAcessToken(authDto));
   }
 
+  // todo: Remove
   // test
   @Post('test2')
   @ApiOperation({summary: 'for testing'})
@@ -140,6 +149,7 @@ export class AuthController {
     return ("test2 리턴")
   }
 
+  // todo: Remove
   // test
   @UseGuards(JwtAuthGuard)
   @Post('test3')
@@ -149,6 +159,15 @@ export class AuthController {
     console.log(this.jwtService.verify(token));
     console.log("토큰 " + token);
     return ("test3 리턴")
+  }
+
+  // todo: Remove
+  @Get('oauth')
+  @ApiOperation({summary: 'for testing'})
+  @Redirect('https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-fe0450158bd57a0967d25286f60a880e9dfeaf974652aa249d4b9700a2251a1b&redirect_uri=http%3A%2F%2F10.19.247.186%3A3042%2Fauth%2FfirstJoin&response_type=code', 301)
+  redi()
+  {
+    return("redi");
   }
 
   @Delete('delete')
