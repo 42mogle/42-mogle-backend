@@ -2,7 +2,7 @@ import { UserService } from './user.service';
 import { UserInfoDto } from './dto/user-info.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { ApiParam, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger'
+import { ApiParam, ApiOperation, ApiTags, ApiResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 
 @ApiTags('User')
@@ -14,7 +14,12 @@ export class UserController {
 
 	// GET /user/{intraId}
 	@Get('/:intraId')
-	@ApiOperation({summary: 'get the user information'})
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token') // setting JWT token key
+	@ApiOperation({
+		summary: 'get the user information',
+		description: '유저 정보 요청 API'
+	})
 	@ApiParam({
 		name: 'intraId',
 		type: String,
@@ -26,13 +31,12 @@ export class UserController {
 	})
 	@ApiResponse({
 		status: 401,
-		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard: No JWT access-token)'
 	})
 	@ApiResponse({
 		status: 403,
 		description: 'Forbidden'
 	})
-	@UseGuards(JwtAuthGuard)
 	async getUserInfo(@Param('intraId') intraId: string): Promise<UserInfoDto> {
 		return await this.userService.getUserInfoByIntraId(intraId);
 	}

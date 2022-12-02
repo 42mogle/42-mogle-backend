@@ -25,8 +25,8 @@ export class AuthController {
 		description: 'Success'
 	})
 	@ApiResponse({
-		status: 403,
-		description: 'Forbidden'
+		status: 401,
+		description: 'Unauthorized'
 	})
   async login(@Res() response: Response, @Body() authDto: AuthDto)
   {
@@ -73,6 +73,9 @@ export class AuthController {
     return ;
   }
 
+  /**
+   * GET /serverAuth/firstJoin
+   */
   @Get('firstJoin')
   @ApiOperation({summary: 'get a user info from 42OAuth'})
 	@ApiResponse({

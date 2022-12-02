@@ -42,6 +42,7 @@ export class DbmanagerService {
 		return this.usersRepository.save(user);
 	}
 
+	// todo: Remove
 	async findAll(): Promise<UserInfo[]> {
 		return await this.usersRepository.find();
 	}
