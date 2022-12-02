@@ -4,7 +4,7 @@ import { StatisticService } from './statistic.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('statistic')
+@ApiTags('Statistic')
 @Controller('statistic')
 export class StatisticController {
 	constructor(private readonly statisticService: StatisticService) {}

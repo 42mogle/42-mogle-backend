@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('dbmanager')
+@ApiTags('DbManager')
 @Controller('dbmanager')
 export class DbmanagerController {
 	constructor(private readonly dbmanagerService: DbmanagerService) { }

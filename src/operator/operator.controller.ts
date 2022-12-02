@@ -5,7 +5,7 @@ import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('operator')
+@ApiTags('Operator')
 @Controller('operator')
 export class OperatorController {
 	constructor(private readonly operatorService: OperatorService) {}

@@ -5,13 +5,18 @@ import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // const httpsOptions = {
-  //   key: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/privkey1.pem'),
-  //   cert: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/fullchain1.pem'),
-  // };
-  // const app = await NestFactory.create(AppModule, {
-  //   httpsOptions,
-  // });
+
+  /* When using ssl for https
+
+  const httpsOptions = {
+    key: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/privkey1.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/fullchain1.pem'),
+  };
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
+
+  */
 
   // Setting Swagger
   const config = new DocumentBuilder()
@@ -28,6 +33,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
+
   await app.listen(3000);
 }
 bootstrap();
