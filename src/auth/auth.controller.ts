@@ -15,7 +15,9 @@ export class AuthController {
     private jwtService: JwtService
     ) {}
 
-  // POST /serverAuth/login
+  /**
+   * POST /serverAuth/login
+   */
   @Post('login')
 	@ApiOperation({summary: 'request user login'})
 	@ApiResponse({
@@ -39,6 +41,9 @@ export class AuthController {
     return ;
   }
 
+  /**
+   * POST /serverAuth/logout
+   */
   @Post('logout')
   @ApiOperation({summary: 'request user logout'})
 	@ApiResponse({
@@ -51,14 +56,21 @@ export class AuthController {
 	})
   logout(@Res() response:Response)
   {
-    //쿠키 자용시
-    response.cookie("accessToken","",
-    {
-      httpOnly: true,
-      maxAge: 0
-    })
+    /** 
+     * When using cookie (saving accessToken in cookie), run below code.
+     */
+    // response.cookie("accessToken","",
+    // {
+    //   httpOnly: true,
+    //   maxAge: 0
+    // })
+
+    /** 
+     * When using local storage, the front-end removes the accessToken.
+     */
+
     response.send({message:'로그아웃'});
-    //로컬스토리지는 프론트엔드에서 로컬스토리지에 토큰 지우는 방식으로
+    return ;
   }
 
   @Get('firstJoin')
