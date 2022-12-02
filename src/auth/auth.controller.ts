@@ -28,8 +28,7 @@ export class AuthController {
 		status: 401,
 		description: 'Unauthorized'
 	})
-  async login(@Res() response: Response, @Body() authDto: AuthDto)
-  {
+  async login(@Res() response: Response, @Body() authDto: AuthDto) {
     console.log("[POST /serverAuth/login] requested.");
     console.log("[AuthoDto]:")
     console.log(authDto);
@@ -54,8 +53,7 @@ export class AuthController {
 		status: 403,
 		description: 'Forbidden'
 	})
-  logout(@Res() response:Response)
-  {
+  logout(@Res() response:Response) {
     /** 
      * When using cookie (saving accessToken in cookie), run below code.
      */
@@ -87,8 +85,7 @@ export class AuthController {
 		status: 403,
 		description: 'Forbidden'
 	})
-  async firstJoin(@Query('code') code: string)
-  {
+  async firstJoin(@Query('code') code: string) {
     console.log("[GET /serverAuth/firstJoin] requested.");
     console.log("[42OAuth code]:");
     console.log(code);
@@ -111,9 +108,9 @@ export class AuthController {
 		status: 403,
 		description: 'Forbidden'
 	})
-  async secondJoin(@Body() authDto:AuthDto)
-  {
-    console.log("secondJoin 확인");
+  async secondJoin(@Body() authDto:AuthDto) {
+    console.log("[POST /serverAuth/secondJoin] requested.");
+    console.log("[authDto]:");
     console.log(authDto);
     return(await this.authService.secondJoin(authDto));
   }

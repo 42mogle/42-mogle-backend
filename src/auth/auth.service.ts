@@ -75,7 +75,7 @@ export class AuthService {
       })
       .catch((err) => {
         console.log("getUserData from 42api 에러");
-        
+
         // todo: consider
         throw new HttpException('42회원 정보가 존재하지 않습니다.', HttpStatus.FORBIDDEN);
       });
@@ -130,24 +130,25 @@ export class AuthService {
     const user = new UserInfo();
     const saltOrRounds = 10;
     
-    let userInfo = await this.usersRepository.findOneBy(
-      {
-        intraId: authDto.intraId
-      })
-      if (userInfo === null) {
-        //회원가입
-        console.log("회원가입");
-        user.intraId = authDto.intraId;
-        user.password = await bcrypt.hash(authDto.password, saltOrRounds);
-        // user.password = authDto.password;
-        user.photoUrl = authDto.photoUrl;
-        user.isOperator = authDto.isOperator;
-        console.log(user)
-        await this.usersRepository.save(user);
+    // todo: Request to dbManager
+    let userInfo = await this.usersRepository.findOneBy({
+      intraId: authDto.intraId
+    })
+    if (userInfo === null) {
+      console.log("[Signing in]");
+      // todo: using repository.create() ?
+      user.intraId = authDto.intraId;
+      user.password = await bcrypt.hash(authDto.password, saltOrRounds);
+      user.photoUrl = authDto.photoUrl;
+      user.isOperator = authDto.isOperator;
+      console.log(user);
+      await this.usersRepository.save(user); // todo: Request to dbManager
       return authDto.intraId;
     }
     else {
       console.log("이미 존재하는 회원");
+
+      // todo: consider
       throw new HttpException('이미 존재하는 회원입니다.', HttpStatus.FORBIDDEN);
     }
   }
