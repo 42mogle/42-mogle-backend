@@ -77,43 +77,33 @@ export class AuthService {
     return (authDto);
   }
 
-  //JWT 액세스 토큰 발행
-  createrAcessToken(authDto: AuthDto)
-  {
-    let intraId: string = authDto.intraId;
-    const payload = { intraId };
+  // todo: Rename to createJwtAccessToken()
+  createrAcessToken(authDto: AuthDto) {
+    const payload = { intraId: authDto.intraId };
     const accessToken = this.jwtService.sign(payload)
     return (accessToken);
   }
 
-  async login(response:Response, authDto:AuthDto) 
-  {
-    /* 
-      디비에 아이디 정보 있는지 확인
-      정보 있을시
-        토큰 발행
-      정보 없을시
-        에러코드 반환 || 에러 반환
-    */
-    const user = new UserInfo();
-
+  async login(response:Response, authDto:AuthDto) {
     let userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId });
     if (userInfo !== null) {
       const isMatch = await bcrypt.compare(authDto.password, userInfo.password);
-      console.log(isMatch);
-      if ((userInfo.intraId == authDto.intraId) && isMatch)
-      {
-        console.log("유저 확인 : " + userInfo.intraId);
+      console.log(`isMatch: ${isMatch}`);
+      if ((userInfo.intraId == authDto.intraId) && isMatch) {
+        console.log("User intraId: " + userInfo.intraId);
         return(this.createrAcessToken(authDto));
       }
-      else
-        throw new HttpException('비밀번호가 틀렸습니다.', HttpStatus.FORBIDDEN);
-
-      // return (accessToken);
-      // response.cookie("accessToken", accessToken);
+      else {
+        console.log("Wrong password -> 401 UNAUTHORIZED");
+        throw new HttpException('비밀번호가 틀렸습니다.', HttpStatus.UNAUTHORIZED);
+        //throw new HttpException('비밀번호가 틀렸습니다.', HttpStatus.FORBIDDEN);
+      }
     }
-    else
-      throw new HttpException('회원정보가 존재하지 않습니다.', HttpStatus.FORBIDDEN);
+    else {
+      console.log("No user -> 401 UNAUTHORIZED")
+      throw new HttpException('회원정보가 존재하지 않습니다.', HttpStatus.UNAUTHORIZED);
+      //throw new HttpException('회원정보가 존재하지 않습니다.', HttpStatus.FORBIDDEN);
+    }
   }
 
   //회원가입1 oauth인증
