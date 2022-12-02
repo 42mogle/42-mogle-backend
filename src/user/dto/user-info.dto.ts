@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class UserInfoDto {
-    @ApiProperty({ type: 'string' })
+    @ApiProperty({ type: String })
     intraId : string;
 
-    @ApiProperty({ type: 'boolean' })
+    @ApiProperty({ type: Boolean })
     isOperator : boolean;
 
-    @ApiProperty({ type: 'string' })
+    @ApiProperty({ type: String })
     photoUrl : string;
 }
