@@ -1,15 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class AuthDto {
-    @ApiProperty()
+    @ApiProperty({ type: String })
     intraId : string;
 
-    @ApiProperty()
+    @ApiProperty({ type: String })
     password : string;
 
-    @ApiProperty()
+    @ApiProperty({ type: String })
     photoUrl : string;
 
-    @ApiProperty()
+    @ApiProperty({ type: Boolean })
     isOperator : boolean;
 }
