@@ -23,6 +23,16 @@ async function bootstrap() {
     .setTitle('42mogle API docs')
     .setDescription('API description')
     .setVersion('0.1')
+    // Setting JWT token
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        name: 'JWT',
+        in: 'header',
+      },
+      'access-token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
