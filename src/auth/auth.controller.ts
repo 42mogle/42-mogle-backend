@@ -89,11 +89,13 @@ export class AuthController {
 	})
   async firstJoin(@Query('code') code: string)
   {
-    console.log("firstJoin 확인");
+    console.log("[GET /serverAuth/firstJoin] requested.");
+    console.log("[42OAuth code]:");
     console.log(code);
 
-    //회원가입 유무는 여기서
+    // todo: Rename to checkingAlreadySignedIn
     const userInfo = await this.authService.firstJoin(code);
+    console.log("[userInfo]:");
     console.log(userInfo);
     return(userInfo);
   }
