@@ -30,7 +30,7 @@ export class AuthController {
 	})
   async login(@Res() response: Response, @Body() authDto: AuthDto) {
     console.log("[POST /serverAuth/login] requested.");
-    console.log("[AuthoDto]:")
+    console.log("Body [AuthoDto]:")
     console.log(authDto);
 
     const accessToken = await this.authService.login(response, authDto);
@@ -72,7 +72,7 @@ export class AuthController {
   }
 
   /**
-   * GET /serverAuth/firstJoin
+   * GET /serverAuth/firstJoin?code=
    */
   @Get('firstJoin')
   @ApiOperation({summary: 'get a user info from 42OAuth'})
@@ -87,7 +87,7 @@ export class AuthController {
 	})
   async firstJoin(@Query('code') code: string) {
     console.log("[GET /serverAuth/firstJoin] requested.");
-    console.log("[42OAuth code]:");
+    console.log("Query [42OAuth code]:");
     console.log(code);
 
     // todo: Rename to checkingAlreadySignedIn
@@ -97,8 +97,11 @@ export class AuthController {
     return(userInfo);
   }
 
+  /**
+   * POST /serverAuth/secondJoin
+   */
   @Post('secondJoin')
-  @ApiOperation({summary: 'request user join'})
+  @ApiOperation({summary: 'request a user sign-in'})
 	@ApiResponse({
 		status: 201, 
 		description: 'Success',
@@ -110,9 +113,24 @@ export class AuthController {
 	})
   async secondJoin(@Body() authDto:AuthDto) {
     console.log("[POST /serverAuth/secondJoin] requested.");
-    console.log("[authDto]:");
+    console.log("Body [authDto]:");
     console.log(authDto);
     return(await this.authService.secondJoin(authDto));
+  }
+
+  // todo: Set in UserController
+  // todo: checking when error
+  /**
+   * DELETE /serverAuth/delete?intraId=
+   */
+  @Delete('delete')
+  @ApiOperation({summary: 'remove a user info'})
+  async deleteUser(@Query('intraId') intraId:string) {
+    console.log("[DELETE /serverAuth/delete] requested.");
+    console.log("Query [intraId]");
+    console.log(intraId);
+    console.log(await this.authService.deleteUser(intraId)); // todo: consider
+    console.log(intraId + " 삭제완료");
   }
 
   // todo: Remove
@@ -182,12 +200,5 @@ export class AuthController {
   redi()
   {
     return("redi");
-  }
-
-  @Delete('delete')
-  async DeleteUser(@Query('intraId') intraId:string)
-  {
-    console.log(await this.authService.DeleteUser(intraId));
-    console.log(intraId + " 삭제완료");
   }
 }

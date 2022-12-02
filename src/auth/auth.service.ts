@@ -153,8 +153,8 @@ export class AuthService {
     }
   }
 
-  async DeleteUser(intraId:string)
-  {
+  async deleteUser(intraId:string) {
+    // todo: Request to dbManager
     return (await this.usersRepository.delete({ intraId: intraId }));
   }
 }
