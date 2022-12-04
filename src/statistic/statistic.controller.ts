@@ -9,6 +9,9 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 export class StatisticController {
 	constructor(private readonly statisticService: StatisticService) {}
 
+	/**
+	 * GET /statistic/{intraId}/userAttendanceList
+	 */
 	@Get("/:intraId/userAttendanceList")
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
@@ -38,11 +41,34 @@ export class StatisticController {
 		return await this.statisticService.getAttendanceList(intraId);
 	}
 
-	//출석 일수
-	//개근 여부
+	/**
+	 * GET /statistic/{intraId}/userAttendanceState
+	 */
+	@Get(":intraId/userAttendanceState")
 	@UseGuards(JwtAuthGuard)
-	@Get(":intraId/userAttendanceState") //메인 화면에 띄워줄 출석인수와 개근여부를 반환
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'get the user attendance state',
+		description: '유저 home 화면에 띄워줄 출석일수와 개근여부를 반환'
+	})
+	@ApiParam({
+		name: 'intraId',
+		type: String,
+	})
+	@ApiResponse({
+		status: 200, 
+		description: 'Success', 
+		// todo: type: DTO로 정의하기
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard: No JWT access-token)'
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Forbidden'
+	})
 	async getUserAttendanceState(@Param("intraId") intraId: string) {
-		return this.statisticService.getUserMonthStatus(intraId);
+		return await this.statisticService.getUserMonthStatus(intraId);
 	}
 }
