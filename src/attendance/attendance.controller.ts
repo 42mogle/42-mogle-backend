@@ -1,33 +1,62 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AttendanceService } from './attendance.service';
-import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
+import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 
-@ApiTags('attendance')
+@ApiTags('Attendance')
 @Controller('attendance')
 export class AttendanceController {
-	constructor(private attendanceService: AttendanceService) {}
+	constructor(private readonly attendanceService: AttendanceService) {}
 
+	/**
+	 * GET /attendance/{intraId}/buttonStatus
+	 */
+	@Get('/:intraId/buttonStatus')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'get the attendance button status of the user'})
 	@ApiParam({
 		name: 'intraId',
-		type: 'string',
+		type: String,
 	})
-	@ApiOkResponse({
-		description: 'Success'
+	@ApiResponse({
+		status: 200, 
+		description: 'Success', 
+		type: Number
 	})
-	@UseGuards(JwtAuthGuard)
-	@Get('/:intraId/buttonStatus') // 유저 출석체크 버튼의 상태
-	getUserButtonStatus(@Param('intraId') intraId: string) {
-		console.log(intraId);
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Forbidden'
+	})
+	async getUserButtonStatus(@Param('intraId') intraId: string): Promise<number> {
+		console.log(`API[ GET /attendance/${intraId}/buttonStatus ] requested.`)
+		// todo: return number에 따른 상태를 문서에 명시하거나, enum으로 바꿔서 명시하기
 		return this.attendanceService.getUserButtonStatus(intraId);
 	}
 
+	/**
+	 * GET /attendance/userAttendance
+	 */
+	@Post('/userAttendance')
 	@UseGuards(JwtAuthGuard)
-	@Post('/userAttendance') // 유저 출석체크 인증
-	pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
-		return this.attendanceService.AttendanceCertification(createAttendanceDto);
+	@ApiBearerAuth('access-token')
+	@ApiOperation({summary: 'try for a user to attend'})
+	@ApiResponse({
+		status: 201, 
+		description: 'Success', 
+		// todo: Set type using dto
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
+	})
+	async pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
+		// todo: return object를 DTO로 정의하기
+		return await this.attendanceService.AttendanceCertification(createAttendanceDto);
 	}
-
 }

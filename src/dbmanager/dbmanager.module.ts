@@ -8,6 +8,7 @@ import { DayInfo } from './entities/day_info.entity';
 import { Attendance } from './entities/attendance.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 
+// todo: Rename to DbManager
 @Module({
   imports: [
     TypeOrmModule.forFeature(

@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
-import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
+import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 
@@ -11,42 +11,42 @@ export class AttendanceService {
 	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService;
 	@Inject(OperatorService) private readonly operatorService: OperatorService;
 
-
 	async getUserButtonStatus(intraId: string): Promise<number> {
-		if (!this.isAvailableTime()) {
+		if (this.isAvailableTime() === false) {
 			return (1);
 		}
-		else if (await this.isAttendance(intraId)) {
+		else if (await this.haveAttendedToday(intraId)) {
 			return (2);
 		}
-		else if (await !this.isSetToDayWord()) {
-			return (3)
-		}
+		// else if (await !this.isSetToDayWord()) {
+		// 	return (3)
+		// }
 		return (0);
 	}
 
+	// 이거 user에도 있음. 확인 필요.
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto) {
-		const toDayWord: string = await this.dbmanagerService.getToDayWord();
+		const todayWord: string = await this.dbmanagerService.getTodayWord();
 		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
-		if (await this.isAttendance(attendanceinfo.intraId)) {
+		const userIntraId = attendanceinfo.intraId;
+		if (await this.haveAttendedToday(userIntraId)) {
 			return ({
 				statusAttendance: 1,
 				errorMsg: "이미 출석 체크 했습니다."
 			});
 		}
-		if (attendanceinfo.todayWord !== toDayWord) {
+		if (attendanceinfo.todayWord !== todayWord) {
 			return ({
 				statusAttendance: 2,
 				errorMsg: "오늘의 단어가 다릅니다."
 			});
 		}
-		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(attendanceinfo.intraId);
+		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(userIntraId);
 		if (!monthlyUser)
-			monthlyUser = await this.dbmanagerService.createMonthlyUser(attendanceinfo.intraId);
-		console.log(monthlyUser);
+			monthlyUser = await this.dbmanagerService.createMonthlyUser(userIntraId);
 		await this.dbmanagerService.attendanceRegistration(attendanceinfo);
 		await this.dbmanagerService.updateMonthlyUser(monthlyUser);
-		await this.operatorService.statusUpdate(monthlyUser, monthInto.currentAttendance);
+		await this.operatorService.updatePerfectStatus(monthlyUser, monthInto.currentAttendance);
 		return ({
 			statusAttendance: 0,
 			errorMsg: "성공적으로 출석 체크를 완료했습니다."
@@ -58,31 +58,31 @@ export class AttendanceService {
      * 			util function list     *
      ********************************* */
 	
-	isAvailableTime() {
+	isAvailableTime(): Boolean {
 		const now = new Date();
 		const start = new Date();
 		const end = new Date();
 		start.setHours(8, 30, 0);
 		end.setHours(9, 0, 0);
 		if (now < start || now > end)
-			return (0);		
+			return (false);
 		else
-			return (1);
+			return (true);
 	}
 
-	async isAttendance(intra_id: string): Promise<boolean> {
-		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo();
+	async haveAttendedToday(intra_id: string): Promise<boolean> {
+		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
 		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intra_id)
-		const found = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
-		if (found === null)
+		const todayAttendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, todayInfo);
+		if (todayAttendanceInfo === null)
 			return false;
 		else
 			return true;
 	}
 
-	async isSetToDayWord(): Promise<boolean> {
-		const found: DayInfo = await this.dbmanagerService.getDayInfo();
-		if (found.todayWord === "뀨?")
+	async isTodayWordSet(): Promise<boolean> {
+		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
+		if (todayInfo.todayWord === "뀨?")
 			return (false);
 		else
 			return (true);

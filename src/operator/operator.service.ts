@@ -15,7 +15,7 @@ export class OperatorService {
 
 	setTodayWord(setTodayWordDto: SetTodayWordDto) {
 		if (this.dbmanagerService.isAdmin(setTodayWordDto.intraId)) {
-			this.dbmanagerService.setToDayWord(setTodayWordDto.todayWord);
+			this.dbmanagerService.setTodayWord(setTodayWordDto.todayWord);
 			return "오늘의 단어 설정 성공"
 		}
 		else {
@@ -24,27 +24,32 @@ export class OperatorService {
 	}
 
 	async updateUserAttendance(updateUserAttendanceDto: UpdateUserAttendanceDto): Promise<string> {
-		if (updateUserAttendanceDto.passWord !== "42MogleOperator")
+		if (updateUserAttendanceDto.passWord !== "42MogleOperator") {
 			return "권한이 없습니다."
+		}
 		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(updateUserAttendanceDto.intraId);
 		const monthInfo: MonthInfo = await this.dbmanagerService.getSpecificMonthInfo(
 			updateUserAttendanceDto.year,
 			updateUserAttendanceDto.month
-		)
+		);
 		if (!monthInfo) {
-			return "잘못된 입력입니다."
+			return "잘못된 입력입니다: monthInfo"
 		}
 		const dayInfo: DayInfo = await this.dbmanagerService.getSpecificDayInfo(
 			monthInfo,
 			updateUserAttendanceDto.day
-			);
-		if (!dayInfo || !UserInfo)
-			return "잘못된 입력 입니다.";
-		const attendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo)
+		);
+		if (!dayInfo) {
+			return "잘못된 입력입니다: dayInfo";
+		}
+		else if (!userInfo) {
+			return "잘못된 입력입니다: userInfo";
+		}
+		const attendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
 		if (!attendanceInfo) {
-			this.dbmanagerService.updateAtendanceInfo(userInfo, dayInfo, updateUserAttendanceDto);
+			await this.dbmanagerService.updateAtendanceInfo(userInfo, dayInfo, updateUserAttendanceDto);
 			const monthlyUserInfo : MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
-			this.dbmanagerService.updateAttendanceCountThisMonth(monthlyUserInfo)
+			await this.dbmanagerService.updateAttendanceCountThisMonth(monthlyUserInfo)
 			return "출석체크 완료";
 		}
 		else {
@@ -58,12 +63,11 @@ export class OperatorService {
 		const monthInfo: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
 		const AllmonthlyUser: MonthlyUsers[] = await this.dbmanagerService.getAllMonthlyUser(allUsersInfo, monthInfo);
 		AllmonthlyUser.forEach((user) => {
-			this.statusUpdate(user, monthInfo.currentAttendance);
+			this.updatePerfectStatus(user, monthInfo.currentAttendance);
 		})
 	}
 
-	statusUpdate(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
-		console.log(monthlyUserInfo.attendanceCount, currentAttendance);
+	updatePerfectStatus(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
 		if (monthlyUserInfo.attendanceCount < currentAttendance && monthlyUserInfo.isPerfect === true)
 			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, false);
 		else if (monthlyUserInfo.attendanceCount === currentAttendance && monthlyUserInfo.isPerfect === false)
@@ -73,6 +77,8 @@ export class OperatorService {
 	@Cron('0 0 1 * * 0-6')
 	async updateCurrentCount() {
 		const type: number = this.dbmanagerService.getTodayType();
+		// 0: 일요일
+		// 6: 토요일
 		if (type !== 0 && type !== 6)
 			this.dbmanagerService.updateThisMonthCurrentCount();
 	}

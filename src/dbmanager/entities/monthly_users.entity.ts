@@ -8,13 +8,13 @@ export class MonthlyUsers {
 	@PrimaryGeneratedColumn({ name: "id" })
 	id: number;
 
-	@Column({ name: "AttendanceCount" })
+	@Column({ name: "attendance_count" })
 	attendanceCount: number;
 
-	@Column({ name: "isPerfect" })
+	@Column({ name: "is_perfect" })
 	isPerfect: boolean;
 
-	@Column({ name: "totalPerfectCount" })
+	@Column({ name: "total_perfect_count" })
 	totalPerfectCount: number;
 
 	@ManyToOne(
@@ -22,7 +22,7 @@ export class MonthlyUsers {
 		(monthInfo) => monthInfo.monthlyUsers
 	)
 	@JoinColumn({ 
-		name: "monthInfoId", 
+		name: "month_info_id", 
 		referencedColumnName: "id" 
 	})
 	monthInfo: MonthInfo;
@@ -32,7 +32,7 @@ export class MonthlyUsers {
 		(user_info) => user_info.monthlyUsers
 	)
 	@JoinColumn({ 
-		name: "userInfoId", 
+		name: "user_info_id", 
 		referencedColumnName: "id" 
 	})
 	userInfo: UserInfo;
