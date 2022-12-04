@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
-import { CreateAttendanceDto } from '../dbmanager/dto/create-attendance.dto';
+import { CreateAttendanceDto } from '../attendance/dto/create-attendance.dto';
 import { AttendanceService } from '../attendance/attendance.service';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { Attendance } from '../dbmanager/entities/attendance.entity';
@@ -34,12 +34,13 @@ export class UserService {
 		return ret;
 	}
 
+	// 이거 attendance에도 있음. 확인 필요.
  	async AttendanceCertification(attendanceinfo: CreateAttendanceDto): Promise<Attendance> {
-		const toDayWord: string = await this.dbmanagerService.getToDayWord();
-		if (await this.attendanceService.isAttendance(attendanceinfo.intraId)) {
+		const todayWord: string = await this.dbmanagerService.getTodayWord();
+		if (await this.attendanceService.haveAttendedToday(attendanceinfo.intraId)) {
 			throw new NotFoundException("이미 출석체크 했습니다.");
 		}
-		else if (attendanceinfo.todayWord !== toDayWord) {
+		else if (attendanceinfo.todayWord !== todayWord) {
 			throw new NotFoundException("오늘의 단어가 다릅니다!");
 		}
 		return this.dbmanagerService.attendanceRegistration(attendanceinfo);

@@ -15,7 +15,7 @@ export class OperatorService {
 
 	setTodayWord(setTodayWordDto: SetTodayWordDto) {
 		if (this.dbmanagerService.isAdmin(setTodayWordDto.intraId)) {
-			this.dbmanagerService.setToDayWord(setTodayWordDto.todayWord);
+			this.dbmanagerService.setTodayWord(setTodayWordDto.todayWord);
 			return "오늘의 단어 설정 성공"
 		}
 		else {
@@ -58,11 +58,11 @@ export class OperatorService {
 		const monthInfo: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
 		const AllmonthlyUser: MonthlyUsers[] = await this.dbmanagerService.getAllMonthlyUser(allUsersInfo, monthInfo);
 		AllmonthlyUser.forEach((user) => {
-			this.statusUpdate(user, monthInfo.currentAttendance);
+			this.updatePerfectStatus(user, monthInfo.currentAttendance);
 		})
 	}
 
-	statusUpdate(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
+	updatePerfectStatus(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
 		console.log(monthlyUserInfo.attendanceCount, currentAttendance);
 		if (monthlyUserInfo.attendanceCount < currentAttendance && monthlyUserInfo.isPerfect === true)
 			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, false);

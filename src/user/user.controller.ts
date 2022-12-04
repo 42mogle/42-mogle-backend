@@ -45,6 +45,7 @@ export class UserController {
 	// GET /user //현재는 사용되지 않음
 	@ApiOperation({summary: 'get all users'})
 	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
 	@Get('/')
 	getAllUser(): Promise<UserInfo[]> {
 		return this.userService.findAll();
