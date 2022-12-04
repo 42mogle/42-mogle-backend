@@ -30,8 +30,7 @@ export class AuthController {
 	})
   async login(@Res() response: Response, @Body() authDto: AuthDto) {
     console.log("[POST /serverAuth/login] requested.");
-    console.log("Body [AuthoDto]:")
-    console.log(authDto);
+    console.log(`intraId: ${authDto.intraId}`);
 
     const accessToken = await this.authService.login(response, authDto);
     console.log("[accessToken]:");
