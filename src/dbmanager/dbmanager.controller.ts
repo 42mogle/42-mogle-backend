@@ -1,10 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { DbmanagerService } from './dbmanager.service';
-import { CreateUserDto } from './dto/create-user.dto';
+//import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateUserDto } from 'src/attendance/dto/create-user.dto';
 
-@ApiTags('dbmanager')
+@ApiTags('DbManager')
 @Controller('dbmanager')
 export class DbmanagerController {
 	constructor(private readonly dbmanagerService: DbmanagerService) { }
@@ -22,6 +23,12 @@ export class DbmanagerController {
 	setTotalMonthInfo(@Param("intraId") intraId: string) {
 		return this.dbmanagerService.setTotalMonthInfo(intraId);
 	}
+
+	// temp
+	// @Post('/set/monthInfo/withDayInfos')
+	// setMonthInfoWithDayInfos() {
+	// 	return this.dbmanagerService.setMonthInfo();
+	// }
 
 	@UseGuards(JwtAuthGuard)
 	@Post("/test/setcurrent")

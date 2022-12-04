@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class SetTodayWordDto {
+export class CreateAttendanceDto {
 	@ApiProperty()
 	intraId: string;
 
