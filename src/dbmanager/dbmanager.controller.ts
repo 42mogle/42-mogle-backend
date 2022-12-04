@@ -24,6 +24,12 @@ export class DbmanagerController {
 		return this.dbmanagerService.setTotalMonthInfo(intraId);
 	}
 
+	// temp
+	@Post('/set/monthInfo/withDayInfos')
+	setMonthInfoWithDayInfos() {
+		return this.dbmanagerService.setMonthInfo();
+	}
+
 	@UseGuards(JwtAuthGuard)
 	@Post("/test/setcurrent")
 	testSetCurrent() {

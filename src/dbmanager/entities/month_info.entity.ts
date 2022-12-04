@@ -14,7 +14,7 @@ export class MonthInfo {
 	@Column({ name: "year" })
 	year: number;
 
-	@Column({ name: "current_attednace"})
+	@Column({ name: "current_attendance"})
 	currentAttendance: number;
 
 	@Column({ name: "total_attendance" })
