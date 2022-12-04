@@ -25,10 +25,10 @@ export class DbmanagerController {
 	}
 
 	// temp
-	@Post('/set/monthInfo/withDayInfos')
-	setMonthInfoWithDayInfos() {
-		return this.dbmanagerService.setMonthInfo();
-	}
+	// @Post('/set/monthInfo/withDayInfos')
+	// setMonthInfoWithDayInfos() {
+	// 	return this.dbmanagerService.setMonthInfo();
+	// }
 
 	@UseGuards(JwtAuthGuard)
 	@Post("/test/setcurrent")
