@@ -62,10 +62,11 @@ export class DbmanagerService {
 		const now = new Date();
 		const year = now.getFullYear();
 		const month = now.getMonth() + 1;
-		const totalAttendance = new Date(year, month, 0).getDate(); //bolck
-		const found = await this.monthInfoRepository.findOne({ where: { year, month } });
-		if (found)
+		const totalAttendance = new Date(year, month, 0).getDate(); // todo: consider what 0 means
+		const foundThhisMonthInfo = await this.monthInfoRepository.findOne({ where: { year, month } });
+		if (foundThhisMonthInfo) {
 			throw "이번달 데이터가 이미 있습니다.";
+		}
 		const monthInfo = this.monthInfoRepository.create({
 			year: year,
 			month: month,
