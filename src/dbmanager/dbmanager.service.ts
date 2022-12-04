@@ -245,21 +245,21 @@ export class DbmanagerService {
 		return await this.monthlyUsersRepository.findBy({userInfo: allUserInfo, monthInfo});
 	}
 
-	updateAttendanceCountThisMonth(monthlyuser: MonthlyUsers) {
+	async updateAttendanceCountThisMonth(monthlyuser: MonthlyUsers) {
 		monthlyuser.attendanceCount += 1;
-		this.monthlyUsersRepository.update(monthlyuser.id, {
+		await this.monthlyUsersRepository.update(monthlyuser.id, {
 			attendanceCount: monthlyuser.attendanceCount
 		})
 	}
 
-	updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
+	async updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
 		const timelog = new Date(InfoDto.year, InfoDto.month - 1, InfoDto.day, 8, 30, 0);
 		const userAttendance = this.attendanceRepository.create({
 			userInfo,
 			dayInfo,
 			timelog,
 		});
-		this.attendanceRepository.save(userAttendance);
+		await this.attendanceRepository.save(userAttendance);
 	}
 
 	changeIsPerfect(monthlyUserInfo: MonthlyUsers, status: boolean) {

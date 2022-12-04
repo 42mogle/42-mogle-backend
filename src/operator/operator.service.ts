@@ -24,27 +24,32 @@ export class OperatorService {
 	}
 
 	async updateUserAttendance(updateUserAttendanceDto: UpdateUserAttendanceDto): Promise<string> {
-		if (updateUserAttendanceDto.passWord !== "42MogleOperator")
+		if (updateUserAttendanceDto.passWord !== "42MogleOperator") {
 			return "권한이 없습니다."
+		}
 		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(updateUserAttendanceDto.intraId);
 		const monthInfo: MonthInfo = await this.dbmanagerService.getSpecificMonthInfo(
 			updateUserAttendanceDto.year,
 			updateUserAttendanceDto.month
-		)
+		);
 		if (!monthInfo) {
-			return "잘못된 입력입니다."
+			return "잘못된 입력입니다: monthInfo"
 		}
 		const dayInfo: DayInfo = await this.dbmanagerService.getSpecificDayInfo(
 			monthInfo,
 			updateUserAttendanceDto.day
-			);
-		if (!dayInfo || !UserInfo)
-			return "잘못된 입력 입니다.";
-		const attendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo)
+		);
+		if (!dayInfo) {
+			return "잘못된 입력입니다: dayInfo";
+		}
+		else if (!userInfo) {
+			return "잘못된 입력입니다: userInfo";
+		}
+		const attendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
 		if (!attendanceInfo) {
-			this.dbmanagerService.updateAtendanceInfo(userInfo, dayInfo, updateUserAttendanceDto);
+			await this.dbmanagerService.updateAtendanceInfo(userInfo, dayInfo, updateUserAttendanceDto);
 			const monthlyUserInfo : MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
-			this.dbmanagerService.updateAttendanceCountThisMonth(monthlyUserInfo)
+			await this.dbmanagerService.updateAttendanceCountThisMonth(monthlyUserInfo)
 			return "출석체크 완료";
 		}
 		else {
