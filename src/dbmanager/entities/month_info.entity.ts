@@ -14,17 +14,17 @@ export class MonthInfo {
 	@Column({ name: "year" })
 	year: number;
 
-	@Column({ name: "currentAttednace"})
+	@Column({ name: "current_attednace"})
 	currentAttendance: number;
 
-	@Column({ name: "totalAttendance" })
+	@Column({ name: "total_attendance" })
 	totalAttendance: number;
 
-	@Column({ name: "perfectUserCount" })
+	@Column({ name: "perfect_user_count" })
 	perfectUserCount: number;
 
-	@Column({ name: "failUserCount" })
-	failUserCount: number;
+	@Column({ name: "total_user_count" })
+	totalUserCount: number;
 
 	@OneToMany(
 		() => DayInfo, 

@@ -13,10 +13,10 @@ export class Attendance {
 	timelog: Date;
 
 	@ManyToOne(() => UserInfo, (user: UserInfo) => user.attendances)
-	@JoinColumn({ name: "userInfoId", referencedColumnName: 'id' })
+	@JoinColumn({ name: "user_info_id", referencedColumnName: 'id' })
 	userInfo: UserInfo;
 
 	@ManyToOne(() => DayInfo, (day_info: DayInfo) => day_info.attendances)
-	@JoinColumn({ name: "dayInfoId", referencedColumnName: 'id' })
+	@JoinColumn({ name: "day_info_id", referencedColumnName: 'id' })
 	dayInfo: DayInfo;
 }

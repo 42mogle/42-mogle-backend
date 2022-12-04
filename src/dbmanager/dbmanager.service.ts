@@ -70,7 +70,7 @@ export class DbmanagerService {
 		const monthInfo = this.monthInfoRepository.create({
 			year: year,
 			month: month,
-			failUserCount: 0,
+			totalUserCount: 0,
 			totalAttendance: totalAttendance,
 			currentAttendance: 0,
 			perfectUserCount: 0,
