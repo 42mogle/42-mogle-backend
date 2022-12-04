@@ -5,19 +5,34 @@ import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // const httpsOptions = {
-  //   key: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/privkey1.pem'),
-  //   cert: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/fullchain1.pem'),
-  // };
-  // const app = await NestFactory.create(AppModule, {
-  //   httpsOptions,
-  // });
+
+  /* When using ssl for https
+
+  const httpsOptions = {
+    key: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/privkey1.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/fullchain1.pem'),
+  };
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
+
+  */
 
   // Setting Swagger
   const config = new DocumentBuilder()
     .setTitle('42mogle API docs')
     .setDescription('API description')
     .setVersion('0.1')
+    // Setting JWT token
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        name: 'JWT',
+        in: 'header',
+      },
+      'access-token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
@@ -28,6 +43,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
+
   await app.listen(3000);
 }
 bootstrap();

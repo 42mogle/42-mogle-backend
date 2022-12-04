@@ -1,18 +1,19 @@
 import { All, BadRequestException, GatewayTimeoutException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+//import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { Repository, ReturningStatementNotSupportedError } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron, Interval } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
-import { CreateAttendanceDto } from './dto/create-attendance.dto';
+import { CreateAttendanceDto } from '../attendance/dto/create-attendance.dto';
 import { DayInfo } from './entities/day_info.entity';
 import { userInfo } from 'os';
 import * as request from 'supertest';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
 import { create } from 'domain';
+import { CreateUserDto } from 'src/attendance/dto/create-user.dto';
 
 @Injectable()
 export class DbmanagerService {
@@ -42,6 +43,7 @@ export class DbmanagerService {
 		return this.usersRepository.save(user);
 	}
 
+	// todo: Remove
 	async findAll(): Promise<UserInfo[]> {
 		return await this.usersRepository.find();
 	}
@@ -60,10 +62,11 @@ export class DbmanagerService {
 		const now = new Date();
 		const year = now.getFullYear();
 		const month = now.getMonth() + 1;
-		const totalAttendance = new Date(year, month, 0).getDate(); //bolck
-		const found = await this.monthInfoRepository.findOne({ where: { year, month } });
-		if (found)
+		const totalAttendance = new Date(year, month, 0).getDate(); // todo: consider what 0 means
+		const foundThhisMonthInfo = await this.monthInfoRepository.findOne({ where: { year, month } });
+		if (foundThhisMonthInfo) {
 			throw "이번달 데이터가 이미 있습니다.";
+		}
 		const monthInfo = this.monthInfoRepository.create({
 			year: year,
 			month: month,
@@ -109,18 +112,17 @@ export class DbmanagerService {
 	}
 
 
-	async getDayInfo() {
+	async getTodayInfo() {
 		const now = new Date();
 		const day = now.getDate();
 		const month = now.getMonth() + 1;
 		const year = now.getFullYear();
-		const monthInfo: MonthInfo = await this.getMonthInfo(month + 1, year);
+		const monthInfo: MonthInfo = await this.getMonthInfo(month, year);
 		return await this.dayInfoRepository.findOneBy({ day, monthInfo })
 	}
 
-	async setToDayWord(toDayWord: string) {
-		const now = new Date();
-		const dayInfo = await this.getDayInfo();
+	async setTodayWord(toDayWord: string) {
+		const dayInfo = await this.getTodayInfo();
 		dayInfo.todayWord = toDayWord;
 		await this.dayInfoRepository.save(dayInfo)
 	}
@@ -128,7 +130,7 @@ export class DbmanagerService {
 	async attendanceRegistration(attendinfo: CreateAttendanceDto) {
 		const now = new Date();
 		const userInfo: UserInfo = await this.getUserInfo(attendinfo.intraId);
-		const dayInfo: DayInfo = await this.getDayInfo();
+		const dayInfo: DayInfo = await this.getTodayInfo();
 		const attendanceinfo = this.attendanceRepository.create(
 			{
 				timelog: now,
@@ -140,11 +142,11 @@ export class DbmanagerService {
 	}
 
 	async getAttendanceUserInfo(userInfo: UserInfo, dayInfo: DayInfo): Promise<Attendance> {
-		return await this.attendanceRepository.findOneBy({ userInfo, dayInfo }); // using userInfo, dayInfo
+		return await this.attendanceRepository.findOneBy({ userInfo, dayInfo });
 	}
 
-	async getToDayWord(): Promise<string> {
-		const found: DayInfo = await this.getDayInfo();
+	async getTodayWord(): Promise<string> {
+		const found: DayInfo = await this.getTodayInfo();
 		const ret = found.todayWord;
 		console.log("todayWord in server:", ret);
 		return ret;
@@ -212,6 +214,7 @@ export class DbmanagerService {
 		if (!this.isWeekend())
 		{
 			monthlyuser.attendanceCount += 1;
+			// todo: save랑 update 둘 중에 하나만 하기
 			this.monthlyUsersRepository.save(monthlyuser);
 			this.monthlyUsersRepository.update(monthlyuser.id, {
 				attendanceCount: monthlyuser.attendanceCount,
@@ -239,25 +242,26 @@ export class DbmanagerService {
 		return await this.usersRepository.find();
 	}
 
+	// todo: consider for only using MonthInfo
 	async getAllMonthlyUser(allUserInfo: UserInfo[], monthInfo: MonthInfo) {
 		return await this.monthlyUsersRepository.findBy({userInfo: allUserInfo, monthInfo});
 	}
 
-	updateAttendanceCountThisMonth(monthlyuser: MonthlyUsers) {
+	async updateAttendanceCountThisMonth(monthlyuser: MonthlyUsers) {
 		monthlyuser.attendanceCount += 1;
-		this.monthlyUsersRepository.update(monthlyuser.id, {
+		await this.monthlyUsersRepository.update(monthlyuser.id, {
 			attendanceCount: monthlyuser.attendanceCount
 		})
 	}
 
-	updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
+	async updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
 		const timelog = new Date(InfoDto.year, InfoDto.month - 1, InfoDto.day, 8, 30, 0);
 		const userAttendance = this.attendanceRepository.create({
 			userInfo,
 			dayInfo,
 			timelog,
 		});
-		this.attendanceRepository.save(userAttendance);
+		await this.attendanceRepository.save(userAttendance);
 	}
 
 	changeIsPerfect(monthlyUserInfo: MonthlyUsers, status: boolean) {
