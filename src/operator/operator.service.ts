@@ -68,7 +68,6 @@ export class OperatorService {
 	}
 
 	updatePerfectStatus(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
-		console.log(monthlyUserInfo.attendanceCount, currentAttendance);
 		if (monthlyUserInfo.attendanceCount < currentAttendance && monthlyUserInfo.isPerfect === true)
 			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, false);
 		else if (monthlyUserInfo.attendanceCount === currentAttendance && monthlyUserInfo.isPerfect === false)
@@ -78,6 +77,8 @@ export class OperatorService {
 	@Cron('0 0 1 * * 0-6')
 	async updateCurrentCount() {
 		const type: number = this.dbmanagerService.getTodayType();
+		// 0: 일요일
+		// 6: 토요일
 		if (type !== 0 && type !== 6)
 			this.dbmanagerService.updateThisMonthCurrentCount();
 	}

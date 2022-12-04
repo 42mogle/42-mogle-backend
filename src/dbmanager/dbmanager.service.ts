@@ -241,6 +241,7 @@ export class DbmanagerService {
 		return await this.usersRepository.find();
 	}
 
+	// todo: consider for only using MonthInfo
 	async getAllMonthlyUser(allUserInfo: UserInfo[], monthInfo: MonthInfo) {
 		return await this.monthlyUsersRepository.findBy({userInfo: allUserInfo, monthInfo});
 	}

@@ -54,6 +54,16 @@ export class OperatorController {
 	 */
 	@Post("/update/users/attendanceInfo") // 모든 유저의 출석정보를 업데이트함 //크론으로 대체
 	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({summary: 'update all monthly users attendance info'})
+	@ApiResponse({
+		status: 201, 
+		description: 'Success', 
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
+	})
 	updateAllusersAttendanceInfo() {
 		this.operatorService.updateUsersAttendanceInfo();
 	}
@@ -63,6 +73,16 @@ export class OperatorController {
 	 */
 	@Post("/update/currentAttendanceCount") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
 	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({summary: 'update month currrent attendance count'})
+	@ApiResponse({
+		status: 201, 
+		description: 'Success', 
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
+	})
 	updateCurrentAttendanceCount() {
 		this.operatorService.updateCurrentCount();
 	}
