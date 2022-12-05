@@ -64,6 +64,9 @@ export class AttendanceService {
 		const start = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate(), 9, 30);
 		const end = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate(), 10, 0);
 		
+		console.log(`nowtime: ${nowtime}`);
+		console.log(`start: ${start}`);
+		console.log(`end: ${end}`);
 		if (nowtime < start || nowtime > end)
 			return (false);
 		else
