@@ -29,12 +29,9 @@ export class AuthController {
 		description: 'Unauthorized'
 	})
   async login(@Res() response: Response, @Body() authDto: AuthDto) {
-    console.log("[POST /serverAuth/login] requested.");
-    console.log(`intraId: ${authDto.intraId}`);
-
+    console.log("[ POST /serverAuth/login ] requested.");
+    console.log(`authDto.intraId: [${authDto.intraId}]`);
     const accessToken = await this.authService.login(response, authDto);
-    console.log("[accessToken]:");
-    console.log(accessToken);
     response.send({ accessToken });
     return ;
   }
@@ -53,6 +50,7 @@ export class AuthController {
 		description: 'Forbidden'
 	})
   logout(@Res() response:Response) {
+    console.log(`[ POST /serverAuth/logout ] requested.`);
     /** 
      * When using cookie (saving accessToken in cookie), run below code.
      */
@@ -85,14 +83,10 @@ export class AuthController {
 		description: 'Forbidden'
 	})
   async firstJoin(@Query('code') code: string) {
-    console.log("[GET /serverAuth/firstJoin] requested.");
-    console.log("Query [42OAuth code]:");
-    console.log(code);
-
+    console.log("[ GET /serverAuth/firstJoin ] requested.");
     // todo: Rename to checkingAlreadySignedIn
     const userInfo = await this.authService.firstJoin(code);
-    console.log("[userInfo]:");
-    console.log(userInfo);
+    console.log(`intraId: [${userInfo.intraId}]`);
     return(userInfo);
   }
 
@@ -111,9 +105,8 @@ export class AuthController {
 		description: 'Forbidden'
 	})
   async secondJoin(@Body() authDto:AuthDto) {
-    console.log("[POST /serverAuth/secondJoin] requested.");
-    console.log("Body [authDto]:");
-    console.log(authDto);
+    console.log("[ POST /serverAuth/secondJoin ] requested.");
+    console.log(`authDto.intraId: [${authDto.intraId}]`);
     return(await this.authService.secondJoin(authDto));
   }
 
@@ -125,11 +118,9 @@ export class AuthController {
   @Delete('delete')
   @ApiOperation({summary: 'remove a user info'})
   async deleteUser(@Query('intraId') intraId:string) {
-    console.log("[DELETE /serverAuth/delete] requested.");
-    console.log("Query [intraId]");
-    console.log(intraId);
-    console.log(await this.authService.deleteUser(intraId)); // todo: consider
-    console.log(intraId + " 삭제완료");
+    console.log("[ DELETE /serverAuth/delete ] requested.");
+    console.log(`?intraId: [${intraId}]`);
+    await this.authService.deleteUser(intraId); // todo: consider
   }
 
   // todo: Remove

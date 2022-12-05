@@ -62,6 +62,7 @@ export class AttendanceService {
 		const now = new Date();
 		const start = new Date();
 		const end = new Date();
+		
 		start.setHours(8, 30, 0);
 		end.setHours(9, 0, 0);
 		if (now < start || now > end)

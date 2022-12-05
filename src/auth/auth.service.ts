@@ -45,7 +45,6 @@ export class AuthService {
       })
       .catch((err) => {
         console.log("get 42OAuth AccessToken 실패");
-        console.log(err);
         throw new HttpException('42OAuth 인증 코드를 얻는데 실패하였습니다', HttpStatus.FORBIDDEN); // todo: consider
       });
     return (retOauthAccessToken);
@@ -74,7 +73,7 @@ export class AuthService {
         console.log("getUserData from 42api 성공");
       })
       .catch((err) => {
-        console.log("getUserData from 42api 에러");
+        console.log("getUserData from 42api 실패");
 
         // todo: consider
         throw new HttpException('42회원 정보가 존재하지 않습니다.', HttpStatus.FORBIDDEN);
@@ -93,9 +92,7 @@ export class AuthService {
     let userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId });
     if (userInfo !== null) {
       const isMatch = await bcrypt.compare(authDto.password, userInfo.password);
-      console.log(`isMatch: ${isMatch}`);
       if ((userInfo.intraId == authDto.intraId) && isMatch) {
-        console.log("User intraId: " + userInfo.intraId);
         return(this.createrAcessToken(authDto));
       }
       else {
@@ -135,7 +132,6 @@ export class AuthService {
       intraId: authDto.intraId
     })
     if (userInfo === null) {
-      console.log("[Signing in]");
       // todo: using repository.create() ?
       user.intraId = authDto.intraId;
       user.password = await bcrypt.hash(authDto.password, saltOrRounds);
