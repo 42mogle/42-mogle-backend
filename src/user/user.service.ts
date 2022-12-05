@@ -28,9 +28,6 @@ export class UserService {
 	// todo: Remove
 	async findAll(): Promise<UserInfo[]> {
 		const ret = await this.dbmanagerService.findAll();
-
-		console.log("In UserService.findAll()");
-		console.log(ret);
 		return ret;
 	}
 

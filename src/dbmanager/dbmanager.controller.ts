@@ -13,8 +13,6 @@ export class DbmanagerController {
 	@UseGuards(JwtAuthGuard)
 	@Post('/user') //삭제 예정
 	createUser(@Body() createUserDto: CreateUserDto) {
-		console.log("in DbmanagerController.createUser()");
-		console.log(createUserDto);
 		return this.dbmanagerService.createUser(createUserDto);
 	}
 
