@@ -57,8 +57,8 @@ export class AttendanceController {
 	})
 	async pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
 		console.log(`[ POST /attendance/userAttendance ] requested.`);
-		console.log(`intraId: [${createAttendanceDto.intraId}]`);
-		console.log(`sentWord: [${createAttendanceDto.todayWord}]`);
+		console.log(`createAttendanceDto.intraId: [${createAttendanceDto.intraId}]`);
+		console.log(`createAttendanceDto.todayWord: [${createAttendanceDto.todayWord}]`);
 		// todo: return object를 DTO로 정의하기
 		return await this.attendanceService.AttendanceCertification(createAttendanceDto);
 	}

@@ -30,7 +30,7 @@ export class AuthController {
 	})
   async login(@Res() response: Response, @Body() authDto: AuthDto) {
     console.log("[ POST /serverAuth/login ] requested.");
-    console.log(`intraId: [${authDto.intraId}]`);
+    console.log(`authDto.intraId: [${authDto.intraId}]`);
     const accessToken = await this.authService.login(response, authDto);
     response.send({ accessToken });
     return ;
@@ -106,7 +106,7 @@ export class AuthController {
 	})
   async secondJoin(@Body() authDto:AuthDto) {
     console.log("[ POST /serverAuth/secondJoin ] requested.");
-    console.log(`intraId: [${authDto.intraId}]`);
+    console.log(`authDto.intraId: [${authDto.intraId}]`);
     return(await this.authService.secondJoin(authDto));
   }
 
@@ -119,7 +119,7 @@ export class AuthController {
   @ApiOperation({summary: 'remove a user info'})
   async deleteUser(@Query('intraId') intraId:string) {
     console.log("[ DELETE /serverAuth/delete ] requested.");
-    console.log(`intraId: [${intraId}]`);
+    console.log(`?intraId: [${intraId}]`);
     await this.authService.deleteUser(intraId); // todo: consider
   }
 
