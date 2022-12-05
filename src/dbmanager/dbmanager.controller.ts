@@ -13,12 +13,14 @@ export class DbmanagerController {
 	@UseGuards(JwtAuthGuard)
 	@Post('/user') //삭제 예정
 	createUser(@Body() createUserDto: CreateUserDto) {
+		console.log(`[ POST /dbmanager/user ] requested.`);
 		return this.dbmanagerService.createUser(createUserDto);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Post('/set/totalMonthInfo/:intraId') // 해달 달의 정보와 그달의 모든 일자에 대한 정보를 데이터로 남겨논다 //크론
 	setTotalMonthInfo(@Param("intraId") intraId: string) {
+		console.log(`[ POST /dbmanager/set/totalMonthInfo/${intraId} ] requested.`);
 		return this.dbmanagerService.setTotalMonthInfo(intraId);
 	}
 
@@ -31,19 +33,21 @@ export class DbmanagerController {
 	@UseGuards(JwtAuthGuard)
 	@Post("/test/setcurrent")
 	testSetCurrent() {
+		console.log(`[ POST /dbmanager/test/setcurent ]`);
 		this.dbmanagerService.upDateThisMonthCurrentAttendance();
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Post('/test/createMockUp')
 	tt() {
+		console.log(`[ POST /dbmanager/test/createMockUp ]`);
 		this.dbmanagerService.createMockUp()
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Post('test/:intraId/:num/setatc')
 	ILikeTT(@Param("intraId, num") intraId: string, num: number) {
+		console.log(`[ POST /dbmanager/test/${intraId}/${num}/setatc ]`);
 		this.dbmanagerService.atc(intraId, num);
 	}
-
 }

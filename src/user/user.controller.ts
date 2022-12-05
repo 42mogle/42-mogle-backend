@@ -38,6 +38,7 @@ export class UserController {
 		description: 'Forbidden'
 	})
 	async getUserInfo(@Param('intraId') intraId: string): Promise<UserInfoDto> {
+		console.log(`[ GET /user/${intraId} ] requested.`);
 		return await this.userService.getUserInfoByIntraId(intraId);
 	}
 
@@ -48,6 +49,7 @@ export class UserController {
 	@ApiBearerAuth('access-token')
 	@Get('/')
 	getAllUser(): Promise<UserInfo[]> {
+		console.log(` [ GET /user ] requested.`);
 		return this.userService.findAll();
 	}
 }

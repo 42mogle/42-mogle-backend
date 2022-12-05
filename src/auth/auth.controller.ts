@@ -30,7 +30,7 @@ export class AuthController {
 	})
   async login(@Res() response: Response, @Body() authDto: AuthDto) {
     console.log("[ POST /serverAuth/login ] requested.");
-    console.log(`intraId: ${authDto.intraId}`);
+    console.log(`intraId: [${authDto.intraId}]`);
     const accessToken = await this.authService.login(response, authDto);
     response.send({ accessToken });
     return ;
@@ -50,6 +50,7 @@ export class AuthController {
 		description: 'Forbidden'
 	})
   logout(@Res() response:Response) {
+    console.log(`[ POST /serverAuth/logout ] requested.`);
     /** 
      * When using cookie (saving accessToken in cookie), run below code.
      */
@@ -85,8 +86,7 @@ export class AuthController {
     console.log("[ GET /serverAuth/firstJoin ] requested.");
     // todo: Rename to checkingAlreadySignedIn
     const userInfo = await this.authService.firstJoin(code);
-    console.log("[IntraId]:");
-    console.log(userInfo.intraId);
+    console.log(`intraId: [${userInfo.intraId}]`);
     return(userInfo);
   }
 
@@ -106,8 +106,7 @@ export class AuthController {
 	})
   async secondJoin(@Body() authDto:AuthDto) {
     console.log("[ POST /serverAuth/secondJoin ] requested.");
-    console.log("[IntraId]:");
-    console.log(authDto.intraId);
+    console.log(`intraId: [${authDto.intraId}]`);
     return(await this.authService.secondJoin(authDto));
   }
 
@@ -120,8 +119,7 @@ export class AuthController {
   @ApiOperation({summary: 'remove a user info'})
   async deleteUser(@Query('intraId') intraId:string) {
     console.log("[ DELETE /serverAuth/delete ] requested.");
-    console.log("[intraId]:");
-    console.log(intraId);
+    console.log(`intraId: [${intraId}]`);
     await this.authService.deleteUser(intraId); // todo: consider
   }
 

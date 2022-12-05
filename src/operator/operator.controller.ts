@@ -65,6 +65,7 @@ export class OperatorController {
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
 	updateAllusersAttendanceInfo() {
+		console.log(`[ POST /operator/update/users/attendanceInfo ] requested.`);
 		this.operatorService.updateUsersAttendanceInfo();
 	}
 
@@ -84,6 +85,7 @@ export class OperatorController {
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
 	updateCurrentAttendanceCount() {
+		console.log(` [ POST /operator/update/currentAttendanceCount ] requested.`)
 		this.operatorService.updateCurrentCount();
 	}
 }

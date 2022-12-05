@@ -40,7 +40,7 @@ export class AttendanceController {
 	}
 
 	/**
-	 * GET /attendance/userAttendance
+	 * POST /attendance/userAttendance
 	 */
 	@Post('/userAttendance')
 	@UseGuards(JwtAuthGuard)
@@ -56,6 +56,9 @@ export class AttendanceController {
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
 	async pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
+		console.log(`[ POST /attendance/userAttendance ] requested.`);
+		console.log(`intraId: [${createAttendanceDto.intraId}]`);
+		console.log(`sentWord: [${createAttendanceDto.todayWord}]`);
 		// todo: return object를 DTO로 정의하기
 		return await this.attendanceService.AttendanceCertification(createAttendanceDto);
 	}
