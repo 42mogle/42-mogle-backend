@@ -26,6 +26,9 @@ export class OperatorController {
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
 	settodayword(@Body() setTodayWordDto: SetTodayWordDto) {
+		console.log(`[ PATCH /operator/setTodayWord ] requested.`);
+		console.log(`setTodayWordDto.intraId: [${setTodayWordDto.intraId}]`);
+		console.log(`setTodayWordDto.todayWord: [${setTodayWordDto.todayWord}]`);
 		this.operatorService.setTodayWord(setTodayWordDto);
 	}
 
@@ -46,6 +49,11 @@ export class OperatorController {
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
 	updateUserAttendance(@Body() updateUserAttendanceDto: UpdateUserAttendanceDto) {
+		console.log(`[ POST /operator/update/user/attendance ] requested.`);
+		console.log(`updateUserAttendanceDto.intraId: [${updateUserAttendanceDto.intraId}]`);
+		console.log(`updateUserAttendanceDto.year: [${updateUserAttendanceDto.year}]`);
+		console.log(`updateUserAttendanceDto.month: [${updateUserAttendanceDto.month}]`);
+		console.log(`updateUserAttendanceDto.day: [${updateUserAttendanceDto.day}]`);
 		return this.operatorService.updateUserAttendance(updateUserAttendanceDto);
 	}
 
