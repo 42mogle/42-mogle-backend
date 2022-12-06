@@ -27,11 +27,13 @@ export class AuthService {
   async getOauthToken(code: string) {
     const payload = {
       grant_type: 'authorization_code',
-      client_id: PAYLOAD_CLIENT_ID,
-      client_secret: PAYLOAD_CLIENT_SECRET,
+      client_id: process.env.PAYLOAD_CLIENT_ID,
+      client_secret: process.env.PAYLOAD_CLIENT_SECRET,
       redirect_uri: 'https://42mogle.com/auth',
       code
     };
+    console.log(`payload:`);
+    console.log(payload);
     let retOauthAccessToken: string;
     await this.httpService.axiosRef
       .post('https://api.intra.42.fr/oauth/token', JSON.stringify(payload), {
