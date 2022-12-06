@@ -184,8 +184,8 @@ export class DbmanagerService {
 		}
 	}
 
-	async getThisMonthStatus(intraId: string) {
-		return await this.getThisMonthlyUser(intraId);
+	async getThisMonthStatus(userInfo: UserInfo) {
+		return await this.getThisMonthlyUser(userInfo);
 	}
 
 	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {

@@ -46,7 +46,7 @@ export class StatisticController {
 	/**
 	 * GET /statistic/{intraId}/userAttendanceState
 	 */
-	@Get(":intraId/userAttendanceState")
+	@Get("userAttendanceState")
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({
@@ -70,7 +70,7 @@ export class StatisticController {
 		status: 403,
 		description: 'Forbidden'
 	})
-	async getUserAttendanceState(@Param("intraId") intraId: string) {
-		return await this.statisticService.getUserMonthStatus(intraId);
+	async getUserAttendanceState(@GetUserInfo() userInfo: UserInfo) {
+		return await this.statisticService.getUserMonthStatus(userInfo);
 	}
 }

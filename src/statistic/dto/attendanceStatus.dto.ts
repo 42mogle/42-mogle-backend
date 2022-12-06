@@ -1,4 +1,4 @@
-export class CreateStatisticDto {
+export class AttendanceStatus {
 	attendanceCount: number;
 	isPerfectAttendance: boolean; 
 }
