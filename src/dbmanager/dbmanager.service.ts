@@ -1,19 +1,13 @@
 import { All, BadRequestException, GatewayTimeoutException, Injectable, NotFoundException } from '@nestjs/common';
-//import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Repository, ReturningStatementNotSupportedError } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
-import { Cron, Interval } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
-import { CreateAttendanceDto } from '../attendance/dto/create-attendance.dto';
 import { DayInfo } from './entities/day_info.entity';
-import { userInfo } from 'os';
-import * as request from 'supertest';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
-import { create } from 'domain';
-import { CreateUserDto } from 'src/attendance/dto/create-user.dto';
 
 @Injectable()
 export class DbmanagerService {
@@ -32,30 +26,6 @@ export class DbmanagerService {
 		return found;
 	}
 
-	
-	createUser(createUserDto: CreateUserDto) {
-		const user = this.usersRepository.create({
-			intraId: createUserDto.intraId,
-			password: createUserDto.password,
-			isOperator: false,
-			photoUrl: "minsu!!",
-		});
-		return this.usersRepository.save(user);
-	}
-
-	// todo: Remove
-	async findAll(): Promise<UserInfo[]> {
-		return await this.usersRepository.find();
-	}
-
-	async getUserId(intraId: string) {
-		const user = await this.usersRepository.findOne({ where: { intraId } });
-		return user.id;
-	}
-
-	async getUserInfoByUserId(userId: number) {
-		return await this.usersRepository.findOneBy({ id: userId })
-	}
 
 	// DB table: MonthInfo
 	async setMonthInfo() {
@@ -71,16 +41,16 @@ export class DbmanagerService {
 			year: year,
 			month: month,
 			totalUserCount: 0,
-			totalAttendance: totalAttendance,
+			totalAttendance: 20,
 			currentAttendance: 0,
 			perfectUserCount: 0,
 		})
 		await this.monthInfoRepository.save(monthInfo);
-		this.setAllDayInfo(monthInfo);
+		this.setAllDayInfo(monthInfo, totalAttendance);
 	}
 
-	async setAllDayInfo(monthInfo: MonthInfo) {
-		for(let i = 1; i <= monthInfo.totalAttendance; i++) {
+	async setAllDayInfo(monthInfo: MonthInfo, totalAttendance: number) {
+		for(let i = 1; i <= totalAttendance; i++) {
 			const type = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, i));
 			const dayInfo = this.dayInfoRepository.create({
 				day: i,
@@ -92,9 +62,6 @@ export class DbmanagerService {
 			})
 			await this.dayInfoRepository.save(dayInfo);
 		}
-		this.monthInfoRepository.update(monthInfo.id, {
-			totalAttendance: 20
-		})
 	}
 
 	async upDateThisMonthCurrentAttendance() {
@@ -152,8 +119,8 @@ export class DbmanagerService {
 	}
 
 	//setTotalMonthInfo
-	async setTotalMonthInfo(intra_id: string) {
-		if (!this.isAdmin(intra_id)) {
+	async setTotalMonthInfo(userInfo: UserInfo) {
+		if (userInfo.isOperator === false) {
 			return "permission denied";
 		}
 		this.setMonthInfo();
@@ -276,14 +243,6 @@ export class DbmanagerService {
 	/**************************************
 	 * 			util 함수 목록            *
 	 * ********************************* */
-
- 	async isAdmin(intraId: string): Promise<boolean> {
-		const user: UserInfo = await this.usersRepository.findOneBy({intraId});
-		if(user.isOperator)
-			return (true);
-		else
-			return (false);
-	}
 
 	getDayType(now: Date): number {
 		const day: number = now.getDay();

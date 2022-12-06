@@ -10,24 +10,14 @@ import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 export class DbmanagerController {
 	constructor(private readonly dbmanagerService: DbmanagerService) { }
 
-	///삭제
 	@UseGuards(JwtAuthGuard)
-	@Post("/jwttest")
-	jwttest(@GetUserInfo() userInfo: UserInfo) {
-		console.log(UserInfo);
-	}
-
-	///
-	
-
-	@UseGuards(JwtAuthGuard)
-	@Post('/set/totalMonthInfo/:intraId') // 해달 달의 정보와 그달의 모든 일자에 대한 정보를 데이터로 남겨논다 //크론
-	setTotalMonthInfo(@Param("intraId") intraId: string) {
-		return this.dbmanagerService.setTotalMonthInfo(intraId);
+	@Post('/set/totalMonthInfo') // 해달 달의 정보와 그달의 모든 일자에 대한 정보를 데이터로 남겨논다 //크론
+	setTotalMonthInfo(@GetUserInfo() userInfo: UserInfo) {
+		return this.dbmanagerService.setTotalMonthInfo(userInfo);
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Post("/test/setcurrent")
+	@Post("/setcurrent/")
 	testSetCurrent() {
 		this.dbmanagerService.upDateThisMonthCurrentAttendance();
 	}
