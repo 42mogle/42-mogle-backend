@@ -3,6 +3,8 @@ import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { UserInfo } from '../dbmanager/entities/user_info.entity';
 
 @ApiTags('Attendance')
 @Controller('attendance')
@@ -12,7 +14,7 @@ export class AttendanceController {
 	/**
 	 * GET /attendance/{intraId}/buttonStatus
 	 */
-	@Get('/:intraId/buttonStatus')
+	@Get('/buttonStatus')
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'get the attendance button status of the user'})
@@ -33,10 +35,10 @@ export class AttendanceController {
 		status: 403,
 		description: 'Forbidden'
 	})
-	async getUserButtonStatus(@Param('intraId') intraId: string): Promise<number> {
-		console.log(`API[ GET /attendance/${intraId}/buttonStatus ] requested.`)
+	async getUserButtonStatus(@GetUserInfo() userInfo: UserInfo): Promise<number> {
+		console.log(`API[ GET /attendance/${userInfo.intraId}/buttonStatus ] requested.`)
 		// todo: return number에 따른 상태를 문서에 명시하거나, enum으로 바꿔서 명시하기
-		return this.attendanceService.getUserButtonStatus(intraId);
+		return this.attendanceService.getUserButtonStatus(userInfo);
 	}
 
 	/**

@@ -11,11 +11,11 @@ export class AttendanceService {
 	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService;
 	@Inject(OperatorService) private readonly operatorService: OperatorService;
 
-	async getUserButtonStatus(intraId: string): Promise<number> {
+	async getUserButtonStatus(userInfo: UserInfo): Promise<number> {
 		if (this.isAvailableTime() === false) {
 			return (1);
 		}
-		else if (await this.haveAttendedToday(intraId)) {
+		else if (await this.haveAttendedToday(userInfo)) {
 			return (2);
 		}
 		// else if (await !this.isSetToDayWord()) {
@@ -71,9 +71,8 @@ export class AttendanceService {
 			return (true);
 	}
 
-	async haveAttendedToday(intra_id: string): Promise<boolean> {
+	async haveAttendedToday(userInfo: UserInfo): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intra_id)
 		const todayAttendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, todayInfo);
 		if (todayAttendanceInfo === null)
 			return false;
