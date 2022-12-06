@@ -110,19 +110,6 @@ export class AuthController {
     return(await this.authService.secondJoin(authDto));
   }
 
-  // todo: Set in UserController
-  // todo: checking when error
-  /**
-   * DELETE /serverAuth/delete?intraId=
-   */
-  @Delete('delete')
-  @ApiOperation({summary: 'remove a user info'})
-  async deleteUser(@Query('intraId') intraId:string) {
-    console.log("[ DELETE /serverAuth/delete ] requested.");
-    console.log(`?intraId: [${intraId}]`);
-    await this.authService.deleteUser(intraId); // todo: consider
-  }
-
   // todo: Remove
   // test
   @Get('test0')

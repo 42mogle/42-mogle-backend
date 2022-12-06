@@ -184,9 +184,4 @@ export class AuthService {
       throw new HttpException('회원정보가 존재하지 않습니다.', HttpStatus.UNAUTHORIZED);
     }
   }
-
-  async deleteUser(intraId:string) {
-    // todo: Request to dbManager
-    return (await this.usersRepository.delete({ intraId: intraId }));
-  }
 }
