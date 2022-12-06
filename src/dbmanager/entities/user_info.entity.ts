@@ -10,7 +10,7 @@ export class UserInfo {
 	@Column({name: "intra_id"})
 	intraId: string;
 
-	@Column({name: "password"})
+	@Column({name: "password", nullable: true})
 	password: string;
 
 	@Column({name: "is_operator"})
@@ -18,6 +18,9 @@ export class UserInfo {
 
 	@Column({name: "photo_url", nullable: true})
 	photoUrl: string;
+
+	@Column({name: "is_signed_up"})
+	isSignedUp: boolean;
 
 	@OneToMany(
 		() => Attendance, 

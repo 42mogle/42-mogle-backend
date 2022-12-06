@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-// todo: Rename to SignInDto ?
-export class AuthDto {
+export class IntraIdDto {
     @ApiProperty({
         type: String,
         example: 'intraid',
@@ -9,12 +8,4 @@ export class AuthDto {
         required: true
     })
     intraId : string;
-
-    @ApiProperty({
-        type: String,
-        example: 'q1w2e3r4T%',
-        description: '비밀번호',
-        required: true
-    })
-    password : string;
 }
