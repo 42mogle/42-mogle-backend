@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } fro
 import { DbmanagerService } from './dbmanager.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
+import { UserInfo } from './entities/user_info.entity';
+import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 
 @ApiTags('DbManager')
 @Controller('dbmanager')
@@ -11,8 +13,8 @@ export class DbmanagerController {
 	///삭제
 	@UseGuards(JwtAuthGuard)
 	@Post("/jwttest")
-	jwttest(@Req() req) {
-		console.log("왔나?");
+	jwttest(@GetUserInfo() userInfo: UserInfo) {
+		console.log(UserInfo);
 	}
 
 	///
