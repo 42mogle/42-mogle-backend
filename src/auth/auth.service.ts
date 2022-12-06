@@ -67,7 +67,7 @@ export class AuthService {
           intraId: res.data.login,
           photoUrl: res.data.image.link,
         }
-        console.log("api.intra.42.fr/v2/me 요청 실패");
+        console.log("api.intra.42.fr/v2/me 요청 성공");
       })
       .catch((err) => {
         console.log("api.intra.42.fr/v2/me 요청 실패");
@@ -81,7 +81,7 @@ export class AuthService {
   //회원가입1 oauth인증
   async firstJoin(code: string): Promise<IntraIdDto> {
     const intraIdAndPhotoUrl = await this.get42IntraIdAndPhotoUrl(code);
-    const retIntraIdDto = { intraId: intraIdAndPhotoUrl.IntraId };
+    const retIntraIdDto: IntraIdDto = { intraId: intraIdAndPhotoUrl.IntraId };
     const userInfo = await this.usersRepository.findOneBy({
       intraId: retIntraIdDto.intraId
     }); // todo: Request to dbManager
