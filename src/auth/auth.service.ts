@@ -1,15 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios'
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
-import * as bcrypt from 'bcrypt';
 import { AuthDto } from './dto/auth.dto';
-import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { IntraIdDto } from './dto/intraId.dto';
-import { validateHeaderValue } from 'http';
-
+import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
+import * as bcrypt from 'bcrypt';
+import { Repository } from 'typeorm';
+import { HttpService } from '@nestjs/axios'
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
