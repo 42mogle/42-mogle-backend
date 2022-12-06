@@ -93,20 +93,7 @@ export class AuthController {
    })
    logout(@Res() response:Response) {
      console.log(`[ POST /serverAuth/logout ] requested.`);
-     /** 
-      * When using cookie (saving accessToken in cookie), run below code.
-      */
-     // response.cookie("accessToken","",
-     // {
-     //   httpOnly: true,
-     //   maxAge: 0
-     // })
- 
-     /** 
-      * When using local storage, the front-end removes the accessToken.
-      */
- 
-     response.send({message:'로그아웃'});
+     response.send({ message:'로그아웃' });
      return ;
    } 
 
