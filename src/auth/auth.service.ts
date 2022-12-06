@@ -70,7 +70,6 @@ export class AuthService {
           intraId : res.data.login,
           password: "",                   // todo: consider
           photoUrl : res.data.image.link, // todo: consider
-          isOperator: false
         }
         console.log("getUserData from 42api 성공");
       })
@@ -138,7 +137,7 @@ export class AuthService {
       user.intraId = authDto.intraId;
       user.password = await bcrypt.hash(authDto.password, saltOrRounds);
       user.photoUrl = authDto.photoUrl;
-      user.isOperator = authDto.isOperator;
+      user.isOperator = false;
       console.log(user);
       await this.usersRepository.save(user); // todo: Request to dbManager
       return authDto.intraId;

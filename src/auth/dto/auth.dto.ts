@@ -24,12 +24,4 @@ export class AuthDto {
         required: false
     })
     photoUrl : string;
-
-    @ApiProperty({
-        type: Boolean,
-        example: false,
-        description: "오퍼레이터 권한 유무",
-        required: true
-    })
-    isOperator : boolean;
 }

@@ -10,5 +10,5 @@ export const typeORMConfig : TypeOrmModuleOptions = {
 	entities: [
 		__dirname + '/../**/*.entity.{js,ts}'
 	],
-	synchronize: false		// deploy할 때 false로 해야 DB table columns가 안전함
+	synchronize: true		// deploy할 때 false로 해야 DB table columns가 안전함
 }
