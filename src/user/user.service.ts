@@ -13,15 +13,16 @@ export class UserService {
 	@Inject(AttendanceService)
 	private readonly attendanceService: AttendanceService;
 
-	async getUserInfoByIntraId(inputtedintraId: string): Promise<UserInfoDto> {
-		const user: UserInfo  = await this.dbmanagerService.getUserInfo(inputtedintraId);
-		// todo: user를 못 찾으면 따로 에러처리 유무 조사하고 결정하기
+	//임시 보류
+	// async getUserInfoByIntraId(inputtedintraId: string): Promise<UserInfoDto> {
+	// 	const user: UserInfo  = await this.dbmanagerService.getUserInfo(inputtedintraId);
+	// 	// todo: user를 못 찾으면 따로 에러처리 유무 조사하고 결정하기
 		
-		const userInfoDto: UserInfoDto = {
-			intraId: user.intraId,
-			isOperator: user.isOperator,
-			photoUrl: user.photoUrl
-		};
-		return userInfoDto;
-	}
+	// 	const userInfoDto: UserInfoDto = {
+	// 		intraId: user.intraId,
+	// 		isOperator: user.isOperator,
+	// 		photoUrl: user.photoUrl
+	// 	};
+	// 	return userInfoDto;
+	// }
 }
