@@ -81,7 +81,7 @@ export class AuthService {
   //회원가입1 oauth인증
   async firstJoin(code: string): Promise<IntraIdDto> {
     const intraIdAndPhotoUrl = await this.get42IntraIdAndPhotoUrl(code);
-    const retIntraIdDto: IntraIdDto = { intraId: intraIdAndPhotoUrl.IntraId };
+    const retIntraIdDto: IntraIdDto = { intraId: intraIdAndPhotoUrl.intraId };
     const userInfo = await this.usersRepository.findOneBy({
       intraId: retIntraIdDto.intraId
     }); // todo: Request to dbManager
