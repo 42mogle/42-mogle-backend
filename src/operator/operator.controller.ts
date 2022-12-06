@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { OperatorService } from './operator.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -37,7 +37,7 @@ export class OperatorController {
 	/**
 	 * POST /operator/update/user/attendance
 	 */
-	@Post("/update/user/attendance") // 유저의 출석데이터를 임의로 추가함
+	@Post("/update/user/attendance") // 유저의 출석데이터를 임의로 추가함 보류
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'add a user attendance'})
@@ -69,7 +69,9 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateAllusersAttendanceInfo() {
+	updateAllusersAttendanceInfo(@GetUserInfo() userInfo: UserInfo) {
+		if (userInfo.isOperator === false)
+			throw new UnauthorizedException("Not Operator");
 		this.operatorService.updateUsersAttendanceInfo();
 	}
 
