@@ -5,6 +5,7 @@ import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
+import { ButtonStatus } from './button.status.enum';
 
 @Injectable()
 export class AttendanceService {
@@ -13,10 +14,10 @@ export class AttendanceService {
 
 	async getUserButtonStatus(userInfo: UserInfo): Promise<number> {
 		if (this.isAvailableTime() === false) {
-			return (1);
+			return ButtonStatus.NotAvailableTime;
 		}
 		else if (await this.haveAttendedToday(userInfo)) {
-			return (2);
+			return ButtonStatus.AlreadyCheckedAttendance;
 		}
 		// else if (await !this.isSetToDayWord()) {
 		// 	return (3)
