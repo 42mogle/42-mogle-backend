@@ -159,8 +159,7 @@ export class DbmanagerService {
 		return await this.dayInfoRepository.findBy({monthInfo});
 	}
 
-	async getAttendanceListByintraId(intraId: string): Promise<Attendance[]> {
-		const userInfo = await this.getUserInfo(intraId);
+	async getAttendanceList(userInfo: UserInfo): Promise<Attendance[]> {
 		const monthinfo = await this.getThisMonthInfo();
 		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthinfo);
 		return await this.attendanceRepository.findBy({userInfo, dayInfo})

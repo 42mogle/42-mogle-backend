@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
+import { userInfo } from 'os';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -78,7 +79,7 @@ export class OperatorController {
 	/**
 	 * POST /operator/update/currentAttendanceCount
 	 */
-	@Post("/update/currentAttendanceCount") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
+	@Patch("/update/currentAttendanceCount/") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'update month currrent attendance count'})
@@ -90,7 +91,11 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateCurrentAttendanceCount() {
+	updateCurrentAttendanceCount(
+		@GetUserInfo() userInfo: UserInfo
+	) {
+		if (userInfo.isOperator === false)
+			throw new UnauthorizedException("Not Operator");
 		this.operatorService.updateCurrentCount();
 	}
 }

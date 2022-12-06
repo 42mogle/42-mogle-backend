@@ -4,6 +4,7 @@ import { StatisticModule } from './statistic.module';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { CreateStatisticDto } from './dto/create-statistic.dto';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
+import { userInfo } from 'os';
 
 @Injectable()
 export class StatisticService {
@@ -15,8 +16,8 @@ export class StatisticService {
 		const found: UserInfo = await this.dbmanagerService.getUserInfoByUserId(userId);
 	}
 
-	async getAttendanceList(intraId: string) {
-		return await this.dbmanagerService.getAttendanceListByintraId(intraId);
+	async getAttendanceList(userInfo: UserInfo) {
+		return await this.dbmanagerService.getAttendanceList(userInfo);
 	}
 
 	async getUserMonthStatus(intraId: string): Promise<any> {
