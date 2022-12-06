@@ -7,6 +7,7 @@ import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { AuthDto } from './dto/auth.dto';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
+import { IntraIdDto } from './dto/intraId.dto';
 
 
 @Injectable()
@@ -24,7 +25,8 @@ export class AuthService {
    * @param code 42OAuthCode
    * @returns 42OAuthAccessToken
    */
-  async getOauthToken(code: string) {
+  async getOauthToken(code: string): Promise<string> {
+    let retOauthAccessToken: string;
     const payload = {
       grant_type: 'authorization_code',
       client_id: process.env.PAYLOAD_CLIENT_ID,
@@ -32,9 +34,7 @@ export class AuthService {
       redirect_uri: 'https://42mogle.com/auth',
       code
     };
-    console.log(`payload:`);
-    console.log(payload);
-    let retOauthAccessToken: string;
+
     await this.httpService.axiosRef
       .post('https://api.intra.42.fr/oauth/token', JSON.stringify(payload), {
         headers: {
@@ -47,14 +47,14 @@ export class AuthService {
       })
       .catch((err) => {
         console.log("get 42OAuth AccessToken 실패");
-        throw new HttpException('42OAuth 인증 코드를 얻는데 실패하였습니다', HttpStatus.FORBIDDEN); // todo: consider
+        throw new HttpException('42OAuth 인증 코드를 얻는데 실패하였습니다', HttpStatus.UNAUTHORIZED);
       });
     return (retOauthAccessToken);
   }
 
   //42api로부터 유저 정보 받아오기
-  async getUserData(code: string) {
-    let retAuthDto: AuthDto;
+  async getUserData(code: string): Promise<IntraIdDto> {
+    let retIntraIdDto: IntraIdDto;
     const oauthAccessToken = await this.getOauthToken(code);
 
     await this.httpService.axiosRef
@@ -65,21 +65,18 @@ export class AuthService {
         },
       })
       .then((res) => {
-        retAuthDto =
-        {
+        retIntraIdDto = {
           intraId : res.data.login,
-          password: "",                   // todo: consider
-          photoUrl : res.data.image.link, // todo: consider
         }
-        console.log("getUserData from 42api 성공");
+        console.log("api.intra.42.fr/v2/me 요청 실패");
       })
       .catch((err) => {
-        console.log("getUserData from 42api 실패");
-
-        // todo: consider
-        throw new HttpException('42회원 정보가 존재하지 않습니다.', HttpStatus.FORBIDDEN);
+        console.log("api.intra.42.fr/v2/me 요청 실패");
+        throw new HttpException({
+          errorMessage: "api.intra.42.fr/v2/me 요청 실패"
+        }, HttpStatus.NOT_FOUND);
       });
-    return (retAuthDto);
+    return (retIntraIdDto);
   }
 
   // todo: Rename to createJwtAccessToken()
@@ -108,22 +105,26 @@ export class AuthService {
   }
 
   //회원가입1 oauth인증
-  async firstJoin(code: string) {
-    const authDto: AuthDto = await this.getUserData(code);
-
+  async firstJoin(code: string): Promise<IntraIdDto> {
+    const retIntraIdDto: IntraIdDto = await this.getUserData(code);
     // todo: Request to dbManager
-    const userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId })
+    const userInfo = await this.usersRepository.findOneBy({
+      intraId: retIntraIdDto.intraId
+    });
 
     if (userInfo !== null && (userInfo.isSignedUp === true)) {
       console.log("이미 회원가입 한 사용자");
       // todo: consider
-      throw new HttpException({errorMessage: "이미 회원가입 한 회원입니다.",intraId: userInfo.intraId}, HttpStatus.FORBIDDEN);
+      throw new HttpException({
+        errorMessage: "이미 회원가입 한 회원입니다.",
+        intraId: userInfo.intraId
+      }, HttpStatus.FORBIDDEN);
     } else if (userInfo !== null) {
       console.log("이전에 회원가입 시도(firstJoin) 한 사용자");
     } else {
       console.log("DB user_info table에 사용자 정보 저장");
-      const newUserInfo = this.usersRepository.create({
-        intraId: authDto.intraId,
+      const newUserInfo: UserInfo = this.usersRepository.create({
+        intraId: retIntraIdDto.intraId,
         password: null,
         isOperator: false,
         photoUrl: null,
@@ -131,53 +132,38 @@ export class AuthService {
       });
       await this.usersRepository.save(newUserInfo);
     }
-    return (authDto);
+    return (retIntraIdDto);
   }
 
   //회원가입2 유저가 기입한 정보로 회원가입
   async secondJoin(authDto: AuthDto) {
-    const user = new UserInfo();
-    const saltOrRounds = 10;
-
-    // todo: Request to dbManager
     let userInfo = await this.usersRepository.findOneBy({
       intraId: authDto.intraId
-    })
+    }) // todo: Request to dbManager
+
     if (userInfo === null) {
-      this.usersRepository.create({
-        intraId: authDto.intraId,
-        password: await bcrypt.hash(authDto.password, saltOrRounds),
-        photoUrl: authDto.photoUrl,
-        isOperator: false,
-        
-
-      })
-      // todo: using repository.create() ?
-      user.intraId = authDto.intraId;
-      user.password = await bcrypt.hash(authDto.password, saltOrRounds);
-      user.photoUrl = authDto.photoUrl;
-      user.isOperator = false;
-      console.log(user);
-      await this.usersRepository.save(user); // todo: Request to dbManager
-      return authDto.intraId;
-    }
-    else {
-      console.log("이미 존재하는 회원");
-
+      console.log("유효하지 않은 인트라 아이디");
       // todo: consider
-      throw new HttpException('이미 존재하는 회원입니다.', HttpStatus.FORBIDDEN);
+      throw new HttpException({
+        errorMessage: "유효하지 않은 인트라 아이디",
+      }, HttpStatus.FORBIDDEN);
+    } else if (userInfo.isSignedUp === false) {
+      const saltOrRounds = 10;
+      userInfo.password = await bcrypt.hash(authDto.password, saltOrRounds);
+      userInfo.isSignedUp = true;
+      this.usersRepository.save(userInfo);
+    } else {
+      console.log("이미 회원가입한 사용자");
+      // todo: send error message
+      throw new HttpException({
+        errorMessage: "이미 회원가입한 사용자",
+      }, HttpStatus.FORBIDDEN);
     }
+    return ; // todo: send success message ?
   }
 
   async deleteUser(intraId:string) {
     // todo: Request to dbManager
     return (await this.usersRepository.delete({ intraId: intraId }));
-  }
-
-  testEnv() {
-    const str_test = process.env.ENV_TEST;
-    console.log(str_test);
-    console.log(`in testEnv`);
-    return str_test;
   }
 }
