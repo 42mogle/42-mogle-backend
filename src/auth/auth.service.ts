@@ -114,9 +114,19 @@ export class AuthService {
     return (retIntraIdDto);
   }
 
-  checkPasswordValid(pwd: string) {
-
-    return ;
+  checkPasswordValid(pwd: string): boolean {
+    const ruleRegex = 
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^*+=-])[\da-zA-Z!@#$%^*+=-]{8,}$/;
+    // Explain : 비밀번호 길이는 8자 ~ 20자 사이
+    if (pwd.length < 8 && 20 < pwd.length) {
+      return false;
+    }
+    // Explain : 특수문자, 대문자, 소문자, 길이 모두 확인하는 정규식
+    else if (ruleRegex.test(pwd) === false) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   //회원가입2 유저가 기입한 정보로 회원가입
@@ -138,7 +148,11 @@ export class AuthService {
     } else {
       const saltOrRounds = 10;
       // validation password
-      this.checkPasswordValid(authDto.password);
+      if (this.checkPasswordValid(authDto.password) === false) {
+        throw new HttpException({
+          errorMessage: "비밀번호 규칙 오류",
+        }, HttpStatus.UNAUTHORIZED);
+      }
       userInfo.password = await bcrypt.hash(authDto.password, saltOrRounds);
       userInfo.isSignedUp = true;
       this.usersRepository.save(userInfo);
