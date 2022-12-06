@@ -60,11 +60,12 @@ export class AttendanceService {
 	
 	isAvailableTime(): Boolean {
 		const now = new Date();
-		const nowtime = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes());
-		const start = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate(), 9, 30);
-		const end = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate(), 10, 0);
+		const start = new Date();
+		const end = new Date();
 		
-		if (nowtime < start || nowtime > end)
+		start.setHours(8, 30, 0);
+		end.setHours(9, 0, 0);
+		if (now < start || now > end)
 			return (false);
 		else
 			return (true);
