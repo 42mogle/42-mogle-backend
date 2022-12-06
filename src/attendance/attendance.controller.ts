@@ -12,16 +12,12 @@ export class AttendanceController {
 	constructor(private readonly attendanceService: AttendanceService) {}
 
 	/**
-	 * GET /attendance/{intraId}/buttonStatus
+	 * GET /attendance/buttonStatus
 	 */
 	@Get('/buttonStatus')
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'get the attendance button status of the user'})
-	@ApiParam({
-		name: 'intraId',
-		type: String,
-	})
 	@ApiResponse({
 		status: 200, 
 		description: 'Success', 
@@ -57,8 +53,11 @@ export class AttendanceController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	async pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
+	async pushButton(
+		@Body() AttendanceDto: CreateAttendanceDto,
+		@GetUserInfo() userInfo: UserInfo
+		) {
 		// todo: return object를 DTO로 정의하기
-		return await this.attendanceService.AttendanceCertification(createAttendanceDto);
+		return await this.attendanceService.AttendanceCertification(AttendanceDto, userInfo);
 	}
 }

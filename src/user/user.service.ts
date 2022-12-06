@@ -33,16 +33,4 @@ export class UserService {
 		console.log(ret);
 		return ret;
 	}
-
-	// 이거 attendance에도 있음. 확인 필요.
- 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto): Promise<Attendance> {
-		const todayWord: string = await this.dbmanagerService.getTodayWord();
-		if (await this.attendanceService.haveAttendedToday(attendanceinfo.intraId)) {
-			throw new NotFoundException("이미 출석체크 했습니다.");
-		}
-		else if (attendanceinfo.todayWord !== todayWord) {
-			throw new NotFoundException("오늘의 단어가 다릅니다!");
-		}
-		return this.dbmanagerService.attendanceRegistration(attendanceinfo);
-	}
 }

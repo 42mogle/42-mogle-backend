@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
@@ -22,15 +22,13 @@ export class AttendanceService {
 		// else if (await !this.isSetToDayWord()) {
 		// 	return (3)
 		// }
-		return (0);
+		return ButtonStatus.AttendanceSuccess;
 	}
 
-	// 이거 user에도 있음. 확인 필요.
-	async AttendanceCertification(attendanceinfo: CreateAttendanceDto) {
+	async AttendanceCertification(attendanceinfo: CreateAttendanceDto, userInfo: UserInfo) {
 		const todayWord: string = await this.dbmanagerService.getTodayWord();
 		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
-		const userIntraId = attendanceinfo.intraId;
-		if (await this.haveAttendedToday(userIntraId)) {
+		if (await this.haveAttendedToday(userInfo)) {
 			return ({
 				statusAttendance: 1,
 				errorMsg: "이미 출석 체크 했습니다."
@@ -42,10 +40,10 @@ export class AttendanceService {
 				errorMsg: "오늘의 단어가 다릅니다."
 			});
 		}
-		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(userIntraId);
+		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(userInfo);
 		if (!monthlyUser)
-			monthlyUser = await this.dbmanagerService.createMonthlyUser(userIntraId);
-		await this.dbmanagerService.attendanceRegistration(attendanceinfo);
+			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
+		await this.dbmanagerService.attendanceRegistration(userInfo);
 		await this.dbmanagerService.updateMonthlyUser(monthlyUser);
 		await this.operatorService.updatePerfectStatus(monthlyUser, monthInto.currentAttendance);
 		return ({

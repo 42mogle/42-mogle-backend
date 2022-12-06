@@ -127,9 +127,8 @@ export class DbmanagerService {
 		await this.dayInfoRepository.save(dayInfo)
 	}
 
-	async attendanceRegistration(attendinfo: CreateAttendanceDto) {
+	async attendanceRegistration(userInfo: UserInfo) {
 		const now = new Date();
-		const userInfo: UserInfo = await this.getUserInfo(attendinfo.intraId);
 		const dayInfo: DayInfo = await this.getTodayInfo();
 		const attendanceinfo = this.attendanceRepository.create(
 			{
@@ -171,18 +170,16 @@ export class DbmanagerService {
 
 	}
 
-	async getThisMonthlyUser(intraId: string) {
-		const userInfo: UserInfo = await this.getUserInfo(intraId);
+	async getThisMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo});
 	}
 
-	async createMonthlyUser(intraId: string): Promise<MonthlyUsers> {
+	async createMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo = await this.getThisMonthInfo();
-		const userInfo = await this.getUserInfo(intraId);
 		const monthlyUser = this.monthlyUsersRepository.create({
 			attendanceCount: 0,
-			isPerfect: true,
+			isPerfect: false,
 			totalPerfectCount: 0,
 			monthInfo: monthInfo,
 			userInfo: userInfo
@@ -204,7 +201,6 @@ export class DbmanagerService {
 
 	updateMonthlyUser(monthlyUser: MonthlyUsers) {
 		this.updateMonthlyUserAttendanceCount(monthlyUser);
-		//this.updateMonthlyUserPerfectInfo(monthlyUser);
 	}
 
 
