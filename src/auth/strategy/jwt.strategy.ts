@@ -28,6 +28,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (userInfo === null)
       throw new HttpException('Invalid User', HttpStatus.FORBIDDEN);
     else
-      return (payload);
+      return (userInfo);
   }
 }

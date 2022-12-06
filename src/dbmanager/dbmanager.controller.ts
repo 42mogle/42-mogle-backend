@@ -1,13 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { DbmanagerService } from './dbmanager.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from 'src/attendance/dto/create-user.dto';
 
 @ApiTags('DbManager')
 @Controller('dbmanager')
 export class DbmanagerController {
 	constructor(private readonly dbmanagerService: DbmanagerService) { }
+
+	///삭제
+	@UseGuards(JwtAuthGuard)
+	@Post("/jwttest")
+	jwttest(@Req() req) {
+		console.log("왔나?");
+	}
+
+	///
+	
 
 	@UseGuards(JwtAuthGuard)
 	@Post('/set/totalMonthInfo/:intraId') // 해달 달의 정보와 그달의 모든 일자에 대한 정보를 데이터로 남겨논다 //크론
