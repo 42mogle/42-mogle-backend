@@ -144,6 +144,14 @@ export class AuthService {
       intraId: authDto.intraId
     })
     if (userInfo === null) {
+      this.usersRepository.create({
+        intraId: authDto.intraId,
+        password: await bcrypt.hash(authDto.password, saltOrRounds),
+        photoUrl: authDto.photoUrl,
+        isOperator: false,
+        
+
+      })
       // todo: using repository.create() ?
       user.intraId = authDto.intraId;
       user.password = await bcrypt.hash(authDto.password, saltOrRounds);
