@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { AuthDto } from './dto/auth.dto';
 import { ApiCreatedResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { IntraIdDto } from './dto/intraId.dto';
 
 @ApiTags('Auth')
 @Controller('serverAuth')
@@ -32,9 +33,9 @@ export class AuthController {
   async firstJoin(@Query('code') code: string) {
     console.log("[ GET /serverAuth/firstJoin ] requested.");
     // todo: Rename to checkingAlreadySignedIn
-    const userInfo = await this.authService.firstJoin(code);
-    console.log(`intraId: [${userInfo.intraId}]`);
-    return(userInfo);
+    const intraIdDto: IntraIdDto = await this.authService.firstJoin(code);
+    console.log(`intraId: [${intraIdDto.intraId}]`);
+    return(intraIdDto);
   }
 
   /**
