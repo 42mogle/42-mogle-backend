@@ -94,8 +94,6 @@ export class OperatorController {
 	updateCurrentAttendanceCount(
 		@GetUserInfo() userInfo: UserInfo
 	) {
-		if (userInfo.isOperator === false)
-			throw new UnauthorizedException("Not Operator");
 		this.operatorService.updateCurrentCount();
 	}
 }

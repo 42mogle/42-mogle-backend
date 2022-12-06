@@ -83,4 +83,11 @@ export class OperatorService {
 		if (type !== 0 && type !== 6)
 			this.dbmanagerService.updateThisMonthCurrentCount();
 	}
+
+	///테스트 코드 삭제 예정
+	@Cron('0 0 1 * * 0-6')
+	testcode() {
+		const now = new Date();
+		console.log("개근일수 갱신 크론 활성화\n" + now);
+	}
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
 import { DbmanagerService } from './dbmanager.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
@@ -17,8 +17,10 @@ export class DbmanagerController {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Post("/setcurrent/")
-	testSetCurrent() {
+	@Post("/setcurrent")
+	testSetCurrent(@GetUserInfo() userInfo: UserInfo) {
+		if (userInfo.isOperator === false)
+			throw new UnauthorizedException("Not Operator");
 		this.dbmanagerService.upDateThisMonthCurrentAttendance();
 	}
 }

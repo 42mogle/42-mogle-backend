@@ -1,4 +1,4 @@
-import { All, BadRequestException, GatewayTimeoutException, Injectable, NotFoundException } from '@nestjs/common';
+import { All, BadRequestException, GatewayTimeoutException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { Repository } from 'typeorm';
@@ -121,7 +121,7 @@ export class DbmanagerService {
 	//setTotalMonthInfo
 	async setTotalMonthInfo(userInfo: UserInfo) {
 		if (userInfo.isOperator === false) {
-			return "permission denied";
+			throw new UnauthorizedException("Not Operator");
 		}
 		this.setMonthInfo();
 	}
