@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -7,19 +7,20 @@ import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron } from '@nestjs/schedule';
+import { userInfo } from 'os';
 
 @Injectable()
 export class OperatorService {
 	@Inject(DbmanagerService)
 	private readonly dbmanagerService: DbmanagerService;
 
-	setTodayWord(setTodayWordDto: SetTodayWordDto) {
-		if (this.dbmanagerService.isAdmin(setTodayWordDto.intraId)) {
-			this.dbmanagerService.setTodayWord(setTodayWordDto.todayWord);
+	setTodayWord(TodayWordDto: SetTodayWordDto, userInfo: UserInfo) {
+		if (userInfo.isOperator === true) {
+			this.dbmanagerService.setTodayWord(TodayWordDto.todayWord);
 			return "오늘의 단어 설정 성공"
 		}
 		else {
-			return "권한이 없습니다!!!!!"
+			throw new UnauthorizedException("Not Operator");
 		}
 	}
 

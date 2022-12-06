@@ -4,6 +4,8 @@ import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { UserInfo } from '../dbmanager/entities/user_info.entity';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -25,8 +27,11 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	settodayword(@Body() setTodayWordDto: SetTodayWordDto) {
-		this.operatorService.setTodayWord(setTodayWordDto);
+	settodayword(
+		@Body() TodayWordDto: SetTodayWordDto,
+		@GetUserInfo() userInfo: UserInfo
+		) {
+		this.operatorService.setTodayWord(TodayWordDto, userInfo);
 	}
 
 	/**
