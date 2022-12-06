@@ -115,11 +115,22 @@ export class AuthService {
     // todo: Request to dbManager
     const userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId })
 
-    if (userInfo !== null) {
-      console.log("이미 존재하는 회원");
-
+    if (userInfo !== null && (userInfo.isSignedUp === true)) {
+      console.log("이미 회원가입 한 사용자");
       // todo: consider
-      throw new HttpException({errorMessage: "이미 존재하는 회원입니다.",intraId: userInfo.intraId}, HttpStatus.FORBIDDEN);
+      throw new HttpException({errorMessage: "이미 회원가입 한 회원입니다.",intraId: userInfo.intraId}, HttpStatus.FORBIDDEN);
+    } else if (userInfo !== null) {
+      console.log("이전에 회원가입 시도(firstJoin) 한 사용자");
+    } else {
+      console.log("DB user_info table에 사용자 정보 저장");
+      const newUserInfo = this.usersRepository.create({
+        intraId: authDto.intraId,
+        password: null,
+        isOperator: false,
+        photoUrl: null,
+        isSignedUp: false,
+      });
+      await this.usersRepository.save(newUserInfo);
     }
     return (authDto);
   }
@@ -139,6 +150,7 @@ export class AuthService {
       user.password = await bcrypt.hash(authDto.password, saltOrRounds);
       user.photoUrl = authDto.photoUrl;
       user.isOperator = authDto.isOperator;
+      user.isSignedUp = true;
       console.log(user);
       await this.usersRepository.save(user); // todo: Request to dbManager
       return authDto.intraId;
