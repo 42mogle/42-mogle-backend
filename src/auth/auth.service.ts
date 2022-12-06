@@ -88,6 +88,8 @@ export class AuthService {
     const defaultImage: string =
         "https://i.ytimg.com/vi/AwrFPJk_BGU/maxresdefault.jpg";
 
+    console.log(`In AuthService.firstJoin -> retIntraIdDto: `);
+    console.log(retIntraIdDto);
     if (userInfo !== null && (userInfo.isSignedUp === true)) {
       console.log("이미 회원가입한 사용자");
       throw new HttpException({
