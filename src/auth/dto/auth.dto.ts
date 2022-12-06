@@ -4,7 +4,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class AuthDto {
     @ApiProperty({
         type: String,
-        example: 'mgo',
+        example: 'intraid',
         description: '사용자 인트라 아이디',
         required: true
     })
@@ -17,11 +17,4 @@ export class AuthDto {
         required: true
     })
     password : string;
-
-    @ApiProperty({
-        type: String,   
-        description: '사진 URL',
-        required: false
-    })
-    photoUrl : string;
 }
