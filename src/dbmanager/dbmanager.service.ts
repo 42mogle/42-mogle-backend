@@ -317,46 +317,4 @@ export class DbmanagerService {
 	async getAllDayInfo(monthInfo: MonthInfo) {
 		return this.dayInfoRepository.findBy({monthInfo})
 	}
-
-	async createMockUp() {
-		const intraId: string[] = ["minsukan", "joonhan", "samin", "mgo", "susong"]
-		const passWord: string = "42mogle";
-		///
-		intraId.forEach( (user) => {
-			const abc = this.usersRepository.create({
-				intraId: user,
-				password: passWord,
-				isOperator: true,
-			})
-			this.usersRepository.save(abc);
-		})
-		
-
-		this.setTotalMonthInfo("minsuakn");
-		const monthInfo: MonthInfo = await this.getThisMonthInfo();
-		const dayinfo: DayInfo[] = await this.getAllDayInfo(monthInfo);
-		const allUserInfo: UserInfo[] = await this.getAllUsersInfo();
-		allUserInfo.forEach((user) => {
-			let i = 1;
-			dayinfo.forEach((dayInfo) => {
-				const date = new Date(2022, 11, i, 8, 30);
-				this.attendanceRepository.create({
-					timelog: date,
-					userInfo: user,
-					dayInfo: dayInfo
-				})
-				i++;
-			})
-		})
-	 }
-
-	 async atc(intraId: string, num: number) {
-		const userInfo: UserInfo = await this.getUserInfo(intraId);
-		const monthInfo: MonthInfo = await this.getThisMonthInfo();
-		const monthly: MonthlyUsers = await this.getThisMonthlyUser(intraId);
-		monthly.attendanceCount = num;
-		this.monthlyUsersRepository.save(monthly);
-	 }
-
-
 }

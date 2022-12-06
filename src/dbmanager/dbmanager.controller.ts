@@ -20,17 +20,4 @@ export class DbmanagerController {
 	testSetCurrent() {
 		this.dbmanagerService.upDateThisMonthCurrentAttendance();
 	}
-
-	@UseGuards(JwtAuthGuard)
-	@Post('/test/createMockUp')
-	tt() {
-		this.dbmanagerService.createMockUp()
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@Post('test/:intraId/:num/setatc')
-	ILikeTT(@Param("intraId, num") intraId: string, num: number) {
-		this.dbmanagerService.atc(intraId, num);
-	}
-
 }
