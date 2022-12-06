@@ -160,28 +160,23 @@ export class AuthService {
     return ; // todo: send success message ?
   }
 
-  // todo: Rename to createJwtAccessToken()
-  createrAcessToken(authDto: AuthDto) {
-    const payload = { intraId: authDto.intraId };
-    const accessToken = this.jwtService.sign(payload)
-    return (accessToken);
+  createJwtAccessToken(intraId: string): string {
+    const payload = { intraId };
+    const accessToken: string = this.jwtService.sign(payload);
+    return accessToken;
   }
 
-  async login(response:Response, authDto:AuthDto) {
-    let userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId });
-    if (userInfo !== null) {
-      const isMatch = await bcrypt.compare(authDto.password, userInfo.password);
-      if ((userInfo.intraId == authDto.intraId) && isMatch) {
-        return(this.createrAcessToken(authDto));
-      }
-      else {
-        console.log("Wrong password -> 401 UNAUTHORIZED");
-        throw new HttpException('비밀번호가 틀렸습니다.', HttpStatus.UNAUTHORIZED);
-      }
-    }
-    else {
+  async login(authDto: AuthDto): Promise<string> {
+    const userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId });
+    if (userInfo === null) {
       console.log("No user -> 401 UNAUTHORIZED")
       throw new HttpException('회원정보가 존재하지 않습니다.', HttpStatus.UNAUTHORIZED);
     }
+    const isMatched = await bcrypt.compare(authDto.password, userInfo.password);
+    if (isMatched === false) {
+      console.log("Wrong password -> 401 UNAUTHORIZED");
+      throw new HttpException('비밀번호가 틀렸습니다.', HttpStatus.UNAUTHORIZED);
+    }
+    return (this.createJwtAccessToken(authDto.intraId));
   }
 }
