@@ -20,15 +20,15 @@ export class AuthService {
 
   //42oauth 엑세스 토큰 받아오기
   /**
-   * 
+   *
    * @param code 42OAuthCode
    * @returns 42OAuthAccessToken
    */
   async getOauthToken(code: string) {
     const payload = {
       grant_type: 'authorization_code',
-      client_id: 'u-s4t2ud-ffa1eb7dfe8ca1260f9d27ba33051536d23c76cd1ab09f489cb233c7e8e5e065',
-      client_secret: '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',
+      client_id: PAYLOAD_CLIENT_ID,
+      client_secret: PAYLOAD_CLIENT_SECRET,
       redirect_uri: 'https://42mogle.com/auth',
       code
     };
@@ -126,7 +126,7 @@ export class AuthService {
   async secondJoin(authDto: AuthDto) {
     const user = new UserInfo();
     const saltOrRounds = 10;
-    
+
     // todo: Request to dbManager
     let userInfo = await this.usersRepository.findOneBy({
       intraId: authDto.intraId
