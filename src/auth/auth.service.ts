@@ -155,4 +155,11 @@ export class AuthService {
     // todo: Request to dbManager
     return (await this.usersRepository.delete({ intraId: intraId }));
   }
+
+  testEnv() {
+    const str_test = process.env.ENV_TEST;
+    console.log(str_test);
+    console.log(`in testEnv`);
+    return str_test;
+  }
 }
