@@ -20,19 +20,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any): Promise<UserInfo> {
-    //유저 확인
-    console.log(`[ In validate ]`);
-    console.log(`payload:`);
-    console.log(payload);
-    console.log(`payload.intraId:`);
-    console.log(payload.intraId);
-    const userInfo = await this.usersRepository.findOneBy(
-      { intraId: payload.intraId })
-    console.log(`userInfo:`);
-    console.log(userInfo);
-    if (userInfo === null)
+    const userInfo = await this.usersRepository.findOneBy({
+      intraId: payload.intraId
+    });
+    if (userInfo === null) {
       throw new HttpException('Invalid User', HttpStatus.FORBIDDEN);
-    else
-      return (userInfo);
+    }
+    return (userInfo);
   }
 }

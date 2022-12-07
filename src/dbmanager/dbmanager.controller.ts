@@ -25,8 +25,6 @@ export class DbmanagerController {
 	})
 	setTotalMonthInfo(@GetUserInfo() userInfo: UserInfo) {
 		console.log(`[ POST /dbmanager/set/totalMonthInfo ]`);
-		console.log(`userInfo: `);
-		console.log(userInfo);
 		return this.dbmanagerService.setTotalMonthInfo(userInfo);
 	}
 	

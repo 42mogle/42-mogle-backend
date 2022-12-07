@@ -119,11 +119,10 @@ export class DbmanagerService {
 
 	//setTotalMonthInfo
 	async setTotalMonthInfo(userInfo: UserInfo) {
-		console.log(`userInfo.isOperator: `);
-		console.log(userInfo.isOperator);
 		if (userInfo.isOperator === false) {
 			throw new UnauthorizedException("Not Operator");
 		}
+		console.log("The operator start setMonthInfo()");
 		this.setMonthInfo();
 	}
 
