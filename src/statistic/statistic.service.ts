@@ -16,6 +16,10 @@ export class StatisticService {
 	async getUserMonthStatus(userInfo: UserInfo): Promise<AttendanceStatus> {
 		const monthlyUserInfo: MonthlyUsers = await this.dbmanagerService.getThisMonthStatus(userInfo);
 		let attendanceStatus: AttendanceStatus;
+		console.log(`monthlyUserInfo: `);
+		console.log(monthlyUserInfo);
+		console.log(`attendanceStatus: `);
+		console.log(attendanceStatus);
 		if (!monthlyUserInfo) {
 			attendanceStatus.attendanceCount = 0;
 			attendanceStatus.isPerfectAttendance = false;
