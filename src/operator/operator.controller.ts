@@ -27,19 +27,15 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-<<<<<<< HEAD
-	setTodayWord(
-		@Body() TodayWordDto: SetTodayWordDto,
+	SetTodayWord(
+		@Body() todayWordDto: SetTodayWordDto,
 		@GetUserInfo() userInfo: UserInfo
 		) {
-		this.operatorService.setTodayWord(TodayWordDto, userInfo);
-=======
-	settodayword(@Body() setTodayWordDto: SetTodayWordDto) {
+		this.operatorService.setTodayWord(todayWordDto, userInfo);
 		console.log(`[ PATCH /operator/setTodayWord ] requested.`);
-		console.log(`setTodayWordDto.intraId: [${setTodayWordDto.intraId}]`);
-		console.log(`setTodayWordDto.todayWord: [${setTodayWordDto.todayWord}]`);
-		this.operatorService.setTodayWord(setTodayWordDto);
->>>>>>> develop
+		console.log(`setTodayWordDto.intraId: [${userInfo.intraId}]`);
+		console.log(`setTodayWordDto.todayWord: [${todayWordDto.todayWord}]`);
+		this.operatorService.setTodayWord(todayWordDto, userInfo);
 	}
 
 	/**
@@ -82,14 +78,9 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-<<<<<<< HEAD
 	updateAllUsersAttendanceInfo(@GetUserInfo() userInfo: UserInfo) {
 		if (userInfo.isOperator === false)
 			throw new UnauthorizedException("Not Operator");
-=======
-	updateAllusersAttendanceInfo() {
-		console.log(`[ POST /operator/update/users/attendanceInfo ] requested.`);
->>>>>>> develop
 		this.operatorService.updateUsersAttendanceInfo();
 	}
 
@@ -108,14 +99,10 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-<<<<<<< HEAD
 	updateCurrentAttendanceCount(
 		@GetUserInfo() userInfo: UserInfo
 	) {
-=======
-	updateCurrentAttendanceCount() {
 		console.log(` [ POST /operator/update/currentAttendanceCount ] requested.`)
->>>>>>> develop
 		this.operatorService.updateCurrentCount();
 	}
 }
