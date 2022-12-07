@@ -32,7 +32,7 @@ export class DbmanagerService {
 		const now = new Date();
 		const year = now.getFullYear();
 		const month = now.getMonth() + 1;
-		const totalAttendance = new Date(year, month, 0).getDate(); // todo: consider what 0 means
+		const totaldate: number = new Date(year, month, 0).getDate(); // todo: consider what 0 means
 		const foundThhisMonthInfo = await this.monthInfoRepository.findOne({ where: { year, month } });
 		if (foundThhisMonthInfo) {
 			throw "이번달 데이터가 이미 있습니다.";
@@ -46,11 +46,11 @@ export class DbmanagerService {
 			perfectUserCount: 0,
 		})
 		await this.monthInfoRepository.save(monthInfo);
-		this.setAllDayInfo(monthInfo, totalAttendance);
+		this.setAllDayInfo(monthInfo, totaldate);
 	}
 
-	async setAllDayInfo(monthInfo: MonthInfo, totalAttendance: number) {
-		for(let i = 1; i <= totalAttendance; i++) {
+	async setAllDayInfo(monthInfo: MonthInfo, totaldate: number) {
+		for(let i = 1; i <= totaldate; i++) {
 			const type = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, i));
 			const dayInfo = this.dayInfoRepository.create({
 				day: i,
