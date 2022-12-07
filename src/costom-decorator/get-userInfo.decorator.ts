@@ -5,6 +5,8 @@ export const GetUserInfo = createParamDecorator((data, ctx: ExecutionContext): U
 	const req = ctx.switchToHttp().getRequest();
 	const retUserInfo = req.userInfo;
 	console.log(`[ In GetUserInfo ]`);
+	console.log(`request:`);
+	console.log(req);
 	console.log(`retUserInfo:`);
 	console.log(retUserInfo);
 	return req.userInfo;
