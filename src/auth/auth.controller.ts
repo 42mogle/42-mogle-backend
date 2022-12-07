@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { AuthDto } from './dto/auth.dto';
 import { ApiCreatedResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { IntraIdDto } from './dto/intraId.dto';
 
 @ApiTags('Auth')
 @Controller('serverAuth')
@@ -16,60 +17,7 @@ export class AuthController {
     ) {}
 
   /**
-   * POST /serverAuth/login
-   */
-  @Post('login')
-	@ApiOperation({summary: 'request user login'})
-	@ApiResponse({
-		status: 201, 
-		description: 'Success'
-	})
-	@ApiResponse({
-		status: 401,
-		description: 'Unauthorized'
-	})
-  async login(@Res() response: Response, @Body() authDto: AuthDto) {
-    console.log("[ POST /serverAuth/login ] requested.");
-    console.log(`authDto.intraId: [${authDto.intraId}]`);
-    const accessToken = await this.authService.login(response, authDto);
-    response.send({ accessToken });
-    return ;
-  }
-
-  /**
-   * POST /serverAuth/logout
-   */
-  @Post('logout')
-  @ApiOperation({summary: 'request user logout'})
-	@ApiResponse({
-		status: 201, 
-		description: 'Success'
-	})
-	@ApiResponse({
-		status: 403,
-		description: 'Forbidden'
-	})
-  logout(@Res() response:Response) {
-    console.log(`[ POST /serverAuth/logout ] requested.`);
-    /** 
-     * When using cookie (saving accessToken in cookie), run below code.
-     */
-    // response.cookie("accessToken","",
-    // {
-    //   httpOnly: true,
-    //   maxAge: 0
-    // })
-
-    /** 
-     * When using local storage, the front-end removes the accessToken.
-     */
-
-    response.send({message:'로그아웃'});
-    return ;
-  }
-
-  /**
-   * GET /serverAuth/firstJoin?code=
+   * GET /serverAuth/firstJoin?code=${code}
    */
   @Get('firstJoin')
   @ApiOperation({summary: 'get a user info from 42OAuth'})
@@ -85,9 +33,9 @@ export class AuthController {
   async firstJoin(@Query('code') code: string) {
     console.log("[ GET /serverAuth/firstJoin ] requested.");
     // todo: Rename to checkingAlreadySignedIn
-    const userInfo = await this.authService.firstJoin(code);
-    console.log(`intraId: [${userInfo.intraId}]`);
-    return(userInfo);
+    const intraIdDto: IntraIdDto = await this.authService.firstJoin(code);
+    console.log(`intraId: [${intraIdDto.intraId}]`);
+    return(intraIdDto);
   }
 
   /**
@@ -110,55 +58,45 @@ export class AuthController {
     return(await this.authService.secondJoin(authDto));
   }
 
-  // todo: Set in UserController
-  // todo: checking when error
   /**
-   * DELETE /serverAuth/delete?intraId=
+   * POST /serverAuth/login
    */
-  @Delete('delete')
-  @ApiOperation({summary: 'remove a user info'})
-  async deleteUser(@Query('intraId') intraId:string) {
-    console.log("[ DELETE /serverAuth/delete ] requested.");
-    console.log(`?intraId: [${intraId}]`);
-    await this.authService.deleteUser(intraId); // todo: consider
-  }
-
-  // todo: Remove
-  // test
-  @Get('test0')
-  @ApiOperation({summary: 'for testing'})
-  test0()
-  {
-    console.log("hello");
-    return("test0")
-  }
-  
-  // todo: Remove
-  // test
-  @Post('test')
-	@ApiCreatedResponse({
-		description: '테스트',
-		schema: {
-			example: {
-				intraId: 'mgo',
-				isOperator: true,
-				photoUrl: 'https://awesome.photo'
-			}
-		}
-	})
-  @ApiOperation({summary: 'for testing'})
-  async test(@Body() authDto: AuthDto)
-  {
-    // response.cookie("accessToken", this.authService.createrAcessToken(authDto),
-    // {
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: "none",
-    //   maxAge: 24 * 60 * 60 * 1000 //1 day
-    // })
-    // return(response.send({message:'로그인 성공'}));
-    return (this.authService.createrAcessToken(authDto));
-  }
+   @Post('login')
+   @ApiOperation({summary: 'request user login'})
+   @ApiResponse({
+     status: 201, 
+     description: 'Success'
+   })
+   @ApiResponse({
+     status: 401,
+     description: 'Unauthorized'
+   })
+   async login(@Res() response: Response, @Body() authDto: AuthDto) {
+     console.log("[ POST /serverAuth/login ] requested.");
+     console.log(`authDto.intraId: [${authDto.intraId}]`);
+     const accessToken = await this.authService.login(authDto);
+     response.send({ accessToken });
+     return ;
+   }
+ 
+   /**
+    * POST /serverAuth/logout
+    */
+   @Post('logout')
+   @ApiOperation({summary: 'request user logout'})
+   @ApiResponse({
+     status: 201, 
+     description: 'Success'
+   })
+   @ApiResponse({
+     status: 403,
+     description: 'Forbidden'
+   })
+   logout(@Res() response:Response) {
+     console.log(`[ POST /serverAuth/logout ] requested.`);
+     response.send({ message:'로그아웃' });
+     return ;
+   } 
 
   // todo: Remove
   // test
