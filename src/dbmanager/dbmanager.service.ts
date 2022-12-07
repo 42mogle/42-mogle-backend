@@ -78,14 +78,13 @@ export class DbmanagerService {
 		return monthInfo;
 	}
 
-
 	async getTodayInfo() {
 		const now = new Date();
 		const day = now.getDate();
 		const month = now.getMonth() + 1;
 		const year = now.getFullYear();
-		const monthInfo: MonthInfo = await this.getMonthInfo(month, year);
-		return await this.dayInfoRepository.findOneBy({ day, monthInfo })
+		const monthInfo: MonthInfo = await this.getMonthInfo(month, year); // todo: check null
+		return await this.dayInfoRepository.findOneBy({ day, monthInfo }) // todo: check null
 	}
 
 	async setTodayWord(toDayWord: string) {

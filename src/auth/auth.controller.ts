@@ -105,36 +105,4 @@ export class AuthController {
      response.send({ message:'로그아웃' });
      return ;
    } 
-
-  // todo: Remove
-  // test
-  @Post('test2')
-  @ApiOperation({summary: 'for testing'})
-  test2(@Token() token:string)
-  {
-    console.log(this.jwtService.verify(token));
-    console.log("토큰 " + token);
-    return ("test2 리턴")
-  }
-
-  // todo: Remove
-  // test
-  @UseGuards(JwtAuthGuard)
-  @Post('test3')
-  @ApiOperation({summary: 'for testing'})
-  test3(@Token() token:string)
-  {
-    console.log(this.jwtService.verify(token));
-    console.log("토큰 " + token);
-    return ("test3 리턴")
-  }
-
-  // todo: Remove
-  @Get('oauth')
-  @ApiOperation({summary: 'for testing'})
-  @Redirect('https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-fe0450158bd57a0967d25286f60a880e9dfeaf974652aa249d4b9700a2251a1b&redirect_uri=http%3A%2F%2F10.19.247.186%3A3042%2Fauth%2FfirstJoin&response_type=code', 301)
-  redi()
-  {
-    return("redi");
-  }
 }
