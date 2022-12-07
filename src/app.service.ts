@@ -23,6 +23,8 @@ export class AppService {
   ) {}
 
   getHello(): string {
-    return 'Hello 42mogle!';
+    const str_test = process.env.ENV_TEST;
+    console.log(str_test);
+    return str_test;
   }
 }

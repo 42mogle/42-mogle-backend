@@ -16,6 +16,7 @@ import { DbmanagerService } from './dbmanager/dbmanager.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 // import { HttpModule } from '@nestjs/axios';
 //import { BoardsController } from './boards/boards.controller';
 
@@ -32,6 +33,10 @@ import { AuthModule } from './auth/auth.module';
     StatisticModule,
     DbmanagerModule,
     ScheduleModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }
+    ),
   ],
   controllers: [AppController],
   providers: [AppService, DbmanagerService],

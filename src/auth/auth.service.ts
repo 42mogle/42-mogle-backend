@@ -20,18 +20,20 @@ export class AuthService {
 
   //42oauth 엑세스 토큰 받아오기
   /**
-   * 
+   *
    * @param code 42OAuthCode
    * @returns 42OAuthAccessToken
    */
   async getOauthToken(code: string) {
     const payload = {
       grant_type: 'authorization_code',
-      client_id: 'u-s4t2ud-ffa1eb7dfe8ca1260f9d27ba33051536d23c76cd1ab09f489cb233c7e8e5e065',
-      client_secret: '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',
+      client_id: process.env.PAYLOAD_CLIENT_ID,
+      client_secret: process.env.PAYLOAD_CLIENT_SECRET,
       redirect_uri: 'https://42mogle.com/auth',
       code
     };
+    console.log(`payload:`);
+    console.log(payload);
     let retOauthAccessToken: string;
     await this.httpService.axiosRef
       .post('https://api.intra.42.fr/oauth/token', JSON.stringify(payload), {
@@ -45,7 +47,6 @@ export class AuthService {
       })
       .catch((err) => {
         console.log("get 42OAuth AccessToken 실패");
-        console.log(err);
         throw new HttpException('42OAuth 인증 코드를 얻는데 실패하였습니다', HttpStatus.FORBIDDEN); // todo: consider
       });
     return (retOauthAccessToken);
@@ -74,7 +75,7 @@ export class AuthService {
         console.log("getUserData from 42api 성공");
       })
       .catch((err) => {
-        console.log("getUserData from 42api 에러");
+        console.log("getUserData from 42api 실패");
 
         // todo: consider
         throw new HttpException('42회원 정보가 존재하지 않습니다.', HttpStatus.FORBIDDEN);
@@ -93,9 +94,7 @@ export class AuthService {
     let userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId });
     if (userInfo !== null) {
       const isMatch = await bcrypt.compare(authDto.password, userInfo.password);
-      console.log(`isMatch: ${isMatch}`);
       if ((userInfo.intraId == authDto.intraId) && isMatch) {
-        console.log("User intraId: " + userInfo.intraId);
         return(this.createrAcessToken(authDto));
       }
       else {
@@ -129,13 +128,12 @@ export class AuthService {
   async secondJoin(authDto: AuthDto) {
     const user = new UserInfo();
     const saltOrRounds = 10;
-    
+
     // todo: Request to dbManager
     let userInfo = await this.usersRepository.findOneBy({
       intraId: authDto.intraId
     })
     if (userInfo === null) {
-      console.log("[Signing in]");
       // todo: using repository.create() ?
       user.intraId = authDto.intraId;
       user.password = await bcrypt.hash(authDto.password, saltOrRounds);
@@ -156,5 +154,12 @@ export class AuthService {
   async deleteUser(intraId:string) {
     // todo: Request to dbManager
     return (await this.usersRepository.delete({ intraId: intraId }));
+  }
+
+  testEnv() {
+    const str_test = process.env.ENV_TEST;
+    console.log(str_test);
+    console.log(`in testEnv`);
+    return str_test;
   }
 }

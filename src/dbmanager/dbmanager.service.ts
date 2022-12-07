@@ -112,10 +112,9 @@ export class DbmanagerService {
 	}
 
 	async getTodayWord(): Promise<string> {
-		const found: DayInfo = await this.getTodayInfo();
-		const ret = found.todayWord;
-		console.log("todayWord in server:", ret);
-		return ret;
+		const todayInfo: DayInfo = await this.getTodayInfo();
+		const retTodayWord = todayInfo.todayWord;
+		return retTodayWord;
 	}
 
 	//setTotalMonthInfo

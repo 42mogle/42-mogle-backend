@@ -39,7 +39,7 @@ export class StatisticController {
 		description: 'Forbidden'
 	})
 	async getUserAttendanceList(@GetUserInfo() userInfo: UserInfo): Promise<Attendance[]> {
-		console.log("[GET /statistic/{intraId}/userAttendanceList] requested.");
+		console.log("[GET /statistic/userAttendanceList] requested.");
 		return await this.statisticService.getAttendanceList(userInfo);
 	}
 
@@ -71,6 +71,7 @@ export class StatisticController {
 		description: 'Forbidden'
 	})
 	async getUserAttendanceState(@GetUserInfo() userInfo: UserInfo) {
+		console.log("[GET /statistic/userAttendanceState] requested.");
 		return await this.statisticService.getUserMonthStatus(userInfo);
 	}
 }
