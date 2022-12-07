@@ -1,9 +1,11 @@
-import { Body, Controller, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { OperatorService } from './operator.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { UserInfo } from '../dbmanager/entities/user_info.entity';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -25,17 +27,21 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	settodayword(@Body() setTodayWordDto: SetTodayWordDto) {
+	SetTodayWord(
+		@Body() todayWordDto: SetTodayWordDto,
+		@GetUserInfo() userInfo: UserInfo
+		) {
+		this.operatorService.setTodayWord(todayWordDto, userInfo);
 		console.log(`[ PATCH /operator/setTodayWord ] requested.`);
-		console.log(`setTodayWordDto.intraId: [${setTodayWordDto.intraId}]`);
-		console.log(`setTodayWordDto.todayWord: [${setTodayWordDto.todayWord}]`);
-		this.operatorService.setTodayWord(setTodayWordDto);
+		console.log(`setTodayWordDto.intraId: [${userInfo.intraId}]`);
+		console.log(`setTodayWordDto.todayWord: [${todayWordDto.todayWord}]`);
+		this.operatorService.setTodayWord(todayWordDto, userInfo);
 	}
 
 	/**
 	 * POST /operator/update/user/attendance
 	 */
-	@Post("/update/user/attendance") // 유저의 출석데이터를 임의로 추가함
+	@Post("/update/user/attendance") // 유저의 출석데이터를 임의로 추가함 보류
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'add a user attendance'})
@@ -72,15 +78,16 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateAllusersAttendanceInfo() {
-		console.log(`[ POST /operator/update/users/attendanceInfo ] requested.`);
+	updateAllUsersAttendanceInfo(@GetUserInfo() userInfo: UserInfo) {
+		if (userInfo.isOperator === false)
+			throw new UnauthorizedException("Not Operator");
 		this.operatorService.updateUsersAttendanceInfo();
 	}
 
 	/**
 	 * POST /operator/update/currentAttendanceCount
 	 */
-	@Post("/update/currentAttendanceCount") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
+	@Patch("/update/currentAttendanceCount/") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'update month currrent attendance count'})
@@ -92,7 +99,9 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateCurrentAttendanceCount() {
+	updateCurrentAttendanceCount(
+		@GetUserInfo() userInfo: UserInfo
+	) {
 		console.log(` [ POST /operator/update/currentAttendanceCount ] requested.`)
 		this.operatorService.updateCurrentCount();
 	}

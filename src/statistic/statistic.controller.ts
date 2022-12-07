@@ -1,8 +1,10 @@
-import { ConsoleLogger, Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 import { StatisticService } from './statistic.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { UserInfo } from '../dbmanager/entities/user_info.entity';
 
 @ApiTags('Statistic')
 @Controller('statistic')
@@ -12,7 +14,7 @@ export class StatisticController {
 	/**
 	 * GET /statistic/{intraId}/userAttendanceList
 	 */
-	@Get("/:intraId/userAttendanceList")
+	@Get("/userAttendanceList")
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({
@@ -36,15 +38,15 @@ export class StatisticController {
 		status: 403,
 		description: 'Forbidden'
 	})
-	async getUserAttendanceList(@Param("intraId") intraId: string): Promise<Attendance[]> {
-		console.log(`[ GET /statistic/${intraId}/userAttendanceList ] requested.`);
-		return await this.statisticService.getAttendanceList(intraId);
+	async getUserAttendanceList(@GetUserInfo() userInfo: UserInfo): Promise<Attendance[]> {
+		console.log("[GET /statistic/userAttendanceList] requested.");
+		return await this.statisticService.getAttendanceList(userInfo);
 	}
 
 	/**
 	 * GET /statistic/{intraId}/userAttendanceState
 	 */
-	@Get(":intraId/userAttendanceState")
+	@Get("userAttendanceState")
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({
@@ -68,8 +70,8 @@ export class StatisticController {
 		status: 403,
 		description: 'Forbidden'
 	})
-	async getUserAttendanceState(@Param("intraId") intraId: string) {
-		console.log(`[ GET /statistic/${intraId}/userAttendanceState ] requested.`)
-		return await this.statisticService.getUserMonthStatus(intraId);
+	async getUserAttendanceState(@GetUserInfo() userInfo: UserInfo) {
+		console.log("[GET /statistic/userAttendanceState] requested.");
+		return await this.statisticService.getUserMonthStatus(userInfo);
 	}
 }

@@ -4,6 +4,8 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { ApiParam, ApiOperation, ApiTags, ApiResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { userInfo } from 'os';
 
 @ApiTags('User')
 @Controller('user')
@@ -12,8 +14,8 @@ export class UserController {
 		this.userService = userService;
 	}
 
-	// GET /user/{intraId}
-	@Get('/:intraId')
+	// GET /user/getUserInfo
+	@Get('getUserInfo')
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token') // setting JWT token key
 	@ApiOperation({
@@ -37,19 +39,12 @@ export class UserController {
 		status: 403,
 		description: 'Forbidden'
 	})
-	async getUserInfo(@Param('intraId') intraId: string): Promise<UserInfoDto> {
-		console.log(`[ GET /user/${intraId} ] requested.`);
-		return await this.userService.getUserInfoByIntraId(intraId);
-	}
-
-	// todo: Remove
-	// GET /user //현재는 사용되지 않음
-	@ApiOperation({summary: 'get all users'})
-	@UseGuards(JwtAuthGuard)
-	@ApiBearerAuth('access-token')
-	@Get('/')
-	getAllUser(): Promise<UserInfo[]> {
-		console.log(` [ GET /user ] requested.`);
-		return this.userService.findAll();
+	getUserInfo(@GetUserInfo() userInfo: UserInfo): UserInfoDto {
+		const userInfoDto: UserInfoDto = {
+			intraId: userInfo.intraId,
+			isOperator: userInfo.isOperator,
+			photoUrl: userInfo.photoUrl
+		};
+		return userInfoDto;
 	}
 }

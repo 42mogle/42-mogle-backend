@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -13,13 +13,13 @@ export class OperatorService {
 	@Inject(DbmanagerService)
 	private readonly dbmanagerService: DbmanagerService;
 
-	setTodayWord(setTodayWordDto: SetTodayWordDto) {
-		if (this.dbmanagerService.isAdmin(setTodayWordDto.intraId)) {
-			this.dbmanagerService.setTodayWord(setTodayWordDto.todayWord);
+	setTodayWord(TodayWordDto: SetTodayWordDto, userInfo: UserInfo) {
+		if (userInfo.isOperator === true) {
+			this.dbmanagerService.setTodayWord(TodayWordDto.todayWord);
 			return "오늘의 단어 설정 성공"
 		}
 		else {
-			return "권한이 없습니다!!!!!"
+			throw new UnauthorizedException("Not Operator");
 		}
 	}
 
@@ -81,5 +81,12 @@ export class OperatorService {
 		// 6: 토요일
 		if (type !== 0 && type !== 6)
 			this.dbmanagerService.updateThisMonthCurrentCount();
+	}
+
+	///테스트 코드 삭제 예정
+	@Cron('0 0 1 * * 0-6')
+	testcode() {
+		const now = new Date();
+		console.log("개근일수 갱신 크론 활성화\n" + now);
 	}
 }

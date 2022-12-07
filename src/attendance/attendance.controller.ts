@@ -3,6 +3,8 @@ import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { UserInfo } from '../dbmanager/entities/user_info.entity';
 
 @ApiTags('Attendance')
 @Controller('attendance')
@@ -10,16 +12,12 @@ export class AttendanceController {
 	constructor(private readonly attendanceService: AttendanceService) {}
 
 	/**
-	 * GET /attendance/{intraId}/buttonStatus
+	 * GET /attendance/buttonStatus
 	 */
-	@Get('/:intraId/buttonStatus')
+	@Get('/buttonStatus')
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'get the attendance button status of the user'})
-	@ApiParam({
-		name: 'intraId',
-		type: String,
-	})
 	@ApiResponse({
 		status: 200, 
 		description: 'Success', 
@@ -33,10 +31,10 @@ export class AttendanceController {
 		status: 403,
 		description: 'Forbidden'
 	})
-	async getUserButtonStatus(@Param('intraId') intraId: string): Promise<number> {
-		console.log(`[ GET /attendance/${intraId}/buttonStatus ] requested.`)
+	async getUserButtonStatus(@GetUserInfo() userInfo: UserInfo): Promise<number> {
+		console.log(`[ GET /attendance/${userInfo.intraId}/buttonStatus ] requested.`)
 		// todo: return number에 따른 상태를 문서에 명시하거나, enum으로 바꿔서 명시하기
-		return this.attendanceService.getUserButtonStatus(intraId);
+		return this.attendanceService.getUserButtonStatus(userInfo);
 	}
 
 	/**
@@ -55,11 +53,14 @@ export class AttendanceController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	async pushButton(@Body() createAttendanceDto: CreateAttendanceDto) {
+	async pushButton(
+		@Body() attendanceDto: CreateAttendanceDto,
+		@GetUserInfo() userInfo: UserInfo
+		) {
 		console.log(`[ POST /attendance/userAttendance ] requested.`);
-		console.log(`createAttendanceDto.intraId: [${createAttendanceDto.intraId}]`);
-		console.log(`createAttendanceDto.todayWord: [${createAttendanceDto.todayWord}]`);
+		console.log(`createAttendanceDto.intraId: [${userInfo.intraId}]`);
+		console.log(`createAttendanceDto.todayWord: [${attendanceDto.todayWord}]`);
 		// todo: return object를 DTO로 정의하기
-		return await this.attendanceService.AttendanceCertification(createAttendanceDto);
+		return await this.attendanceService.AttendanceCertification(attendanceDto, userInfo);
 	}
 }
