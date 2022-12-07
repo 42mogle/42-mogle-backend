@@ -32,7 +32,7 @@ export class AttendanceController {
 		description: 'Forbidden'
 	})
 	async getUserButtonStatus(@GetUserInfo() userInfo: UserInfo): Promise<number> {
-		console.log(`API[ GET /attendance/${userInfo.intraId}/buttonStatus ] requested.`)
+		console.log(`[ GET /attendance/${userInfo.intraId}/buttonStatus ] requested.`)
 		// todo: return number에 따른 상태를 문서에 명시하거나, enum으로 바꿔서 명시하기
 		return this.attendanceService.getUserButtonStatus(userInfo);
 	}
