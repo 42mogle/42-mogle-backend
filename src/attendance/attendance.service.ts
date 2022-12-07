@@ -1,35 +1,34 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
+import { ButtonStatus } from './button.status.enum';
 
 @Injectable()
 export class AttendanceService {
 	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService;
 	@Inject(OperatorService) private readonly operatorService: OperatorService;
 
-	async getUserButtonStatus(intraId: string): Promise<number> {
+	async getUserButtonStatus(userInfo: UserInfo): Promise<number> {
 		if (this.isAvailableTime() === false) {
-			return (1);
+			return ButtonStatus.NotAvailableTime;
 		}
-		else if (await this.haveAttendedToday(intraId)) {
-			return (2);
+		else if (await this.haveAttendedToday(userInfo)) {
+			return ButtonStatus.AlreadyCheckedAttendance;
 		}
 		// else if (await !this.isSetToDayWord()) {
 		// 	return (3)
 		// }
-		return (0);
+		return ButtonStatus.AttendanceSuccess;
 	}
 
-	// 이거 user에도 있음. 확인 필요.
-	async AttendanceCertification(attendanceinfo: CreateAttendanceDto) {
+	async AttendanceCertification(attendanceinfo: CreateAttendanceDto, userInfo: UserInfo) {
 		const todayWord: string = await this.dbmanagerService.getTodayWord();
 		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
-		const userIntraId = attendanceinfo.intraId;
-		if (await this.haveAttendedToday(userIntraId)) {
+		if (await this.haveAttendedToday(userInfo)) {
 			return ({
 				statusAttendance: 1,
 				errorMsg: "이미 출석 체크 했습니다."
@@ -41,10 +40,10 @@ export class AttendanceService {
 				errorMsg: "오늘의 단어가 다릅니다."
 			});
 		}
-		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(userIntraId);
+		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(userInfo);
 		if (!monthlyUser)
-			monthlyUser = await this.dbmanagerService.createMonthlyUser(userIntraId);
-		await this.dbmanagerService.attendanceRegistration(attendanceinfo);
+			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
+		await this.dbmanagerService.attendanceRegistration(userInfo);
 		await this.dbmanagerService.updateMonthlyUser(monthlyUser);
 		await this.operatorService.updatePerfectStatus(monthlyUser, monthInto.currentAttendance);
 		return ({
@@ -71,9 +70,8 @@ export class AttendanceService {
 			return (true);
 	}
 
-	async haveAttendedToday(intra_id: string): Promise<boolean> {
+	async haveAttendedToday(userInfo: UserInfo): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intra_id)
 		const todayAttendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, todayInfo);
 		if (todayAttendanceInfo === null)
 			return false;
