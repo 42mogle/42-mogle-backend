@@ -6,7 +6,6 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
-import { userInfo } from 'os';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -28,7 +27,7 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	settodayword(
+	setTodayWord(
 		@Body() TodayWordDto: SetTodayWordDto,
 		@GetUserInfo() userInfo: UserInfo
 		) {
@@ -70,7 +69,7 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateAllusersAttendanceInfo(@GetUserInfo() userInfo: UserInfo) {
+	updateAllUsersAttendanceInfo(@GetUserInfo() userInfo: UserInfo) {
 		if (userInfo.isOperator === false)
 			throw new UnauthorizedException("Not Operator");
 		this.operatorService.updateUsersAttendanceInfo();

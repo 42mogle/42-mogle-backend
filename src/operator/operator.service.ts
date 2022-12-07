@@ -7,7 +7,6 @@ import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron } from '@nestjs/schedule';
-import { userInfo } from 'os';
 
 @Injectable()
 export class OperatorService {
