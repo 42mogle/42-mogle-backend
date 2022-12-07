@@ -26,9 +26,17 @@ export class AuthController {
 		description: 'Success', 
     type: AuthDto
 	})
-	@ApiResponse({
+  @ApiResponse({
+		status: 401,
+		description: '42 api에서 토큰 발급 실패'
+	})
+  @ApiResponse({
 		status: 403,
-		description: 'Forbidden'
+		description: '이미 회원가입한 사용자'
+	})
+  @ApiResponse({
+		status: 404,
+		description: 'api.intra.42.fr/v2/me 요청 실패'
 	})
   async firstJoin(@Query('code') code: string) {
     console.log("[ GET /serverAuth/firstJoin ] requested.");
