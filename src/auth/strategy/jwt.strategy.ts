@@ -19,8 +19,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: any): Promise<UserInfo> {
     //유저 확인
+    console.log(payload);
     let userInfo = await this.usersRepository.findOneBy(
       { intraId: payload.intraId })
     if (userInfo === null)
