@@ -1,29 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import * as fs from 'fs';
+import * as config from 'config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  /* When using ssl for https
-
-  const httpsOptions = {
-    key: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/privkey1.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/archive/42mogle.com/fullchain1.pem'),
-  };
-  const app = await NestFactory.create(AppModule, {
-    httpsOptions,
-  });
-
-  */
+  const serverConfig = config.get('server');
+  const port = serverConfig.port;
 
   // Setting Swagger
-  const config = new DocumentBuilder()
-    .setTitle('42mogle API docs')
+  const apiDocConfig = new DocumentBuilder()
+    .setTitle('42mogle API document')
     .setDescription('API description')
     .setVersion('0.1')
-    // Setting JWT token
     .addBearerAuth(
       {
         type: 'http',
@@ -34,7 +24,7 @@ async function bootstrap() {
       'access-token',
     )
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, apiDocConfig);
   SwaggerModule.setup('api', app, document);
 
   // Resolving CORS
@@ -44,6 +34,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(3000);
+  await app.listen(port);
 }
 bootstrap();
