@@ -6,7 +6,6 @@ import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { ButtonStatus } from './button.status.enum';
-import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
 
 @Injectable()
 export class AttendanceService {
