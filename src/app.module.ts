@@ -17,11 +17,33 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { utilities, WinstonLogger, WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 // import { HttpModule } from '@nestjs/axios';
 //import { BoardsController } from './boards/boards.controller';
 
+const level = process.env.Node_ENV === 'production' ? 'error' : 'silly';
+const format = winston.format.combine(
+  winston.format.timestamp(),
+  utilities.format.nestLike('log', { prettyPrint: true })
+)
+
 @Module({
   imports: [
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.Console({
+          level: level,
+          format: format
+        }),
+        new winston.transports.File({
+          dirname: 'Log',
+          filename: 'history.log',
+          level: level,
+          format: format,
+        }),
+      ],
+    }),
     TypeOrmModule.forRoot(typeORMConfig), 
     TypeOrmModule.forFeature(
       [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
