@@ -37,7 +37,7 @@ export class AttendanceController {
 	})
 	async getUserButtonStatus(@GetUserInfo() userInfo: UserInfo): Promise<number> {
 		//console.log(`[ GET /attendance/${userInfo.intraId}/buttonStatus ] requested.`)
-		this.logger.debug('[ GET /attendance/buttonStatus ] requested', userInfo.intraId);
+		this.logger.log('[ GET /attendance/buttonStatus ] requested', userInfo.intraId);
 		return this.attendanceService.getUserButtonStatus(userInfo);
 	}
 
@@ -64,7 +64,7 @@ export class AttendanceController {
 		console.log(`[ POST /attendance/userAttendance ] requested.`);
 		console.log(`createAttendanceDto.intraId: [${userInfo.intraId}]`);
 		console.log(`createAttendanceDto.todayWord: [${attendanceDto.todayWord}]`);
-		this.logger.debug('[ POST /attendance/userAttendance ] requested ' + userInfo.intraId, JSON.stringify(attendanceDto));
+		this.logger.log('[ POST /attendance/userAttendance ] requested ' + userInfo.intraId, JSON.stringify(attendanceDto));
 		// todo: return object를 DTO로 정의하기
 		return await this.attendanceService.AttendanceCertification(attendanceDto, userInfo);
 	}

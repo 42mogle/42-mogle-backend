@@ -29,7 +29,7 @@ export class DbmanagerController {
 	})
 	setTotalMonthInfo(@GetUserInfo() userInfo: UserInfo) {
 		console.log(`[ POST /dbmanager/set/totalMonthInfo ]`);
-		this.logger.debug(`[ POST /dbmanager/set/totalMonthInfo ]`, JSON.stringify(userInfo));
+		this.logger.log(`[ POST /dbmanager/set/totalMonthInfo ]`, JSON.stringify(userInfo));
 		return this.dbmanagerService.setTotalMonthInfo(userInfo);
 	}
 	
@@ -47,7 +47,7 @@ export class DbmanagerController {
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
 	testSetCurrent(@GetUserInfo() userInfo: UserInfo) {
-		this.logger.debug(`[ POST /dbmanager/setcurrent ]`, JSON.stringify(userInfo));
+		this.logger.log(`[ POST /dbmanager/setcurrent ]`, JSON.stringify(userInfo));
 		if (userInfo.isOperator === false)
 			throw new UnauthorizedException("Not Operator");
 		this.dbmanagerService.upDateThisMonthCurrentAttendance();

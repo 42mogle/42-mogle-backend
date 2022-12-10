@@ -45,7 +45,7 @@ export class AuthController {
     console.log("[ GET /serverAuth/firstJoin ] requested.");
     // todo: Rename to checkingAlreadySignedIn
     const intraIdDto: IntraIdDto = await this.authService.firstJoin(code);
-    this.logger.debug("[ GET /serverAuth/firstJoin ] requested.", JSON.stringify(intraIdDto));
+    this.logger.log("[ GET /serverAuth/firstJoin ] requested.", JSON.stringify(intraIdDto));
     console.log(`intraId: [${intraIdDto.intraId}]`);
     return(intraIdDto);
   }
@@ -67,6 +67,7 @@ export class AuthController {
   async secondJoin(@Body() authDto:AuthDto) {
     console.log("[ POST /serverAuth/secondJoin ] requested.");
     console.log(`authDto.intraId: [${authDto.intraId}]`);
+    this.logger.log("[ POST /serverAuth/secondJoin ] requested.", JSON.stringify(authDto));
     return(await this.authService.secondJoin(authDto));
   }
 
@@ -86,7 +87,7 @@ export class AuthController {
    async login(@Res() response: Response, @Body() authDto: AuthDto) {
      console.log("[ POST /serverAuth/login ] requested.");
      console.log(`authDto.intraId: [${authDto.intraId}]`);
-     this.logger.debug("[ POST /serverAuth/login ] requested.", JSON.stringify(authDto));
+     this.logger.log("[ POST /serverAuth/login ] requested.", JSON.stringify(authDto));
      const accessToken = await this.authService.login(authDto);
      response.send({ accessToken });
      return ;
@@ -108,6 +109,7 @@ export class AuthController {
    logout(@Res() response:Response) {
      console.log(`[ POST /serverAuth/logout ] requested.`);
      response.send({ message:'로그아웃' });
+     this.logger.log("[ POST /serverAuth/logout ] requested.", JSON.stringify(response));
      return ;
    } 
 }
