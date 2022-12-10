@@ -10,7 +10,6 @@ async function bootstrap() {
   const serverConfig = config.get('server');
   const port = serverConfig.port;
 
-  // Setting Swagger
   const apiDocConfig = new DocumentBuilder()
     .setTitle('42mogle API document')
     .setDescription('API description')
@@ -28,7 +27,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, apiDocConfig);
   SwaggerModule.setup('api', app, document);
 
-  // Resolving CORS
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
