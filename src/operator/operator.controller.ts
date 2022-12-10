@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, UseGuards, UnauthorizedException, Inject } from '@nestjs/common';
 import { OperatorService } from './operator.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -6,11 +6,15 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
+import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
 
 @ApiTags('Operator')
 @Controller('operator')
 export class OperatorController {
-	constructor(private readonly operatorService: OperatorService) {}
+	constructor(
+		private readonly operatorService: OperatorService,
+		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		) { }
 	
 	/**
 	 * PATCH /operator/setTodayWord
@@ -35,6 +39,7 @@ export class OperatorController {
 		console.log(`[ PATCH /operator/setTodayWord ] requested.`);
 		console.log(`setTodayWordDto.intraId: [${userInfo.intraId}]`);
 		console.log(`setTodayWordDto.todayWord: [${todayWordDto.todayWord}]`);
+		this.logger.log(`[ PATCH /operator/setTodayWord ] requested.`, JSON.stringify(userInfo));
 		this.operatorService.setTodayWord(todayWordDto, userInfo);
 	}
 
@@ -54,12 +59,18 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateUserAttendance(@Body() updateUserAttendanceDto: UpdateUserAttendanceDto) {
+	updateUserAttendance(
+		@GetUserInfo() userInfo: UserInfo,
+		@Body() updateUserAttendanceDto: UpdateUserAttendanceDto
+		) {
 		console.log(`[ POST /operator/update/user/attendance ] requested.`);
 		console.log(`updateUserAttendanceDto.intraId: [${updateUserAttendanceDto.intraId}]`);
 		console.log(`updateUserAttendanceDto.year: [${updateUserAttendanceDto.year}]`);
 		console.log(`updateUserAttendanceDto.month: [${updateUserAttendanceDto.month}]`);
 		console.log(`updateUserAttendanceDto.day: [${updateUserAttendanceDto.day}]`);
+		this.logger.log(`[ POST /operator/update/user/attendance ] requested.` + userInfo.intraId, JSON.stringify(updateUserAttendanceDto));
+		if (!userInfo.isOperator)
+			return new UnauthorizedException("Not Operator");
 		return this.operatorService.updateUserAttendance(updateUserAttendanceDto);
 	}
 
@@ -79,6 +90,7 @@ export class OperatorController {
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
 	updateAllUsersAttendanceInfo(@GetUserInfo() userInfo: UserInfo) {
+		this.logger.log(`[ POST /operator/update/user/attendance ] requested.`, JSON.stringify(userInfo));
 		if (userInfo.isOperator === false)
 			throw new UnauthorizedException("Not Operator");
 		this.operatorService.updateUsersAttendanceInfo();

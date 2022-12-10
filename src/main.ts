@@ -45,9 +45,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const serverConfig = config.get('server');
-  const port = serverConfig.port
-
   await app.listen(3000);
 }
 bootstrap();

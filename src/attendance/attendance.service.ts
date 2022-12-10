@@ -6,6 +6,7 @@ import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { ButtonStatus } from './button.status.enum';
+import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
 
 @Injectable()
 export class AttendanceService {
@@ -19,9 +20,6 @@ export class AttendanceService {
 		else if (await this.haveAttendedToday(userInfo)) {
 			return ButtonStatus.AlreadyCheckedAttendance;
 		}
-		// else if (await !this.isSetToDayWord()) {
-		// 	return (3)
-		// }
 		return ButtonStatus.AttendanceSuccess;
 	}
 
@@ -81,7 +79,7 @@ export class AttendanceService {
 
 	async isTodayWordSet(): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		if (todayInfo.todayWord === "뀨?")
+		if (todayInfo.todayWord === "")
 			return (false);
 		else
 			return (true);
