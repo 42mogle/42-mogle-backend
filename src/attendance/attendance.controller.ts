@@ -64,7 +64,7 @@ export class AttendanceController {
 		console.log(`[ POST /attendance/userAttendance ] requested.`);
 		console.log(`createAttendanceDto.intraId: [${userInfo.intraId}]`);
 		console.log(`createAttendanceDto.todayWord: [${attendanceDto.todayWord}]`);
-		this.logger.debug('[ GET /attendance/userAttendance ] requested ' + userInfo.intraId, JSON.stringify(attendanceDto));
+		this.logger.debug('[ POST /attendance/userAttendance ] requested ' + userInfo.intraId, JSON.stringify(attendanceDto));
 		// todo: return object를 DTO로 정의하기
 		return await this.attendanceService.AttendanceCertification(attendanceDto, userInfo);
 	}
