@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { AttendanceModule } from './attendance/attendance.module';
 import { OperatorModule } from './operator/operator.module';
 import { StatisticModule } from './statistic/statistic.module';
-import { typeORMConfig } from './configs/typeorm.config';
+import { typeOrmConfig } from './configs/typeorm.config';
 import { DbmanagerModule } from './dbmanager/dbmanager.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UserInfo } from './dbmanager/entities/user_info.entity';
@@ -19,8 +19,6 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { utilities, WinstonLogger, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
-// import { HttpModule } from '@nestjs/axios';
-//import { BoardsController } from './boards/boards.controller';
 
 const level = process.env.Node_ENV === 'production' ? 'error' : 'silly';
 const format = winston.format.combine(
@@ -44,7 +42,7 @@ const format = winston.format.combine(
         }),
       ],
     }),
-    TypeOrmModule.forRoot(typeORMConfig), 
+    TypeOrmModule.forRoot(typeOrmConfig),
     TypeOrmModule.forFeature(
       [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
     ),
@@ -57,8 +55,7 @@ const format = winston.format.combine(
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-    }
-    ),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService, DbmanagerService],
