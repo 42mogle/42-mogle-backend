@@ -5,10 +5,11 @@ import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { jwtConstants } from './strategy/jwtConstants';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
+import * as config from 'config';
 
+const jwtConfig = config.get('jwt');
 
 @Module({
   imports: [
@@ -16,9 +17,9 @@ import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
     PassportModule,
     TypeOrmModule.forFeature([UserInfo]),
     JwtModule.register({
-      secret: jwtConstants.secret,
+      secret: process.env.JWT_SECRET || jwtConfig.secret,
       signOptions:{
-        expiresIn: 60 * 60 * 60
+        expiresIn: jwtConfig.expiresIn
       }
     })
   ],
