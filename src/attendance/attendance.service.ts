@@ -19,9 +19,6 @@ export class AttendanceService {
 		else if (await this.haveAttendedToday(userInfo)) {
 			return ButtonStatus.AlreadyCheckedAttendance;
 		}
-		// else if (await !this.isSetToDayWord()) {
-		// 	return (3)
-		// }
 		return ButtonStatus.AttendanceSuccess;
 	}
 
@@ -81,7 +78,7 @@ export class AttendanceService {
 
 	async isTodayWordSet(): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		if (todayInfo.todayWord === "뀨?")
+		if (todayInfo.todayWord === "")
 			return (false);
 		else
 			return (true);

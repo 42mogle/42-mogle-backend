@@ -3,14 +3,17 @@ import { UserInfoDto } from './dto/user-info.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { ApiParam, ApiOperation, ApiTags, ApiResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger'
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Param, UseGuards } from '@nestjs/common';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
-import { userInfo } from 'os';
+import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-	constructor(private readonly userService: UserService) {
+	constructor(
+		private readonly userService: UserService,
+		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		) {
 		this.userService = userService;
 	}
 
@@ -40,6 +43,7 @@ export class UserController {
 		description: 'Forbidden'
 	})
 	getUserInfo(@GetUserInfo() userInfo: UserInfo): UserInfoDto {
+		this.logger.log("[GET /user/getUserInfo] requested.", JSON.stringify(userInfo));
 		const userInfoDto: UserInfoDto = {
 			intraId: userInfo.intraId,
 			isOperator: userInfo.isOperator,

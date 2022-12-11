@@ -7,11 +7,16 @@ import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron } from '@nestjs/schedule';
+import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class OperatorService {
 	@Inject(DbmanagerService)
 	private readonly dbmanagerService: DbmanagerService;
+
+	constructor(
+		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+	) {}
 
 	setTodayWord(TodayWordDto: SetTodayWordDto, userInfo: UserInfo) {
 		if (userInfo.isOperator === true) {
@@ -24,9 +29,6 @@ export class OperatorService {
 	}
 
 	async updateUserAttendance(updateUserAttendanceDto: UpdateUserAttendanceDto): Promise<string> {
-		if (updateUserAttendanceDto.passWord !== "42MogleOperator") {
-			return "권한이 없습니다."
-		}
 		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(updateUserAttendanceDto.intraId);
 		const monthInfo: MonthInfo = await this.dbmanagerService.getSpecificMonthInfo(
 			updateUserAttendanceDto.year,
@@ -59,6 +61,7 @@ export class OperatorService {
 
 	@Cron('0 10 9 * * 0-6')
 	async updateUsersAttendanceInfo() {
+		this.logger.log("check updateUsersAttendanceInfo");
 		const allUsersInfo: UserInfo[] = await this.dbmanagerService.getAllUsersInfo();
 		const monthInfo: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
 		const AllmonthlyUser: MonthlyUsers[] = await this.dbmanagerService.getAllMonthlyUser(allUsersInfo, monthInfo);
@@ -76,17 +79,11 @@ export class OperatorService {
 
 	@Cron('0 0 1 * * 0-6')
 	async updateCurrentCount() {
+		this.logger.log("check updateCurrentCount");
 		const type: number = this.dbmanagerService.getTodayType();
 		// 0: 일요일
 		// 6: 토요일
 		if (type !== 0 && type !== 6)
 			this.dbmanagerService.updateThisMonthCurrentCount();
-	}
-
-	///테스트 코드 삭제 예정
-	@Cron('0 0 1 * * 0-6')
-	testcode() {
-		const now = new Date();
-		console.log("개근일수 갱신 크론 활성화\n" + now);
 	}
 }

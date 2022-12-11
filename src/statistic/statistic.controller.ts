@@ -1,15 +1,19 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Param, UseGuards } from '@nestjs/common';
 import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 import { StatisticService } from './statistic.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
+import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
 
 @ApiTags('Statistic')
 @Controller('statistic')
 export class StatisticController {
-	constructor(private readonly statisticService: StatisticService) {}
+	constructor(
+		private readonly statisticService: StatisticService,
+		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		) {}
 
 	/**
 	 * GET /statistic/{intraId}/userAttendanceList
@@ -40,6 +44,7 @@ export class StatisticController {
 	})
 	async getUserAttendanceList(@GetUserInfo() userInfo: UserInfo): Promise<Attendance[]> {
 		console.log("[GET /statistic/userAttendanceList] requested.");
+		this.logger.log("[GET /statistic/userAttendanceList] requested.", JSON.stringify(userInfo));
 		return await this.statisticService.getAttendanceList(userInfo);
 	}
 
@@ -72,6 +77,7 @@ export class StatisticController {
 	})
 	async getUserAttendanceState(@GetUserInfo() userInfo: UserInfo) {
 		console.log("[GET /statistic/userAttendanceState] requested.");
+		this.logger.log("[GET /statistic/userAttendanceState] requested.", JSON.stringify(userInfo));
 		return await this.statisticService.getUserMonthStatus(userInfo);
 	}
 }

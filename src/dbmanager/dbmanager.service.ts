@@ -1,4 +1,4 @@
-import { All, BadRequestException, GatewayTimeoutException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { All, BadRequestException, GatewayTimeoutException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +8,7 @@ import { MonthInfo } from './entities/month_info.entity';
 import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
+import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
 
 @Injectable()
 export class DbmanagerService {
@@ -16,7 +17,8 @@ export class DbmanagerService {
 		@InjectRepository(Attendance) private attendanceRepository: Repository<Attendance>,
 		@InjectRepository(MonthInfo) private monthInfoRepository: Repository<MonthInfo>,
 		@InjectRepository(DayInfo) private dayInfoRepository: Repository<DayInfo>,
-		@InjectRepository(MonthlyUsers) private monthlyUsersRepository: Repository<MonthlyUsers> 
+		@InjectRepository(MonthlyUsers) private monthlyUsersRepository: Repository<MonthlyUsers>,
+		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
 	) { }
 
 	// DB table: User
@@ -127,6 +129,7 @@ export class DbmanagerService {
 
 	@Cron('0 0 1 1 * *')
 	setTotalMonthcron() {
+		this.logger.debug("setTotalMonthcron test")
 		this.setMonthInfo();
 	}
 
