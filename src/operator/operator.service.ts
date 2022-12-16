@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -8,6 +8,8 @@ import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron } from '@nestjs/schedule';
 import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
+import { stringify } from 'querystring';
 
 @Injectable()
 export class OperatorService {
@@ -47,7 +49,7 @@ export class OperatorService {
 		else if (!userInfo) {
 			return "잘못된 입력입니다: userInfo";
 		}
-		const attendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
+		const attendanceInfo = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
 		if (!attendanceInfo) {
 			await this.dbmanagerService.updateAtendanceInfo(userInfo, dayInfo, updateUserAttendanceDto);
 			const monthlyUserInfo : MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
@@ -85,5 +87,52 @@ export class OperatorService {
 		// 6: 토요일
 		if (type !== 0 && type !== 6)
 			this.dbmanagerService.updateThisMonthCurrentCount();
+	}
+
+	// implementing...
+	async updateAttendanceFromGsheet(commanderInfo: UserInfo, gsheetAttendanceDto: GsheetAttendanceDto) {
+		if (commanderInfo.isOperator === false) {
+			new UnauthorizedException("Not Operator");
+		}
+		const intraId: string = gsheetAttendanceDto.intraId;
+		const date: string = gsheetAttendanceDto.date;
+		const time: string = gsheetAttendanceDto.time;
+		const strDateTime = date + ' ' + time;
+		const datetime = new Date(Date.parse(strDateTime));
+		console.log(`datetime type: ${typeof(datetime)}`);
+		// console.log(intraId);
+		// console.log(date);
+		// console.log(time);
+		// console.log(datetime);
+		// console.log(`month: ${datetime.getMonth() + 1}`);
+		// console.log(`date: ${datetime.getDate()}`);
+		// console.log(`hours: ${datetime.getHours()}`);
+		// console.log(`minutes: ${datetime.getMinutes()}`);
+		// console.log(`seconds: ${datetime.getSeconds()}`);
+
+		// get user_info
+		const userInfo = await this.dbmanagerService.getUserInfo(intraId);
+		if (userInfo === null) {
+			console.log('no intraId user');
+			throw new NotFoundException('no intraId user');
+		}
+		console.log(`uesr_info: `);
+		console.log(userInfo);
+		// get month_info_id
+		const monthInfo = await this.dbmanagerService.getMonthInfo(datetime.getMonth() + 1, datetime.getFullYear());
+		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
+		// get day_info_id
+		const dayInfo = await this.dbmanagerService.getDayInfo(datetime.getDate(), monthInfo);
+		console.log(`dayInfo: ${JSON.stringify(dayInfo)}`);
+		// get attendance
+		const attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
+		if (attendance) {
+			console.log(`attendance: ${JSON.stringify(attendance)}`);
+		} else {
+			this.dbmanagerService.setAttendance(userInfo, dayInfo, datetime);
+		}
+		// update status
+		
+		return ;
 	}
 }

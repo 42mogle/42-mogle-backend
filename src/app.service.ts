@@ -24,8 +24,7 @@ export class AppService {
 
   getHello(): string {
     const str_test = process.env.ENV_TEST;
-    console.log(`.env.ENV_TEST: `);
-    console.log(str_test);
+    console.log(`.env.ENV_TEST: ${str_test}`);
     return str_test;
   }
 }

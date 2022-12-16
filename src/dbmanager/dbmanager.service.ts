@@ -80,6 +80,12 @@ export class DbmanagerService {
 		return monthInfo;
 	}
 
+	async getDayInfo(day: number, monthInfo: MonthInfo): Promise<DayInfo> {
+		const dayInfo = await this.dayInfoRepository.findOne({ where: { day, monthInfo}});
+
+		return dayInfo;
+	}
+
 	async getTodayInfo() {
 		const now = new Date();
 		const day = now.getDate();
@@ -108,8 +114,18 @@ export class DbmanagerService {
 		return await this.attendanceRepository.save(attendanceinfo);
 	}
 
-	async getAttendanceUserInfo(userInfo: UserInfo, dayInfo: DayInfo): Promise<Attendance> {
+	async getAttendance(userInfo: UserInfo, dayInfo: DayInfo): Promise<Attendance> {
 		return await this.attendanceRepository.findOneBy({ userInfo, dayInfo });
+	}
+
+	async setAttendance(userInfo: UserInfo, dayInfo: DayInfo, datetime: Date) {
+		const attendanceToSet = this.attendanceRepository.create({
+			timelog: datetime,
+			userInfo,
+			dayInfo
+		});
+		return await this.attendanceRepository.save(attendanceToSet);
+		
 	}
 
 	async getTodayWord(): Promise<string> {
