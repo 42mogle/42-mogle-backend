@@ -10,11 +10,14 @@ import { Cron } from '@nestjs/schedule';
 import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
 import { stringify } from 'querystring';
+import { StatisticService } from 'src/statistic/statistic.service';
 
 @Injectable()
 export class OperatorService {
 	@Inject(DbmanagerService)
 	private readonly dbmanagerService: DbmanagerService;
+	@Inject(StatisticService)
+	private readonly statisticService: StatisticService;
 
 	constructor(
 		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
@@ -115,25 +118,29 @@ export class OperatorService {
 		const year = datetime.getFullYear();
 		let monthInfo = await this.dbmanagerService.getMonthInfo(monthIndexed + 1, year);
 		if (monthInfo === null) {
-			await this.dbmanagerService.setMonthInfoWithDayInfos(monthIndexed, year);
+			monthInfo = await this.dbmanagerService.setMonthInfoWithDayInfos(monthIndexed, year); // todo: getMonthInfo
 			// updateCurrentAttendanceInThisMonthInfo();
 		}
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
 
 		// get day_info_id
 		const dayInfo = await this.dbmanagerService.getDayInfo(datetime.getDate(), monthInfo);
+		if (dayInfo === null) {
+			throw new NotFoundException('MonthInfo가 생겼으면 있어야 한다.')
+		}
 		console.log(`dayInfo: ${JSON.stringify(dayInfo)}`);
 
-		// get attendance
+		// check already being attended
 		const attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
 		if (attendance) {
 			console.log(`attendance: ${JSON.stringify(attendance)}`);
 		} else {
-			this.dbmanagerService.setAttendance(userInfo, dayInfo, datetime);
+			await this.dbmanagerService.setAttendance(userInfo, dayInfo, datetime);
 		}
 
 		// update status
-		
+		await this.statisticService.updateUserMonthlyProperties(userInfo, monthInfo);
+
 		return ;
 	}
 }

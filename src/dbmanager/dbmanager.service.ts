@@ -26,7 +26,6 @@ export class DbmanagerService {
 	 */
 	async getUserInfo(intraId: string): Promise<UserInfo> {
 		const found = await this.usersRepository.findOne({ where: { intraId } });
-
 		return found;
 	}
 
@@ -68,13 +67,13 @@ export class DbmanagerService {
 		});
 		newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
 		await this.setAllDayInfosInThisMonth(newMonthInfo, lastDatetimeInMonth);
-		return ;
+		return newMonthInfo;
 	}
 
 	// todo: implement getCountDayTypeWeekdayInThisMonth
 
 	// todo: replace to setMonthInfoWithDayInfos
-	async setThisMonthInfo() {
+	async setMonthInfo() {
 		const now = new Date();
 		const year = now.getFullYear();
 		const month = now.getMonth() + 1;
@@ -220,6 +219,10 @@ export class DbmanagerService {
 
 	async getSpecificMonthInfo(year: number, month: number): Promise<MonthInfo> {
 		return await this.monthInfoRepository.findOneBy({year, month});
+	}
+
+	async getAttendanceCountOfUserMonth(userInfo: UserInfo, monthInfo: MonthInfo) {
+		return (await this.monthlyUsersRepository.countBy({userInfo, monthInfo}));
 	}
 
 	/******************************************************
