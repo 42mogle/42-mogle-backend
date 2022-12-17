@@ -90,40 +90,40 @@ export class OperatorService {
 	}
 
 	// implementing...
-	async updateAttendanceFromGsheet(commanderInfo: UserInfo, gsheetAttendanceDto: GsheetAttendanceDto) {
+	async addAttendanceFromGsheet(commanderInfo: UserInfo, gsheetAttendanceDto: GsheetAttendanceDto) {
 		if (commanderInfo.isOperator === false) {
-			new UnauthorizedException("Not Operator");
+			throw new UnauthorizedException("Not Operator");
 		}
 		const intraId: string = gsheetAttendanceDto.intraId;
-		const date: string = gsheetAttendanceDto.date;
-		const time: string = gsheetAttendanceDto.time;
-		const strDateTime = date + ' ' + time;
-		const datetime = new Date(Date.parse(strDateTime));
-		console.log(`datetime type: ${typeof(datetime)}`);
-		// console.log(intraId);
-		// console.log(date);
-		// console.log(time);
-		// console.log(datetime);
-		// console.log(`month: ${datetime.getMonth() + 1}`);
-		// console.log(`date: ${datetime.getDate()}`);
-		// console.log(`hours: ${datetime.getHours()}`);
-		// console.log(`minutes: ${datetime.getMinutes()}`);
-		// console.log(`seconds: ${datetime.getSeconds()}`);
+		const dateStr: string = gsheetAttendanceDto.date;
+		const timeStr: string = gsheetAttendanceDto.time;
+		const datetime: Date = new Date(Date.parse(dateStr + ' ' + timeStr));
 
 		// get user_info
 		const userInfo = await this.dbmanagerService.getUserInfo(intraId);
 		if (userInfo === null) {
 			console.log('no intraId user');
-			throw new NotFoundException('no intraId user');
+			throw new NotFoundException('Not existed user');
 		}
-		console.log(`uesr_info: `);
-		console.log(userInfo);
-		// get month_info_id
-		const monthInfo = await this.dbmanagerService.getMonthInfo(datetime.getMonth() + 1, datetime.getFullYear());
+		console.log(`uesr_info: ${JSON.stringify(userInfo)}`);
+
+		// get month_info_id and if not existing set month_info
+		let monthIndexed = datetime.getMonth();
+		if (monthIndexed === 12) {
+			monthIndexed = 0;
+		}
+		const year = datetime.getFullYear();
+		let monthInfo = await this.dbmanagerService.getMonthInfo(monthIndexed + 1, year);
+		if (monthInfo === null) {
+			await this.dbmanagerService.setMonthInfoWithDayInfos(monthIndexed, year);
+			// updateCurrentAttendanceInThisMonthInfo();
+		}
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
+
 		// get day_info_id
 		const dayInfo = await this.dbmanagerService.getDayInfo(datetime.getDate(), monthInfo);
 		console.log(`dayInfo: ${JSON.stringify(dayInfo)}`);
+
 		// get attendance
 		const attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
 		if (attendance) {
@@ -131,6 +131,7 @@ export class OperatorService {
 		} else {
 			this.dbmanagerService.setAttendance(userInfo, dayInfo, datetime);
 		}
+
 		// update status
 		
 		return ;

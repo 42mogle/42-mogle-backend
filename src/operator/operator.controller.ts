@@ -137,12 +137,11 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	async updateAttendanceFromGsheet(
+	async addAttendanceFromGsheet(
 		@GetUserInfo() userInfo: UserInfo,
 		@Body() gsheetAttendanceDto: GsheetAttendanceDto,
 		) {
-		//console.log(`[ POST /operator/gsheet-attendance ] requested.`);
 		console.log("[ POST /operator/gsheet-attendance ] requested.");
-		return await this.operatorService.updateAttendanceFromGsheet(userInfo, gsheetAttendanceDto);
+		return (await this.operatorService.addAttendanceFromGsheet(userInfo, gsheetAttendanceDto));
 	}
 }

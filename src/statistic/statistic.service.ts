@@ -25,4 +25,18 @@ export class StatisticService {
 		}
 		return attendanceStatus;
 	}
+
+
+	// updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers) {
+
+	// 	if (!this.isWeekend())
+	// 	{
+	// 		monthlyuser.attendanceCount += 1;
+	// 		// todo: save랑 update 둘 중에 하나만 하기
+	// 		this.monthlyUsersRepository.save(monthlyuser);
+	// 		this.monthlyUsersRepository.update(monthlyuser.id, {
+	// 			attendanceCount: monthlyuser.attendanceCount,
+	// 		});
+	// 	}
+	// }
 }
