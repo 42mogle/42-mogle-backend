@@ -172,7 +172,6 @@ export class DbmanagerService {
 			dayInfo
 		});
 		return await this.attendanceRepository.save(attendanceToSet);
-		
 	}
 
 	async getTodayWord(): Promise<string> {
@@ -221,8 +220,19 @@ export class DbmanagerService {
 		return await this.monthInfoRepository.findOneBy({year, month});
 	}
 
-	async getAttendanceCountOfUserMonth(userInfo: UserInfo, monthInfo: MonthInfo) {
-		return (await this.monthlyUsersRepository.countBy({userInfo, monthInfo}));
+	async getCountFromAttendanceOfUserInMonth(userInfo: UserInfo, monthInfo: MonthInfo) {
+		const countFromAttendanceOfUserInMonth = await this.attendanceRepository.count({
+			relations: {
+				dayInfo: true,
+			},
+			where: {
+				userInfo,
+				dayInfo: {
+					monthInfo,
+				}
+			}
+		});
+		return countFromAttendanceOfUserInMonth;
 	}
 
 	/******************************************************
@@ -301,6 +311,7 @@ export class DbmanagerService {
 	 * 			util 함수 목록            *
 	 * ********************************* */
 
+	// todo: to use day_info enum
 	getDayType(now: Date): number {
 		const day: number = now.getDay();
 		if (day !== 0 && day !== 6)

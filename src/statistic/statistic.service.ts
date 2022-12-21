@@ -28,20 +28,22 @@ export class StatisticService {
 	}
 
 	async updateUserMonthlyProperties(userInfo: UserInfo, monthInfo: MonthInfo) {
-		const monthlyUserInfo = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
+		//const monthlyUserInfo = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
 
 		// update attendanceCount
-		this.dbmanagerService.getAttendanceCountOfUserMonth(userInfo, monthInfo);
-		// 처음에 attendance 테이블에서 month_info_id 를 가지지 않도록 설계했는데, 없을 경우에 일일이 그 month_info_id를 가진 day_info를 코드 상에서 찾아서 attendance를 조회해야한다.
-		// attendance 테이블이 month_info_id를 column으로 가지도록 하면 특정 month_info_id를 가진 attendance들을 database에서 SQL 로 조회를 바로 할 수 있기 때문에 더 빠르게 조회할 수 있다.
+		let countFromAttendanceOfUserInMonth = await this.dbmanagerService.getCountFromAttendanceOfUserInMonth(userInfo, monthInfo);
+		console.log(`countFromAttendanceOfUserInMonth: ${countFromAttendanceOfUserInMonth}`)
 		
 		// update isPerfect
+		/*
 		if (monthlyUserInfo.attendanceCount === monthInfo.currentAttendance 
 			&& monthlyUserInfo.isPerfect === false) {
 			monthlyUserInfo.isPerfect = true;
 		}
+		*/
 
 		// update totalPerfectCount
+		/*
 		let lastMonth: number = monthInfo.month - 1;
 		let yearToLastMonth: number = monthInfo.year;
 		if (monthlyUserInfo.isPerfect) {
@@ -63,6 +65,7 @@ export class StatisticService {
 				}
 			}
 		}
+		*/
 		return ;
 	}
 

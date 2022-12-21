@@ -108,16 +108,14 @@ export class OperatorService {
 			console.log('no intraId user');
 			throw new NotFoundException('Not existed user');
 		}
-		console.log(`uesr_info: ${JSON.stringify(userInfo)}`);
+		console.log(`uesr_info: ${JSON.stringify(userInfo.intraId)}`);
 
 		// get month_info_id and if not existing set month_info
 		let monthIndexed = datetime.getMonth();
-		if (monthIndexed === 12) {
-			monthIndexed = 0;
-		}
 		const year = datetime.getFullYear();
 		let monthInfo = await this.dbmanagerService.getMonthInfo(monthIndexed + 1, year);
 		if (monthInfo === null) {
+			console.log('no month_info');
 			monthInfo = await this.dbmanagerService.setMonthInfoWithDayInfos(monthIndexed, year); // todo: getMonthInfo
 			// updateCurrentAttendanceInThisMonthInfo();
 		}
@@ -126,16 +124,20 @@ export class OperatorService {
 		// get day_info_id
 		const dayInfo = await this.dbmanagerService.getDayInfo(datetime.getDate(), monthInfo);
 		if (dayInfo === null) {
+			console.log('no day_info');
 			throw new NotFoundException('MonthInfo가 생겼으면 있어야 한다.')
 		}
 		console.log(`dayInfo: ${JSON.stringify(dayInfo)}`);
 
 		// check already being attended
-		const attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
+		let attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
 		if (attendance) {
+			console.log('기존에 attendance 존재함');
 			console.log(`attendance: ${JSON.stringify(attendance)}`);
 		} else {
-			await this.dbmanagerService.setAttendance(userInfo, dayInfo, datetime);
+			attendance = await this.dbmanagerService.setAttendance(userInfo, dayInfo, datetime);
+			console.log('새로운 attendance 등록!');
+			console.log(`attendance: ${JSON.stringify(attendance)}`);
 		}
 
 		// update status
