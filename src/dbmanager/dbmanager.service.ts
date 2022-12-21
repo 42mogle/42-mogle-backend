@@ -229,6 +229,7 @@ export class DbmanagerService {
 				userInfo,
 				dayInfo: {
 					monthInfo,
+					type: 0, // todo: replace to normal_day
 				}
 			}
 		});
