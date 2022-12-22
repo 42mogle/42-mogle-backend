@@ -155,6 +155,7 @@ export class OperatorService {
 		// update total_attendance
 		const countOfThisMonthTotalAttendance: number = await this.dbmanagerService.getCountOfThisMonthTotalAttendance(monthInfo);
 		console.log(`countOfThisMonthTotalAttendance: ${countOfThisMonthTotalAttendance}`);
+		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
 
 		// update current_attendance
 		let countOfThisMonthCurrentAttendance: number;
@@ -165,12 +166,16 @@ export class OperatorService {
 			countOfThisMonthCurrentAttendance = countOfThisMonthTotalAttendance;
 		}
 		console.log(`countOfThisMonthCurrentAttendance: ${countOfThisMonthCurrentAttendance}`);
-
-
-		// update perfect_user_count
-		//const countOfThisMonthPerfectMonthlyUsers: number = 
+		//monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
 
 		// update total_user_count
+		const countOfTotalThisMonthlyUsers: number = await this.dbmanagerService.getCountOfTotalThisMonthlyUsers(monthInfo);
+		console.log(`countOfTotalThisMonthlyUsers: ${countOfTotalThisMonthlyUsers}`);
+
+		// update perfect_user_count
+		// const countOfPerfectThisMonthlyUsers: number = 
+
+		// save updated month_info
 
 		return countOfThisMonthCurrentAttendance;
 	}
