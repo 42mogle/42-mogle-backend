@@ -146,21 +146,30 @@ export class OperatorService {
 		return ;
 	}
 
-	async updateMonthInfoProperty() {
+	async updateThisMonthInfoProperty() {
 		// get month_info
 		const currentDatetime: Date = new Date();
 		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(currentDatetime.getMonth() + 1, currentDatetime.getFullYear());
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
 
-		// update current_attendance
-		const countOfThisMonthCurrentAttendance: number = await this.dbmanagerService.getCountOfThisMonthCurrentAttendance(monthInfo);
-		console.log(`countOfThisMonthCurrentAttendance: ${countOfThisMonthCurrentAttendance}`);
-
 		// update total_attendance
 		const countOfThisMonthTotalAttendance: number = await this.dbmanagerService.getCountOfThisMonthTotalAttendance(monthInfo);
 		console.log(`countOfThisMonthTotalAttendance: ${countOfThisMonthTotalAttendance}`);
-		
+
+		// update current_attendance
+		let countOfThisMonthCurrentAttendance: number;
+		if (monthInfo.month === currentDatetime.getMonth() + 1
+		&& monthInfo.year === currentDatetime.getFullYear()) {
+			countOfThisMonthCurrentAttendance = await this.dbmanagerService.getCountOfThisMonthCurrentAttendance(monthInfo, currentDatetime.getDate());
+		} else {
+			countOfThisMonthCurrentAttendance = countOfThisMonthTotalAttendance;
+		}
+		console.log(`countOfThisMonthCurrentAttendance: ${countOfThisMonthCurrentAttendance}`);
+
+
 		// update perfect_user_count
+		//const countOfThisMonthPerfectMonthlyUsers: number = 
+
 		// update total_user_count
 
 		return countOfThisMonthCurrentAttendance;

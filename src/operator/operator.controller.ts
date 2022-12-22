@@ -168,13 +168,13 @@ export class OperatorController {
 		 status: 403,
 		 description: 'Forbidden'
 	 })
-	 async getUserAttendanceState(@GetUserInfo() userInfo: UserInfo) {
+	 async updateThisMonthInfoProperty(@GetUserInfo() userInfo: UserInfo) {
 		 console.log("[PATCH /operator/thisMonthInfoProperty] requested.");
 		 this.logger.log("[PATCH /operator/thisMonthInfoProperty] requested.", JSON.stringify(userInfo));
 		if (userInfo.isOperator === false) {
 			console.log("Not Operator")
 			throw new UnauthorizedException("Not Operator");
 		}
-		 return (await this.operatorService.updateMonthInfoProperty());
+		 return (await this.operatorService.updateThisMonthInfoProperty());
 	 }
 }

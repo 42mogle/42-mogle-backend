@@ -1,7 +1,7 @@
 import { All, BadRequestException, GatewayTimeoutException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Repository } from 'typeorm';
+import { LessThan, LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -118,10 +118,11 @@ export class DbmanagerService {
 		});
 	}
 
-	async getCountOfThisMonthCurrentAttendance(monthInfo: MonthInfo): Promise<number> {
+	async getCountOfThisMonthCurrentAttendance(monthInfo: MonthInfo, currentDate: number): Promise<number> {
 		const countOfThisMonthCurrentAttendance = await this.dayInfoRepository.count({
 			where: {
 				monthInfo,
+				day: LessThanOrEqual(currentDate),
 				type: 0,
 			}
 		});
