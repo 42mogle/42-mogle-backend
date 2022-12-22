@@ -171,6 +171,10 @@ export class OperatorController {
 	 async getUserAttendanceState(@GetUserInfo() userInfo: UserInfo) {
 		 console.log("[PATCH /operator/thisMonthInfoProperty] requested.");
 		 this.logger.log("[PATCH /operator/thisMonthInfoProperty] requested.", JSON.stringify(userInfo));
-		 return (await this.operatorService.updateMonthInfoProperty(userInfo));
+		if (userInfo.isOperator === false) {
+			console.log("Not Operator")
+			throw new UnauthorizedException("Not Operator");
+		}
+		 return (await this.operatorService.updateMonthInfoProperty());
 	 }
 }

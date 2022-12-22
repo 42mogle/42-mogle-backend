@@ -146,16 +146,20 @@ export class OperatorService {
 		return ;
 	}
 
-	async updateMonthInfoProperty(commanderInfo: UserInfo) {
-		if (commanderInfo.isOperator === false) {
-			throw new UnauthorizedException("Not Operator");
-		}
-
+	async updateMonthInfoProperty() {
 		// get month_info
 		const currentDatetime: Date = new Date();
 		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(currentDatetime.getMonth() + 1, currentDatetime.getFullYear());
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
 
-		return ;
+		// update current_attendance
+		const countOfThisMonthCurrentAttendance: number = await this.dbmanagerService.getCountOfThisMonthCurrentAttendance(monthInfo);
+		console.log(`countOfThisMonthCurrentAttendance: ${countOfThisMonthCurrentAttendance}`);
+
+		// update total_attendance
+		// update perfect_user_count
+		// update total_user_count
+
+		return countOfThisMonthCurrentAttendance;
 	}
 }
