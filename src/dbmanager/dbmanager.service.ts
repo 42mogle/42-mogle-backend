@@ -36,6 +36,10 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbMonthAndDayInfoManager
 	 */
+	async saveMonthInfoTable(monthInfo: MonthInfo) {
+		return (await this.monthInfoRepository.save(monthInfo));
+	}
+
 	async setAllDayInfosInThisMonth(monthInfo: MonthInfo, lastDatetimeInMonth: Date) {
 		let dayType: number;
 		let eachNewDayInfo: DayInfo;

@@ -149,7 +149,7 @@ export class OperatorService {
 	async updateThisMonthInfoProperty() {
 		// get month_info
 		const currentDatetime: Date = new Date();
-		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(currentDatetime.getMonth() + 1, currentDatetime.getFullYear());
+		let monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(currentDatetime.getMonth() + 1, currentDatetime.getFullYear());
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
 
 		// update total_attendance
@@ -177,7 +177,15 @@ export class OperatorService {
 		console.log(`countOfPerfectThisMonthlyUsers: ${countOfPerfectThisMonthlyUsers}`);
 
 		// save updated month_info
+		console.log(`monthInfo(before): ${JSON.stringify(monthInfo)}`);
 
-		return countOfThisMonthCurrentAttendance;
+		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
+		monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
+		monthInfo.totalUserCount = countOfTotalThisMonthlyUsers;
+		monthInfo.perfectUserCount = countOfPerfectThisMonthlyUsers;
+		console.log(`monthInfo(after): `);
+		monthInfo = await this.dbmanagerService.saveMonthInfoTable(monthInfo);
+		console.log(monthInfo);
+		return monthInfo;
 	}
 }
