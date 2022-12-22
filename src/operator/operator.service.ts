@@ -145,4 +145,17 @@ export class OperatorService {
 
 		return ;
 	}
+
+	async updateMonthInfoProperty(commanderInfo: UserInfo) {
+		if (commanderInfo.isOperator === false) {
+			throw new UnauthorizedException("Not Operator");
+		}
+
+		// get month_info
+		const currentDatetime: Date = new Date();
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(currentDatetime.getMonth() + 1, currentDatetime.getFullYear());
+		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
+
+		return ;
+	}
 }
