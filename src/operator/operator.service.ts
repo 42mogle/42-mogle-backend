@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -8,11 +8,16 @@ import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron } from '@nestjs/schedule';
 import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
+import { stringify } from 'querystring';
+import { StatisticService } from 'src/statistic/statistic.service';
 
 @Injectable()
 export class OperatorService {
 	@Inject(DbmanagerService)
 	private readonly dbmanagerService: DbmanagerService;
+	@Inject(StatisticService)
+	private readonly statisticService: StatisticService;
 
 	constructor(
 		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
@@ -47,7 +52,7 @@ export class OperatorService {
 		else if (!userInfo) {
 			return "잘못된 입력입니다: userInfo";
 		}
-		const attendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, dayInfo);
+		const attendanceInfo = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
 		if (!attendanceInfo) {
 			await this.dbmanagerService.updateAtendanceInfo(userInfo, dayInfo, updateUserAttendanceDto);
 			const monthlyUserInfo : MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
@@ -85,5 +90,59 @@ export class OperatorService {
 		// 6: 토요일
 		if (type !== 0 && type !== 6)
 			this.dbmanagerService.updateThisMonthCurrentCount();
+	}
+
+	// implementing...
+	async addAttendanceFromGsheet(commanderInfo: UserInfo, gsheetAttendanceDto: GsheetAttendanceDto) {
+		if (commanderInfo.isOperator === false) {
+			throw new UnauthorizedException("Not Operator");
+		}
+		const intraId: string = gsheetAttendanceDto.intraId;
+		const dateStr: string = gsheetAttendanceDto.date;
+		const timeStr: string = gsheetAttendanceDto.time;
+		const datetime: Date = new Date(Date.parse(dateStr + ' ' + timeStr));
+
+		// get user_info
+		const userInfo = await this.dbmanagerService.getUserInfo(intraId);
+		if (userInfo === null) {
+			console.log('no intraId user');
+			throw new NotFoundException('Not existed user');
+		}
+		console.log(`uesr_info: ${JSON.stringify(userInfo.intraId)}`);
+
+		// get month_info_id and if not existing set month_info
+		let monthIndexed = datetime.getMonth();
+		const year = datetime.getFullYear();
+		let monthInfo = await this.dbmanagerService.getMonthInfo(monthIndexed + 1, year);
+		if (monthInfo === null) {
+			console.log('no month_info');
+			monthInfo = await this.dbmanagerService.setMonthInfoWithDayInfos(monthIndexed, year); // todo: getMonthInfo
+			// updateCurrentAttendanceInThisMonthInfo();
+		}
+		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
+
+		// get day_info_id
+		const dayInfo = await this.dbmanagerService.getDayInfo(datetime.getDate(), monthInfo);
+		if (dayInfo === null) {
+			console.log('no day_info');
+			throw new NotFoundException('MonthInfo가 생겼으면 있어야 한다.')
+		}
+		console.log(`dayInfo: ${JSON.stringify(dayInfo)}`);
+
+		// check already being attended
+		let attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
+		if (attendance) {
+			console.log('기존에 attendance 존재함');
+			console.log(`attendance: ${JSON.stringify(attendance)}`);
+		} else {
+			attendance = await this.dbmanagerService.setAttendance(userInfo, dayInfo, datetime);
+			console.log('새로운 attendance 등록!');
+			console.log(`attendance: ${JSON.stringify(attendance)}`);
+		}
+
+		// update status
+		await this.statisticService.updateUserMonthlyProperties(userInfo, monthInfo);
+
+		return ;
 	}
 }

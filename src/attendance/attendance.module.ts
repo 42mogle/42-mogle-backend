@@ -9,6 +9,7 @@ import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { AttendanceController } from './attendance.controller';
 import { AttendanceService } from './attendance.service';
 import { OperatorService } from '../operator/operator.service';
+import { StatisticService } from 'src/statistic/statistic.service';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { OperatorService } from '../operator/operator.service';
     ),
   ],
   controllers: [AttendanceController],
-  providers: [AttendanceService, DbmanagerService, OperatorService]
+  providers: [AttendanceService, DbmanagerService, OperatorService, StatisticService]
 })
 export class AttendanceModule {}

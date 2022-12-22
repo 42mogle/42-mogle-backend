@@ -7,6 +7,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
+import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
+import { json } from 'stream/consumers';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -116,5 +118,30 @@ export class OperatorController {
 	) {
 		console.log(` [ POST /operator/update/currentAttendanceCount ] requested.`)
 		this.operatorService.updateCurrentCount();
+	}
+
+
+	/**
+	 * POST /operator/gsheet-attendance
+	 */
+	@Post("/gsheet-attendance") // 유저의 출석데이터를 임의로 추가함 보류
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({summary: 'add a user attendance from gsheet'})
+	@ApiResponse({
+		status: 201, 
+		description: 'Success', 
+		// todo: Set type using dto
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
+	})
+	async addAttendanceFromGsheet(
+		@GetUserInfo() userInfo: UserInfo,
+		@Body() gsheetAttendanceDto: GsheetAttendanceDto,
+		) {
+		console.log("[ POST /operator/gsheet-attendance ] requested.");
+		return (await this.operatorService.addAttendanceFromGsheet(userInfo, gsheetAttendanceDto));
 	}
 }

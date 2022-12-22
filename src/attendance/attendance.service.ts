@@ -69,7 +69,7 @@ export class AttendanceService {
 
 	async haveAttendedToday(userInfo: UserInfo): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		const todayAttendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, todayInfo);
+		const todayAttendanceInfo = await this.dbmanagerService.getAttendance(userInfo, todayInfo);
 		if (todayAttendanceInfo === null)
 			return false;
 		else

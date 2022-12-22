@@ -21,15 +21,58 @@ export class DbmanagerService {
 		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
 	) { }
 
-	// DB table: User
+	/******************************************************
+	 * todo: set in DbUserInfoManager
+	 */
 	async getUserInfo(intraId: string): Promise<UserInfo> {
 		const found = await this.usersRepository.findOne({ where: { intraId } });
-
 		return found;
 	}
 
+	async getAllUsersInfo(): Promise<UserInfo[]> {
+		return await this.usersRepository.find();
+	}
 
-	// DB table: MonthInfo
+	/******************************************************
+	 * todo: set in DbMonthAndDayInfoManager
+	 */
+	async setAllDayInfosInThisMonth(monthInfo: MonthInfo, lastDatetimeInMonth: Date) {
+		let dayType: number;
+		let eachNewDayInfo: DayInfo;
+		const totalDate: number = lastDatetimeInMonth.getDate();
+		for(let eachDate = 1; eachDate <= totalDate; ++eachDate) {
+			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate)); // search: how to be more efficient ?
+			eachNewDayInfo = this.dayInfoRepository.create({
+				day: eachDate,
+				monthInfo: monthInfo,
+				type: dayType,
+				attendUserCount: 0,
+				perfectUserCount: 0,
+				todayWord: "뀨?", // todo: set In .env
+			})
+			await this.dayInfoRepository.save(eachNewDayInfo);
+		}
+		return ;
+	}
+
+	async setMonthInfoWithDayInfos(monthIndexed: number, year: number) {
+		const lastDatetimeInMonth: Date = new Date(year, monthIndexed, 0);
+		let newMonthInfo: MonthInfo = this.monthInfoRepository.create({
+			month: monthIndexed + 1,
+			year,
+			currentAttendance: 0,
+			totalAttendance: 20,
+			perfectUserCount: 0,
+			totalUserCount: 0,
+		});
+		newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		await this.setAllDayInfosInThisMonth(newMonthInfo, lastDatetimeInMonth);
+		return newMonthInfo;
+	}
+
+	// todo: implement getCountDayTypeWeekdayInThisMonth
+
+	// todo: replace to setMonthInfoWithDayInfos
 	async setMonthInfo() {
 		const now = new Date();
 		const year = now.getFullYear();
@@ -51,6 +94,7 @@ export class DbmanagerService {
 		this.setAllDayInfo(monthInfo, totaldate);
 	}
 
+	// todo: replace to setAllDayInfosInThisMonth
 	async setAllDayInfo(monthInfo: MonthInfo, totaldate: number) {
 		for(let i = 1; i <= totaldate; i++) {
 			const type = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, i));
@@ -80,6 +124,12 @@ export class DbmanagerService {
 		return monthInfo;
 	}
 
+	async getDayInfo(day: number, monthInfo: MonthInfo): Promise<DayInfo> {
+		const dayInfo = await this.dayInfoRepository.findOne({ where: { day, monthInfo}});
+
+		return dayInfo;
+	}
+
 	async getTodayInfo() {
 		const now = new Date();
 		const day = now.getDate();
@@ -95,6 +145,9 @@ export class DbmanagerService {
 		await this.dayInfoRepository.save(dayInfo)
 	}
 
+	/******************************************************
+	 * todo: set in DbAttendanceManager
+	 */
 	async attendanceRegistration(userInfo: UserInfo) {
 		const now = new Date();
 		const dayInfo: DayInfo = await this.getTodayInfo();
@@ -108,8 +161,17 @@ export class DbmanagerService {
 		return await this.attendanceRepository.save(attendanceinfo);
 	}
 
-	async getAttendanceUserInfo(userInfo: UserInfo, dayInfo: DayInfo): Promise<Attendance> {
+	async getAttendance(userInfo: UserInfo, dayInfo: DayInfo): Promise<Attendance> {
 		return await this.attendanceRepository.findOneBy({ userInfo, dayInfo });
+	}
+
+	async setAttendance(userInfo: UserInfo, dayInfo: DayInfo, datetime: Date) {
+		const attendanceToSet = this.attendanceRepository.create({
+			timelog: datetime,
+			userInfo,
+			dayInfo
+		});
+		return await this.attendanceRepository.save(attendanceToSet);
 	}
 
 	async getTodayWord(): Promise<string> {
@@ -139,6 +201,44 @@ export class DbmanagerService {
 
 	}
 
+	async getThisMonthDayList(monthInfo: MonthInfo): Promise<DayInfo[]>  {
+		return await this.dayInfoRepository.findBy({monthInfo});
+	}
+
+	async getAttendanceList(userInfo: UserInfo): Promise<Attendance[]> {
+		const monthinfo = await this.getThisMonthInfo();
+		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthinfo);
+		return await this.attendanceRepository.findBy({userInfo, dayInfo})
+	}
+
+
+	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {
+		return await this.dayInfoRepository.findOneBy({monthInfo, day});
+	}
+
+	async getSpecificMonthInfo(year: number, month: number): Promise<MonthInfo> {
+		return await this.monthInfoRepository.findOneBy({year, month});
+	}
+
+	async getCountFromAttendanceOfUserInMonth(userInfo: UserInfo, monthInfo: MonthInfo) {
+		const countFromAttendanceOfUserInMonth = await this.attendanceRepository.count({
+			relations: {
+				dayInfo: true,
+			},
+			where: {
+				userInfo,
+				dayInfo: {
+					monthInfo,
+					type: 0, // todo: replace to normal_day
+				}
+			}
+		});
+		return countFromAttendanceOfUserInMonth;
+	}
+
+	/******************************************************
+	 * todo: set in DbMonthlyUsersManager
+	 */
 	async getThisMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo});
@@ -157,21 +257,9 @@ export class DbmanagerService {
 		return (monthlyUser)
 	}
 
-	async getThisMonthDayList(monthInfo: MonthInfo): Promise<DayInfo[]>  {
-		return await this.dayInfoRepository.findBy({monthInfo});
-	}
-
-	async getAttendanceList(userInfo: UserInfo): Promise<Attendance[]> {
-		const monthinfo = await this.getThisMonthInfo();
-		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthinfo);
-		return await this.attendanceRepository.findBy({userInfo, dayInfo})
-	}
-
 	updateMonthlyUser(monthlyUser: MonthlyUsers) {
 		this.updateMonthlyUserAttendanceCount(monthlyUser);
 	}
-
-
 
 	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers) {
 
@@ -190,21 +278,10 @@ export class DbmanagerService {
 		return await this.getThisMonthlyUser(userInfo);
 	}
 
-	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {
-		return await this.dayInfoRepository.findOneBy({monthInfo, day});
-	}
-
-	async getSpecificMonthInfo(year: number, month: number): Promise<MonthInfo> {
-		return await this.monthInfoRepository.findOneBy({year, month});
-	}
-
 	async getSpecificMonthlyuserInfo(monthInfo: MonthInfo, userInfo: UserInfo): Promise<MonthlyUsers> {
 		return await this.monthlyUsersRepository.findOneBy({monthInfo, userInfo})
 	}
 
-	async getAllUsersInfo(): Promise<UserInfo[]> {
-		return await this.usersRepository.find();
-	}
 
 	// todo: consider for only using MonthInfo
 	async getAllMonthlyUser(allUserInfo: UserInfo[], monthInfo: MonthInfo) {
@@ -216,16 +293,6 @@ export class DbmanagerService {
 		await this.monthlyUsersRepository.update(monthlyuser.id, {
 			attendanceCount: monthlyuser.attendanceCount
 		})
-	}
-
-	async updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
-		const timelog = new Date(InfoDto.year, InfoDto.month - 1, InfoDto.day, 8, 30, 0);
-		const userAttendance = this.attendanceRepository.create({
-			userInfo,
-			dayInfo,
-			timelog,
-		});
-		await this.attendanceRepository.save(userAttendance);
 	}
 
 	changeIsPerfect(monthlyUserInfo: MonthlyUsers, status: boolean) {
@@ -245,6 +312,7 @@ export class DbmanagerService {
 	 * 			util 함수 목록            *
 	 * ********************************* */
 
+	// todo: to use day_info enum
 	getDayType(now: Date): number {
 		const day: number = now.getDay();
 		if (day !== 0 && day !== 6)
@@ -269,6 +337,17 @@ export class DbmanagerService {
 	/**************************************
 	 * 			test 함수 목록            *
 	 * ********************************* */
+
+	
+	async updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
+		const timelog = new Date(InfoDto.year, InfoDto.month - 1, InfoDto.day, 8, 30, 0);
+		const userAttendance = this.attendanceRepository.create({
+			userInfo,
+			dayInfo,
+			timelog,
+		});
+		await this.attendanceRepository.save(userAttendance);
+	}
 
 	async getAllDayInfo(monthInfo: MonthInfo) {
 		return this.dayInfoRepository.findBy({monthInfo})
