@@ -270,6 +270,16 @@ export class DbmanagerService {
 		return countOfTotalThisMonthlyUsers;
 	}
 
+	async getCountOfPerfectThisMonthlyUsers(monthInfo: MonthInfo) {
+		const countOfTotalThisMonthlyUsers = await this.monthlyUsersRepository.count({
+			where: {
+				monthInfo,
+				isPerfect: true,
+			}
+		});
+		return countOfTotalThisMonthlyUsers;
+	}
+
 	async getThisMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo});

@@ -173,7 +173,8 @@ export class OperatorService {
 		console.log(`countOfTotalThisMonthlyUsers: ${countOfTotalThisMonthlyUsers}`);
 
 		// update perfect_user_count
-		// const countOfPerfectThisMonthlyUsers: number = 
+		const countOfPerfectThisMonthlyUsers: number = await this.dbmanagerService.getCountOfPerfectThisMonthlyUsers(monthInfo);
+		console.log(`countOfPerfectThisMonthlyUsers: ${countOfPerfectThisMonthlyUsers}`);
 
 		// save updated month_info
 
