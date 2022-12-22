@@ -128,6 +128,16 @@ export class DbmanagerService {
 		return countOfThisMonthCurrentAttendance;
 	}
 
+	async getCountOfThisMonthTotalAttendance(monthInfo: MonthInfo): Promise<number> {
+		const countOfThisMonthTotalAttendance = await this.dayInfoRepository.count({
+			where: {
+				monthInfo,
+				type: 0,
+			}
+		});
+		return countOfThisMonthTotalAttendance;
+	}
+
 	async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
 		const monthInfo = await this.monthInfoRepository.findOne({ where: { month, year } });
 

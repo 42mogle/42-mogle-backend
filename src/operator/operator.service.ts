@@ -157,6 +157,9 @@ export class OperatorService {
 		console.log(`countOfThisMonthCurrentAttendance: ${countOfThisMonthCurrentAttendance}`);
 
 		// update total_attendance
+		const countOfThisMonthTotalAttendance: number = await this.dbmanagerService.getCountOfThisMonthTotalAttendance(monthInfo);
+		console.log(`countOfThisMonthTotalAttendance: ${countOfThisMonthTotalAttendance}`);
+		
 		// update perfect_user_count
 		// update total_user_count
 
