@@ -144,4 +144,37 @@ export class OperatorController {
 		console.log("[ POST /operator/gsheet-attendance ] requested.");
 		return (await this.operatorService.addAttendanceFromGsheet(userInfo, gsheetAttendanceDto));
 	}
+
+	/**
+	 * PATCH /operator/this-month-info-property
+	 */
+	 @Patch("this-month-info-property")
+	 @UseGuards(JwtAuthGuard)
+	 @ApiBearerAuth('access-token')
+	 @ApiOperation({
+		 summary: 'update user info property',
+		 description: 'month_info table의 property(current_attendance 등)을 업데이트'
+	 })
+	 @ApiResponse({
+		 status: 200, 
+		 description: 'Success', 
+		 // todo: type: DTO로 정의하기
+	 })
+	 @ApiResponse({
+		 status: 401,
+		 description: 'Error: Unauthorized (Blocked by JwtAuthGuard: No JWT access-token)'
+	 })
+	 @ApiResponse({
+		 status: 403,
+		 description: 'Forbidden'
+	 })
+	 async updateThisMonthInfoProperty(@GetUserInfo() userInfo: UserInfo) {
+		 console.log("[PATCH /operator/thisMonthInfoProperty] requested.");
+		 this.logger.log("[PATCH /operator/thisMonthInfoProperty] requested.", JSON.stringify(userInfo));
+		if (userInfo.isOperator === false) {
+			console.log("Not Operator")
+			throw new UnauthorizedException("Not Operator");
+		}
+		 return (await this.operatorService.updateThisMonthInfoProperty());
+	 }
 }

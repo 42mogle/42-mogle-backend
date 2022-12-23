@@ -1,7 +1,7 @@
 import { All, BadRequestException, GatewayTimeoutException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Repository } from 'typeorm';
+import { LessThan, LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -36,6 +36,10 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbMonthAndDayInfoManager
 	 */
+	async saveMonthInfoTable(monthInfo: MonthInfo) {
+		return (await this.monthInfoRepository.save(monthInfo));
+	}
+
 	async setAllDayInfosInThisMonth(monthInfo: MonthInfo, lastDatetimeInMonth: Date) {
 		let dayType: number;
 		let eachNewDayInfo: DayInfo;
@@ -116,6 +120,27 @@ export class DbmanagerService {
 		this.monthInfoRepository.update(monthInfo.id, {
 			currentAttendance: monthInfo.currentAttendance,
 		});
+	}
+
+	async getCountOfThisMonthCurrentAttendance(monthInfo: MonthInfo, currentDate: number): Promise<number> {
+		const countOfThisMonthCurrentAttendance = await this.dayInfoRepository.count({
+			where: {
+				monthInfo,
+				day: LessThanOrEqual(currentDate),
+				type: 0,
+			}
+		});
+		return countOfThisMonthCurrentAttendance;
+	}
+
+	async getCountOfThisMonthTotalAttendance(monthInfo: MonthInfo): Promise<number> {
+		const countOfThisMonthTotalAttendance = await this.dayInfoRepository.count({
+			where: {
+				monthInfo,
+				type: 0,
+			}
+		});
+		return countOfThisMonthTotalAttendance;
 	}
 
 	async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
@@ -239,6 +264,26 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbMonthlyUsersManager
 	 */
+
+	async getCountOfTotalThisMonthlyUsers(monthInfo: MonthInfo) {
+		const countOfTotalThisMonthlyUsers = await this.monthlyUsersRepository.count({
+			where: {
+				monthInfo,
+			}
+		});
+		return countOfTotalThisMonthlyUsers;
+	}
+
+	async getCountOfPerfectThisMonthlyUsers(monthInfo: MonthInfo) {
+		const countOfTotalThisMonthlyUsers = await this.monthlyUsersRepository.count({
+			where: {
+				monthInfo,
+				isPerfect: true,
+			}
+		});
+		return countOfTotalThisMonthlyUsers;
+	}
+
 	async getThisMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo});
