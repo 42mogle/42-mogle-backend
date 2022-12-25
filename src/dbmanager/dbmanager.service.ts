@@ -284,6 +284,10 @@ export class DbmanagerService {
 		return countOfTotalThisMonthlyUsers;
 	}
 
+	async saveMonthlyUser(monthlyUser: MonthlyUsers): Promise<MonthlyUsers> {
+		return (await this.monthlyUsersRepository.save(monthlyUser));
+	}
+
 	async getThisMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo});
