@@ -1,4 +1,4 @@
-import { All, BadRequestException, GatewayTimeoutException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { Repository } from 'typeorm';
@@ -8,7 +8,7 @@ import { MonthInfo } from './entities/month_info.entity';
 import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
-import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class DbmanagerService {
@@ -18,7 +18,7 @@ export class DbmanagerService {
 		@InjectRepository(MonthInfo) private monthInfoRepository: Repository<MonthInfo>,
 		@InjectRepository(DayInfo) private dayInfoRepository: Repository<DayInfo>,
 		@InjectRepository(MonthlyUsers) private monthlyUsersRepository: Repository<MonthlyUsers>,
-		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
 	) { }
 
 	/******************************************************

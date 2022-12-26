@@ -115,7 +115,8 @@ export class AuthService {
 
   checkPasswordValid(pwd: string): boolean {
     const ruleRegex = 
-      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\d\sa-zA-Z])[\S]``{8,20}$/;
+      ///^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\d\sa-zA-Z])[\S]``{8,20}$/;
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^*+=-])[\da-zA-Z!@#$%^*+=-]{8,}$/;
     // Explain : 비밀번호 길이는 8자 ~ 20자 사이
     if (pwd.length < 8 && 20 < pwd.length) {
       return false;

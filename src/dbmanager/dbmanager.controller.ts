@@ -4,14 +4,14 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserInfo } from './entities/user_info.entity';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
-import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @ApiTags('DbManager')
 @Controller('dbmanager')
 export class DbmanagerController {
 	constructor(
 		private readonly dbmanagerService: DbmanagerService,
-		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
 		) { }
 
 	@Post('/set/totalMonthInfo') // 해달 달의 정보와 그달의 모든 일자에 대한 정보를 데이터로 남겨논다 //크론

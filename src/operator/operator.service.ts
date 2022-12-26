@@ -1,4 +1,4 @@
-import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -7,9 +7,8 @@ import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron } from '@nestjs/schedule';
-import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
-import { stringify } from 'querystring';
 import { StatisticService } from 'src/statistic/statistic.service';
 
 @Injectable()
@@ -20,7 +19,7 @@ export class OperatorService {
 	private readonly statisticService: StatisticService;
 
 	constructor(
-		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
 	) {}
 
 	setTodayWord(TodayWordDto: SetTodayWordDto, userInfo: UserInfo) {
