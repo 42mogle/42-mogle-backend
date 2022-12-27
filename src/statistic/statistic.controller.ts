@@ -5,14 +5,14 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
-import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
+import { WINSTON_MODULE_PROVIDER, WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @ApiTags('Statistic')
 @Controller('statistic')
 export class StatisticController {
 	constructor(
 		private readonly statisticService: StatisticService,
-		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
 		) {}
 
 	/**

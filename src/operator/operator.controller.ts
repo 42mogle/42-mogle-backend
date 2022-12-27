@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, UseGuards, UnauthorizedException, Inject } from '@nestjs/common';
+import { Body, Controller, Patch, Post, UseGuards, UnauthorizedException, Inject } from '@nestjs/common';
 import { OperatorService } from './operator.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -6,16 +6,15 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
-import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
-import { json } from 'stream/consumers';
 
 @ApiTags('Operator')
 @Controller('operator')
 export class OperatorController {
 	constructor(
 		private readonly operatorService: OperatorService,
-		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
 		) { }
 	
 	/**
@@ -41,7 +40,7 @@ export class OperatorController {
 		console.log(`[ PATCH /operator/setTodayWord ] requested.`);
 		console.log(`setTodayWordDto.intraId: [${userInfo.intraId}]`);
 		console.log(`setTodayWordDto.todayWord: [${todayWordDto.todayWord}]`);
-		this.logger.log(`[ PATCH /operator/setTodayWord ] requested.`, JSON.stringify(userInfo));
+		this.logger.log(`[ PATCH /operator/setTodayWord ] requested.`, JSON.stringify(userInfo) + JSON.stringify(todayWordDto));
 		this.operatorService.setTodayWord(todayWordDto, userInfo);
 	}
 

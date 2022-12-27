@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import * as config from 'config';
 import { Logger } from '@nestjs/common';
 
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -32,7 +33,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
-
+  
   await app.listen(port);
   Logger.log(`42mogle app running on port ${port}`);
 }

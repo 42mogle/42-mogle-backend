@@ -20,7 +20,7 @@ import { ConfigModule } from '@nestjs/config';
 import { utilities, WinstonLogger, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 
-const level = process.env.Node_ENV === 'production' ? 'error' : 'silly';
+const level = 'silly'
 const format = winston.format.combine(
   winston.format.timestamp(),
   utilities.format.nestLike('log', { prettyPrint: true })
