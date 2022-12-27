@@ -144,4 +144,47 @@ export class OperatorService {
 
 		return ;
 	}
+
+	async updateThisMonthInfoProperty() {
+		// get month_info
+		const currentDatetime: Date = new Date();
+		let monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(currentDatetime.getMonth() + 1, currentDatetime.getFullYear());
+		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
+
+		// update total_attendance
+		const countOfThisMonthTotalAttendance: number = await this.dbmanagerService.getCountOfThisMonthTotalAttendance(monthInfo);
+		console.log(`countOfThisMonthTotalAttendance: ${countOfThisMonthTotalAttendance}`);
+		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
+
+		// update current_attendance
+		let countOfThisMonthCurrentAttendance: number;
+		if (monthInfo.month === currentDatetime.getMonth() + 1
+		&& monthInfo.year === currentDatetime.getFullYear()) {
+			countOfThisMonthCurrentAttendance = await this.dbmanagerService.getCountOfThisMonthCurrentAttendance(monthInfo, currentDatetime.getDate());
+		} else {
+			countOfThisMonthCurrentAttendance = countOfThisMonthTotalAttendance;
+		}
+		console.log(`countOfThisMonthCurrentAttendance: ${countOfThisMonthCurrentAttendance}`);
+		//monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
+
+		// update total_user_count
+		const countOfTotalThisMonthlyUsers: number = await this.dbmanagerService.getCountOfTotalThisMonthlyUsers(monthInfo);
+		console.log(`countOfTotalThisMonthlyUsers: ${countOfTotalThisMonthlyUsers}`);
+
+		// update perfect_user_count
+		const countOfPerfectThisMonthlyUsers: number = await this.dbmanagerService.getCountOfPerfectThisMonthlyUsers(monthInfo);
+		console.log(`countOfPerfectThisMonthlyUsers: ${countOfPerfectThisMonthlyUsers}`);
+
+		// save updated month_info
+		console.log(`monthInfo(before): ${JSON.stringify(monthInfo)}`);
+
+		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
+		monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
+		monthInfo.totalUserCount = countOfTotalThisMonthlyUsers;
+		monthInfo.perfectUserCount = countOfPerfectThisMonthlyUsers;
+		console.log(`monthInfo(after): `);
+		monthInfo = await this.dbmanagerService.saveMonthInfoTable(monthInfo);
+		console.log(monthInfo);
+		return monthInfo;
+	}
 }

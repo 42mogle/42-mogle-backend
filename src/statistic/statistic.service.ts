@@ -60,6 +60,7 @@ export class StatisticService {
 				}
 			}
 		}
+		// todo: save monthlyUsers
 		return ;
 	}
 
