@@ -8,8 +8,16 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import * as config from 'config';
+import * as winston from 'winston';
+import { utilities } from 'nest-winston';
 
 const jwtConfig = config.get('jwt');
+
+const level = process.env.Node_ENV === 'production' ? 'error' : 'silly';
+const format = winston.format.combine(
+  winston.format.timestamp(),
+  utilities.format.nestLike('log', { prettyPrint: true })
+)
 
 @Module({
   imports: [

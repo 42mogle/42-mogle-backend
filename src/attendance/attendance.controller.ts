@@ -5,14 +5,14 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 import { Body, Controller, Get, Param, Post, UseGuards, Inject } from '@nestjs/common';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
-import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @ApiTags('Attendance')
 @Controller('attendance')
 export class AttendanceController {
 	constructor(
 		private readonly attendanceService: AttendanceService,
-		@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
 		) {}
 
 	/**

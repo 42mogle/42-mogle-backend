@@ -1,14 +1,11 @@
-import { Controller, Get, Post, Body, Redirect, Query, Res, UseGuards, Delete, Param, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Res, Inject } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Response, Request, query } from 'express';
-import { Token } from './auth.decorator';
+import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { AuthDto } from './dto/auth.dto';
-import { ApiCreatedResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IntraIdDto } from './dto/intraId.dto';
-import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { JoinColumn } from 'typeorm';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @ApiTags('Auth')
 @Controller('serverAuth')
@@ -16,7 +13,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private jwtService: JwtService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger
     ) {}
 
   /**
@@ -45,7 +42,7 @@ export class AuthController {
     console.log("[ GET /serverAuth/firstJoin ] requested.");
     // todo: Rename to checkingAlreadySignedIn
     const intraIdDto: IntraIdDto = await this.authService.firstJoin(code);
-    this.logger.log("[ GET /serverAuth/firstJoin ] requested.", JSON.stringify(intraIdDto));
+    this.logger.log("[ GET /serverAuth/firstJoin ] requested.", intraIdDto.intraId);
     console.log(`intraId: [${intraIdDto.intraId}]`);
     return(intraIdDto);
   }
@@ -67,7 +64,7 @@ export class AuthController {
   async secondJoin(@Body() authDto:AuthDto) {
     console.log("[ POST /serverAuth/secondJoin ] requested.");
     console.log(`authDto.intraId: [${authDto.intraId}]`);
-    this.logger.log("[ POST /serverAuth/secondJoin ] requested.", JSON.stringify(authDto));
+    this.logger.log("[ POST /serverAuth/secondJoin ] requested.", authDto.intraId);
     return(await this.authService.secondJoin(authDto));
   }
 
@@ -87,7 +84,7 @@ export class AuthController {
    async login(@Res() response: Response, @Body() authDto: AuthDto) {
      console.log("[ POST /serverAuth/login ] requested.");
      console.log(`authDto.intraId: [${authDto.intraId}]`);
-     this.logger.log("[ POST /serverAuth/login ] requested.", JSON.stringify(authDto));
+     this.logger.log("[ POST /serverAuth/login ] requested.", authDto.intraId);
      const accessToken = await this.authService.login(authDto);
      response.send({ accessToken });
      return ;
@@ -109,7 +106,7 @@ export class AuthController {
    logout(@Res() response:Response) {
      console.log(`[ POST /serverAuth/logout ] requested.`);
      response.send({ message:'로그아웃' });
-     this.logger.log("[ POST /serverAuth/logout ] requested.", JSON.stringify(response));
+     this.logger.log("[ POST /serverAuth/logout ] requested.");
      return ;
    } 
 }
