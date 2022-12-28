@@ -83,7 +83,7 @@ export class OperatorService {
 
 	@Cron('0 0 1 * * 0-6')
 	async updateCurrentCount() {
-		this.logger.log("check updateCurrentCount");
+		this.logger.log("test", "check updateCurrentCount");
 		const type: number = this.dbmanagerService.getTodayType();
 		// 0: 일요일
 		// 6: 토요일
