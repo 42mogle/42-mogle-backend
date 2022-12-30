@@ -265,6 +265,15 @@ export class DbmanagerService {
 	 * todo: set in DbMonthlyUsersManager
 	 */
 
+	async getAllMonthlyUsersInMonth(monthInfo: MonthInfo) {
+		const monthlyUsersAndCountInAMonth = this.monthlyUsersRepository.find({
+			where: {
+				monthInfo,
+			}
+		});
+		return monthlyUsersAndCountInAMonth;
+	}
+
 	async getCountOfTotalThisMonthlyUsers(monthInfo: MonthInfo) {
 		const countOfTotalThisMonthlyUsers = await this.monthlyUsersRepository.count({
 			where: {
