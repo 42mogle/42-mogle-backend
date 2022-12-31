@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { LessThan, LessThanOrEqual, Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -233,6 +233,11 @@ export class DbmanagerService {
 	async getAttendanceList(userInfo: UserInfo): Promise<Attendance[]> {
 		const monthinfo = await this.getThisMonthInfo();
 		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthinfo);
+		return await this.attendanceRepository.findBy({userInfo, dayInfo})
+	}
+
+	async getAttendanceListByMonthInfo(userInfo: UserInfo, monthInfo: MonthInfo): Promise<Attendance[]> {
+		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthInfo)
 		return await this.attendanceRepository.findBy({userInfo, dayInfo})
 	}
 
