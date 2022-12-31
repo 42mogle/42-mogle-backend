@@ -196,12 +196,12 @@ export class OperatorController {
 		@GetUserInfo()
 		userInfo: UserInfo
 	) {
+		this.logger.log('/attendance-list/:year/:month/:day/:intraId', JSON.stringify(dataListDto) + " " + userInfo.intraId)
 		if (!userInfo.isOperator) {
 			this.logger.log(userInfo.intraId + " is not operator")
 			throw new UnauthorizedException()
 		}
-		this.logger.log('/attendance-list/:year/:month/:day/:intraId', JSON.stringify(dataListDto) + " " + userInfo.intraId)
-		return this.operatorService.findUserAttendanceLog(dataListDto)
+		return await this.operatorService.findUserAttendanceLog(dataListDto)
 	}
 
 }
