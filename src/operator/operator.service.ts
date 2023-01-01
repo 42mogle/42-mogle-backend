@@ -10,6 +10,7 @@ import { Cron } from '@nestjs/schedule';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
 import { StatisticService } from 'src/statistic/statistic.service';
+import { DataListDto } from './dto/dataList.dto';
 
 @Injectable()
 export class OperatorService {
@@ -186,5 +187,17 @@ export class OperatorService {
 		monthInfo = await this.dbmanagerService.saveMonthInfoTable(monthInfo);
 		console.log(monthInfo);
 		return monthInfo;
+	}
+
+	async findUserAttendanceLog(dataList: DataListDto) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(dataList.intraId)
+		if (!userInfo) {
+			throw new NotFoundException("userInfo that does not exist")
+		}
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(dataList.month, dataList.year)
+		if (!monthInfo) {
+			throw new NotFoundException("monthInfo that dose not exist")
+		}
+		return await this.dbmanagerService.getAttendanceListByMonthInfo(userInfo, monthInfo)
 	}
 }
