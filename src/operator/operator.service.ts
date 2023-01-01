@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -7,17 +7,18 @@ import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron } from '@nestjs/schedule';
-import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER, WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
-import { StatisticService } from 'src/statistic/statistic.service';
-import { DataListDto } from './dto/dataList.dto';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER} from 'nest-winston'
+import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto'
+import { StatisticService } from 'src/statistic/statistic.service'
+import { DataListDto } from './dto/dataList.dto'
+import { AttendanceData } from './dto/attendnaceData.dto'
+import { Attendance } from '../dbmanager/entities/attendance.entity'
+import { AttendanceService } from 'src/attendance/attendance.service';
 
 @Injectable()
 export class OperatorService {
-	@Inject(DbmanagerService)
-	private readonly dbmanagerService: DbmanagerService;
-	@Inject(StatisticService)
-	private readonly statisticService: StatisticService;
+	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService
+	@Inject(StatisticService) private readonly statisticService: StatisticService
 
 	constructor(
 		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
@@ -199,5 +200,40 @@ export class OperatorService {
 			throw new NotFoundException("monthInfo that dose not exist")
 		}
 		return await this.dbmanagerService.getAttendanceListByMonthInfo(userInfo, monthInfo)
+	}
+
+	async userAttendanceLogAdd(attendanceData: AttendanceData) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(attendanceData.intraId)
+		if (!userInfo) {
+			throw new NotFoundException("userInfo that does not exist")
+		}
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(attendanceData.month, attendanceData.year)
+		if (!monthInfo) {
+			throw new NotFoundException("monthInfo that dose not exist")
+		}
+		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo(attendanceData.day, monthInfo)
+		if (!dayInfo) {
+			throw new NotFoundException("dayInfo that dose not exist")
+		}
+		const attendnaceLog: Attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo)
+		if (attendnaceLog) {
+			throw new BadRequestException("Attendance information already exists")
+		}
+		else {
+			const date = new Date(
+				attendanceData.year,
+				attendanceData.month - 1,
+				attendanceData.day,
+				8,
+				30
+			)
+			let monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
+			if (!monthlyUser) {
+				monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(userInfo, monthInfo)
+			}
+			this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
+			await this.dbmanagerService.updateMonthlyUser(monthlyUser, date)
+			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+		}
 	}
 }

@@ -6,11 +6,12 @@ import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { ButtonStatus } from './button.status.enum';
+import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 
 @Injectable()
 export class AttendanceService {
-	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService;
-	@Inject(OperatorService) private readonly operatorService: OperatorService;
+	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService
+	@Inject(OperatorService) private readonly operatorService: OperatorService
 
 	async getUserButtonStatus(userInfo: UserInfo): Promise<number> {
 		if (this.isAvailableTime() === false) {
@@ -25,6 +26,7 @@ export class AttendanceService {
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto, userInfo: UserInfo) {
 		const todayWord: string = await this.dbmanagerService.getTodayWord();
 		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
+		const date = new Date()
 		if (await this.haveAttendedToday(userInfo)) {
 			return ({
 				statusAttendance: 1,
@@ -41,14 +43,13 @@ export class AttendanceService {
 		if (!monthlyUser)
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
 		await this.dbmanagerService.attendanceRegistration(userInfo);
-		await this.dbmanagerService.updateMonthlyUser(monthlyUser);
+		await this.dbmanagerService.updateMonthlyUser(monthlyUser, date);
 		await this.operatorService.updatePerfectStatus(monthlyUser, monthInto.currentAttendance);
 		return ({
 			statusAttendance: 0,
 			errorMsg: "성공적으로 출석 체크를 완료했습니다."
 		})
 	}
-
 
 	/***********************************
      * 			util function list     *
