@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, UseGuards, UnauthorizedException, Inject } from '@nestjs/common';
+import { Body, Controller, Patch, Post, UseGuards, UnauthorizedException, Inject, Get, Param } from '@nestjs/common';
 import { OperatorService } from './operator.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -8,6 +8,8 @@ import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
+import { DataListDto } from './dto/dataList.dto';
+import { AttendanceData } from './dto/attendnaceData.dto';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -145,9 +147,9 @@ export class OperatorController {
 	}
 
 	/**
-	 * PATCH /operator/this-month-info-property
+	 * PATCH /operator/month-info-property/{year}/{month}
 	 */
-	 @Patch("this-month-info-property")
+	 @Patch("month-info-property/:year/:month")
 	 @UseGuards(JwtAuthGuard)
 	 @ApiBearerAuth('access-token')
 	 @ApiOperation({
@@ -167,13 +169,62 @@ export class OperatorController {
 		 status: 403,
 		 description: 'Forbidden'
 	 })
-	 async updateThisMonthInfoProperty(@GetUserInfo() userInfo: UserInfo) {
-		 console.log("[PATCH /operator/thisMonthInfoProperty] requested.");
-		 this.logger.log("[PATCH /operator/thisMonthInfoProperty] requested.", JSON.stringify(userInfo));
+	 async updateMonthInfoProperty(@GetUserInfo() userInfo: UserInfo, @Param('year') year: number, @Param('month') month: number) {
+		 console.log("[PATCH /operator/month-info-property] requested.");
+		 console.log(`year: ${year}, month: ${month}`);
+		 this.logger.log("[PATCH /operator/month-info-property] requested.", JSON.stringify(userInfo));
 		if (userInfo.isOperator === false) {
 			console.log("Not Operator")
 			throw new UnauthorizedException("Not Operator");
 		}
-		 return (await this.operatorService.updateThisMonthInfoProperty());
+		 return (await this.operatorService.updateMonthInfoProperty(year, month));
 	 }
+
+	@Get('/attendance-list/:year/:month/:intraId')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'Returns the user\'s attendance log',
+		description: 'admin page에서 intraId를 입력 하면 해당 유저의 해당 연 월의 attendance log 반환'
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized'
+	})
+	async getAttendanceLogByUser(
+		@Param()
+		dataListDto: DataListDto,
+		@GetUserInfo()
+		userInfo: UserInfo
+	) {
+		this.logger.log('/attendance-list/:year/:month/:day/:intraId', JSON.stringify(dataListDto) + " " + userInfo.intraId)
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		return await this.operatorService.findUserAttendanceLog(dataListDto)
+	}
+
+	@Post("/attendance-add")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'Returns the user\'s attendance log',
+		description: '관리자 페이지에서 유저의 출석정보를 추가'
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized'
+	})
+	async UserAttendanceLogAdd(
+		@Body() attendanceData: AttendanceData,
+		@GetUserInfo() userInfo: UserInfo
+	) {
+		this.logger.log('/attendance-add' + "request Id : " + userInfo.intraId, JSON.stringify(attendanceData))
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		return await this.operatorService.userAttendanceLogAdd(attendanceData)
+	}
 }

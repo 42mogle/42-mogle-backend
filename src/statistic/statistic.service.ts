@@ -71,6 +71,18 @@ export class StatisticService {
 		return await this.dbmanagerService.saveMonthlyUser(monthlyUserInfo);
 	}
 
+	async getMonthlyUsersInSepcificMonth(year: number, month: number) {
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(month, year);
+		console.log(`year: ${year}, month: ${month}`);
+		if (monthInfo === null) { // todo: considering == or ===
+			throw new NotFoundException('지정된 달의 데이터가 없습니다.');
+		}
+		const monthlyUsersAndCountInAMonth = await this.dbmanagerService.getAllMonthlyUsersInMonth(monthInfo);
+		console.log(`monthlyUsersAndCountInAMonth: `);
+		console.log(monthlyUsersAndCountInAMonth);
+		return monthlyUsersAndCountInAMonth;
+	}
+
 
 	// updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers) {
 

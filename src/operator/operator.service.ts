@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -7,16 +7,18 @@ import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron } from '@nestjs/schedule';
-import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER, WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
-import { StatisticService } from 'src/statistic/statistic.service';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER} from 'nest-winston'
+import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto'
+import { StatisticService } from 'src/statistic/statistic.service'
+import { DataListDto } from './dto/dataList.dto'
+import { AttendanceData } from './dto/attendnaceData.dto'
+import { Attendance } from '../dbmanager/entities/attendance.entity'
+import { AttendanceService } from 'src/attendance/attendance.service';
 
 @Injectable()
 export class OperatorService {
-	@Inject(DbmanagerService)
-	private readonly dbmanagerService: DbmanagerService;
-	@Inject(StatisticService)
-	private readonly statisticService: StatisticService;
+	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService
+	@Inject(StatisticService) private readonly statisticService: StatisticService
 
 	constructor(
 		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
@@ -74,6 +76,7 @@ export class OperatorService {
 		})
 	}
 
+	// todo: set async and await
 	updatePerfectStatus(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
 		if (monthlyUserInfo.attendanceCount < currentAttendance && monthlyUserInfo.isPerfect === true)
 			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, false);
@@ -83,7 +86,7 @@ export class OperatorService {
 
 	@Cron('0 0 1 * * 0-6')
 	async updateCurrentCount() {
-		this.logger.log("check updateCurrentCount");
+		this.logger.log("test", "check updateCurrentCount");
 		const type: number = this.dbmanagerService.getTodayType();
 		// 0: 일요일
 		// 6: 토요일
@@ -145,10 +148,9 @@ export class OperatorService {
 		return ;
 	}
 
-	async updateThisMonthInfoProperty() {
+	async updateMonthInfoProperty(year: number, month: number) {
 		// get month_info
-		const currentDatetime: Date = new Date();
-		let monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(currentDatetime.getMonth() + 1, currentDatetime.getFullYear());
+		let monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(month, year);
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
 
 		// update total_attendance
@@ -157,6 +159,7 @@ export class OperatorService {
 		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
 
 		// update current_attendance
+		const currentDatetime: Date = new Date();
 		let countOfThisMonthCurrentAttendance: number;
 		if (monthInfo.month === currentDatetime.getMonth() + 1
 		&& monthInfo.year === currentDatetime.getFullYear()) {
@@ -165,7 +168,6 @@ export class OperatorService {
 			countOfThisMonthCurrentAttendance = countOfThisMonthTotalAttendance;
 		}
 		console.log(`countOfThisMonthCurrentAttendance: ${countOfThisMonthCurrentAttendance}`);
-		//monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
 
 		// update total_user_count
 		const countOfTotalThisMonthlyUsers: number = await this.dbmanagerService.getCountOfTotalThisMonthlyUsers(monthInfo);
@@ -178,7 +180,7 @@ export class OperatorService {
 		// save updated month_info
 		console.log(`monthInfo(before): ${JSON.stringify(monthInfo)}`);
 
-		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
+		monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
 		monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
 		monthInfo.totalUserCount = countOfTotalThisMonthlyUsers;
 		monthInfo.perfectUserCount = countOfPerfectThisMonthlyUsers;
@@ -186,5 +188,52 @@ export class OperatorService {
 		monthInfo = await this.dbmanagerService.saveMonthInfoTable(monthInfo);
 		console.log(monthInfo);
 		return monthInfo;
+	}
+
+	async findUserAttendanceLog(dataList: DataListDto) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(dataList.intraId)
+		if (!userInfo) {
+			throw new NotFoundException("userInfo that does not exist")
+		}
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(dataList.month, dataList.year)
+		if (!monthInfo) {
+			throw new NotFoundException("monthInfo that dose not exist")
+		}
+		return await this.dbmanagerService.getAttendanceListByMonthInfo(userInfo, monthInfo)
+	}
+
+	async userAttendanceLogAdd(attendanceData: AttendanceData) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(attendanceData.intraId)
+		if (!userInfo) {
+			throw new NotFoundException("userInfo that does not exist")
+		}
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(attendanceData.month, attendanceData.year)
+		if (!monthInfo) {
+			throw new NotFoundException("monthInfo that dose not exist")
+		}
+		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo(attendanceData.day, monthInfo)
+		if (!dayInfo) {
+			throw new NotFoundException("dayInfo that dose not exist")
+		}
+		const attendnaceLog: Attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo)
+		if (attendnaceLog) {
+			throw new BadRequestException("Attendance information already exists")
+		}
+		else {
+			const date = new Date(
+				attendanceData.year,
+				attendanceData.month - 1,
+				attendanceData.day,
+				8,
+				30
+			)
+			let monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
+			if (!monthlyUser) {
+				monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(userInfo, monthInfo)
+			}
+			this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
+			await this.dbmanagerService.updateMonthlyUser(monthlyUser, date)
+			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+		}
 	}
 }
