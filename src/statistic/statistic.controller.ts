@@ -1,11 +1,11 @@
-import { Controller, Get, Inject, Param, UseGuards } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, Inject, Param, UseGuards } from '@nestjs/common';
 import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 import { StatisticService } from './statistic.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
-import { WINSTON_MODULE_PROVIDER, WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @ApiTags('Statistic')
 @Controller('statistic')
@@ -51,7 +51,7 @@ export class StatisticController {
 	/**
 	 * GET /statistic/{intraId}/userAttendanceState
 	 */
-	@Get("userAttendanceState")
+	@Get("/userAttendanceState")
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({
@@ -79,5 +79,46 @@ export class StatisticController {
 		console.log("[GET /statistic/userAttendanceState] requested.");
 		this.logger.log("[GET /statistic/userAttendanceState] requested.", JSON.stringify(userInfo));
 		return await this.statisticService.getUserMonthStatus(userInfo);
+	}
+
+
+	/**
+	 * GET /statistic/monthly-users/{year}/{month}
+	 */
+	@Get("/monthly-users/:year/:month")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'get the monthly users in specified month',
+		description: '특정달에 모닝글로리 참여인원 목록 가져오기'
+	})
+	@ApiParam({
+		name: 'year',
+		type: Number,
+	})
+	@ApiParam({
+		name: 'month',
+		type: Number,
+	})
+	@ApiResponse({
+		status: 200, 
+		description: 'Success', 
+		// todo: type: DTO로 정의하기
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard: No JWT access-token)'
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Forbidden'
+	})
+	async getMonthlyUsersInSpecificMonth(@GetUserInfo() userInfo: UserInfo, @Param('year') year: number, @Param('month') month: number) {
+		if (userInfo.isOperator === false) {
+			throw new ForbiddenException("오퍼레이터 권한이 없습니다.");
+		}
+		console.log("[GET /statistic/monthly_users/{year}/{month}] requested.");
+		//this.logger.log("[GET /statistic/monthly_users/{year}/{month}] requested.");
+		return (await this.statisticService.getMonthlyUsersInSepcificMonth(year, month));
 	}
 }

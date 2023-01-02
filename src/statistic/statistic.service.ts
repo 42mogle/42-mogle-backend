@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
@@ -28,7 +28,14 @@ export class StatisticService {
 	}
 
 	async updateUserMonthlyProperties(userInfo: UserInfo, monthInfo: MonthInfo) {
-		const monthlyUserInfo = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
+		let monthlyUserInfo: MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
+
+		if (monthlyUserInfo == null) {
+			// if no monthly_user, add new monthlyUser
+			monthlyUserInfo = await this.dbmanagerService.createMonthlyUser(userInfo);
+			console.log(`new monthlyUserInfo: `);
+			console.log(monthlyUserInfo);
+		}
 
 		// update attendanceCount
 		const countFromAttendanceOfUserInMonth = await this.dbmanagerService.getCountFromAttendanceOfUserInMonth(userInfo, monthInfo);
@@ -61,7 +68,19 @@ export class StatisticService {
 			}
 		}
 		// todo: save monthlyUsers
-		return ;
+		return await this.dbmanagerService.saveMonthlyUser(monthlyUserInfo);
+	}
+
+	async getMonthlyUsersInSepcificMonth(year: number, month: number) {
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(month, year);
+		console.log(`year: ${year}, month: ${month}`);
+		if (monthInfo === null) { // todo: considering == or ===
+			throw new NotFoundException('지정된 달의 데이터가 없습니다.');
+		}
+		const monthlyUsersAndCountInAMonth = await this.dbmanagerService.getAllMonthlyUsersInMonth(monthInfo);
+		console.log(`monthlyUsersAndCountInAMonth: `);
+		console.log(monthlyUsersAndCountInAMonth);
+		return monthlyUsersAndCountInAMonth;
 	}
 
 
