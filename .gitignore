@@ -48,6 +48,10 @@ yarn-error.log
 /packages/**/LICENSE
 *.tsbuildinfo
 
+# 42API
+./42API_RENEW/*
+42API_RENEW
+
 #env
 .env
 .env.api
