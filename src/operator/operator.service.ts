@@ -56,11 +56,12 @@ export class OperatorService {
 		const attendanceInfo = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
 		if (!attendanceInfo) {
 			await this.dbmanagerService.updateAtendanceInfo(userInfo, dayInfo, updateUserAttendanceDto);
-			const monthlyUserInfo : MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
+			let monthlyUserInfo : MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
+			if (!monthlyUserInfo)
+				monthlyUserInfo = await this.dbmanagerService.createMonthlyUser(userInfo);
 			await this.dbmanagerService.updateAttendanceCountThisMonth(monthlyUserInfo)
 			return "출석체크 완료";
-		}
-		else {
+		} else {
 			return "이미 출석체크가 되었습니다."
 		}
 	}
