@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, UseGuards, UnauthorizedException, Inject, Get, Param } from '@nestjs/common';
+import { Body, Controller, Patch, Post, UseGuards, UnauthorizedException, Inject, Get, Param, Delete } from '@nestjs/common';
 import { OperatorService } from './operator.service';
 import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
@@ -226,5 +226,32 @@ export class OperatorController {
 			throw new UnauthorizedException()
 		}
 		return await this.operatorService.userAttendanceLogAdd(attendanceData)
+	}
+
+	@Delete("/attendance-delete")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'Returns the user\'s attendance log',
+		description: '관리자 페이지에서 유저의 출석정보를 삭제'
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized'
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'NotFound'
+	})
+	async UserAttendanceDelete(
+		@Body() attendanceData: AttendanceData,
+		@GetUserInfo() userInfo: UserInfo
+	) {
+		this.logger.log('/attendance-delete' + "request Id : " + userInfo.intraId, JSON.stringify(attendanceData))
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		return await this.operatorService.userAttendanceLogDelete(attendanceData)
 	}
 }

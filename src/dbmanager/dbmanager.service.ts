@@ -9,7 +9,6 @@ import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { userInfo } from 'os';
 
 @Injectable()
 export class DbmanagerService {
@@ -53,7 +52,7 @@ export class DbmanagerService {
 				type: dayType,
 				attendUserCount: 0,
 				perfectUserCount: 0,
-				todayWord: "뀨?", // todo: set In .env
+				todayWord: process.env.TODAY_WORD, // todo: set In .env
 			})
 			await this.dayInfoRepository.save(eachNewDayInfo);
 		}
@@ -355,6 +354,14 @@ export class DbmanagerService {
 		this.updateMonthlyUserAttendanceCount(monthlyUser, date);
 	}
 
+	decreaseMonthlyUser(monthlyUser: MonthlyUsers) {
+		if (monthlyUser.attendanceCount > 0) {
+			this.monthlyUsersRepository.update(monthlyUser.id, {
+				attendanceCount: monthlyUser.attendanceCount - 1
+			})
+		}
+	}
+
 	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers, date: Date) {
 		if (!this.isWeekend(date))
 		{
@@ -400,15 +407,26 @@ export class DbmanagerService {
 		})
 	}
 
-	async attendanceLogAdd(userInfo: UserInfo, dayInfo: DayInfo ,date: Date) {
-		const attendanceinfo = this.attendanceRepository.create(
+	async attendanceLogAdd(userInfo: UserInfo, dayInfo: DayInfo, date: Date) {
+		const attendanceInfo = this.attendanceRepository.create(
 			{
 				timelog: date,
 				userInfo,
 				dayInfo
 			}
 		)
-		return await this.attendanceRepository.save(attendanceinfo);
+		return await this.attendanceRepository.save(attendanceInfo);
+	}
+
+	async attendanceLogDelete(userInfo: UserInfo, dayInfo: DayInfo): Promise<boolean> {
+		const attendanceInfo = await this.attendanceRepository.findOneBy({userInfo, dayInfo})
+		if (!attendanceInfo) {
+			return false
+		}
+		else {
+			await this.attendanceRepository.delete(attendanceInfo)
+			return true
+		}
 	}
 
 	/**************************************

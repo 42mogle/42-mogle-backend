@@ -236,4 +236,24 @@ export class OperatorService {
 			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
 		}
 	}
+
+	async userAttendanceLogDelete(attendanceData: AttendanceData) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(attendanceData.intraId)
+		if (!userInfo) {
+			throw new NotFoundException("userInfo that does not exist")
+		}
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(attendanceData.month, attendanceData.year)
+		if (!monthInfo) {
+			throw new NotFoundException("monthInfo that dose not exist")
+		}
+		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo(attendanceData.day, monthInfo)
+		if (!dayInfo) {
+			throw new NotFoundException("dayInfo that dose not exist")
+		}
+		const monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
+		if ( await this.dbmanagerService.attendanceLogDelete(userInfo, dayInfo)) {
+			await this.dbmanagerService.decreaseMonthlyUser(monthlyUser)
+			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+		}
+	}
 }
