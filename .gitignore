@@ -51,3 +51,4 @@ yarn-error.log
 #env
 .env
 .env.api
+.env.api.copy
