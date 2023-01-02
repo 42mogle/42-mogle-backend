@@ -1,7 +1,7 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { LessThan, LessThanOrEqual, Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -9,6 +9,7 @@ import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { userInfo } from 'os';
 
 @Injectable()
 export class DbmanagerService {
@@ -84,7 +85,7 @@ export class DbmanagerService {
 		const totaldate: number = new Date(year, month, 0).getDate(); // todo: consider what 0 means
 		const foundThhisMonthInfo = await this.monthInfoRepository.findOne({ where: { year, month } });
 		if (foundThhisMonthInfo) {
-			throw "이번달 데이터가 이미 있습니다.";
+			throw new BadRequestException("이번달 데이터가 이미 있습니다.")
 		}
 		const monthInfo = this.monthInfoRepository.create({
 			year: year,
@@ -240,6 +241,11 @@ export class DbmanagerService {
 		return await this.attendanceRepository.findBy({userInfo, dayInfo})
 	}
 
+	async getAttendanceListByMonthInfo(userInfo: UserInfo, monthInfo: MonthInfo): Promise<Attendance[]> {
+		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthInfo)
+		return await this.attendanceRepository.findBy({userInfo, dayInfo})
+	}
+
 
 	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {
 		return await this.dayInfoRepository.findOneBy({monthInfo, day});
@@ -315,6 +321,10 @@ export class DbmanagerService {
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo});
 	}
 
+	async getMonthlyUser(userInfo: UserInfo, monthInfo: MonthInfo) {
+		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo})
+	}
+
 	async createMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo = await this.getThisMonthInfo();
 		const monthlyUser = this.monthlyUsersRepository.create({
@@ -328,18 +338,28 @@ export class DbmanagerService {
 		return (monthlyUser)
 	}
 
-	updateMonthlyUser(monthlyUser: MonthlyUsers) {
-		this.updateMonthlyUserAttendanceCount(monthlyUser);
+	async createMonthlyUserByMonthInfo(userInfo: UserInfo, monthInfo: MonthInfo): Promise<MonthlyUsers> {
+		const monthlyUser = this.monthlyUsersRepository.create({
+			attendanceCount: 0,
+			isPerfect: false,
+			totalPerfectCount: 0,
+			monthInfo: monthInfo,
+			userInfo: userInfo
+		})
+		await this.monthlyUsersRepository.save(monthlyUser)
+		return monthlyUser
 	}
 
 	// todo: set async and await
-	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers) {
+	updateMonthlyUser(monthlyUser: MonthlyUsers, date: Date) {
+		this.updateMonthlyUserAttendanceCount(monthlyUser, date);
+	}
 
-		if (!this.isWeekend())
+	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers, date: Date) {
+		if (!this.isWeekend(date))
 		{
 			monthlyuser.attendanceCount += 1;
-			// todo: save랑 update 둘 중에 하나만 하기
-			this.monthlyUsersRepository.save(monthlyuser);
+			// todo: save랑 update 둘 중에 하나만 하기 : 일단 save지워봤습니다
 			this.monthlyUsersRepository.update(monthlyuser.id, {
 				attendanceCount: monthlyuser.attendanceCount,
 			});
@@ -380,6 +400,17 @@ export class DbmanagerService {
 		})
 	}
 
+	async attendanceLogAdd(userInfo: UserInfo, dayInfo: DayInfo ,date: Date) {
+		const attendanceinfo = this.attendanceRepository.create(
+			{
+				timelog: date,
+				userInfo,
+				dayInfo
+			}
+		)
+		return await this.attendanceRepository.save(attendanceinfo);
+	}
+
 	/**************************************
 	 * 			util 함수 목록            *
 	 * ********************************* */
@@ -393,9 +424,8 @@ export class DbmanagerService {
 			return (1);
 	}
 
-	isWeekend(): boolean {
-		const Today = new Date();
-		if (Today.getDay() === 6 || Today.getDay() === 0)
+	isWeekend(date: Date): boolean {
+		if (date.getDay() === 6 || date.getDay() === 0)
 			return true;
 		else
 			return false;

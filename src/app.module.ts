@@ -17,7 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { utilities, WinstonLogger, WinstonModule } from 'nest-winston';
+import { utilities, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 
 const level = 'silly'

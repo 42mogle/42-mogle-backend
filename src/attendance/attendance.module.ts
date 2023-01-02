@@ -13,9 +13,13 @@ import { StatisticService } from 'src/statistic/statistic.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature(
-      [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
-    ),
+    TypeOrmModule.forFeature([
+      UserInfo,
+      Attendance,
+      DayInfo,
+      MonthInfo,
+      MonthlyUsers
+    ]),
   ],
   controllers: [AttendanceController],
   providers: [AttendanceService, DbmanagerService, OperatorService, StatisticService]
