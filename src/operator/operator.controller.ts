@@ -280,6 +280,6 @@ export class OperatorController {
 			this.logger.log(userInfo.intraId + " is not operator")
 			throw new UnauthorizedException()
 		}
-		return await this.operatorService.operatorAddAndDelete(operatorlist)
+		return await this.operatorService.operatorAddOrDelete(operatorlist)
 	}
 }
