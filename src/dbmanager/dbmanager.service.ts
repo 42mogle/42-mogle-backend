@@ -144,8 +144,12 @@ export class DbmanagerService {
 	}
 
 	async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
-		const monthInfo = await this.monthInfoRepository.findOne({ where: { month, year } });
-
+		const monthInfo = await this.monthInfoRepository.findOne({
+			where: {
+				month,
+				year,
+			}
+		});
 		return monthInfo;
 	}
 
@@ -266,12 +270,34 @@ export class DbmanagerService {
 	 */
 
 	async getAllMonthlyUsersInMonth(monthInfo: MonthInfo) {
-		const monthlyUsersAndCountInAMonth = this.monthlyUsersRepository.find({
+		
+		// Use QueryBuilder
+		// const tmp_monthlys = this.monthlyUsersRepository
+		// 	.createQueryBuilder("monthlyUsers")
+		// 	.leftJoinAndSelect("monthlyUsers.userInfo", "userInfo")
+		// 	.getMany()
+		// return tmp_monthlys;
+
+		// 
+		const monthlyUsersInTheMonth = this.monthlyUsersRepository.find({
+			select: {
+				userInfo: {
+					intraId: true,
+				},
+				totalPerfectCount: true,
+				isPerfect: true,
+				attendanceCount: true
+			},
+			relations: {
+				userInfo: true,
+			},
 			where: {
 				monthInfo,
-			}
+			},
+			//select: ['userInfo','totalPerfectCount','isPerfect'],
 		});
-		return monthlyUsersAndCountInAMonth;
+		return monthlyUsersInTheMonth;
+		
 	}
 
 	async getCountOfTotalThisMonthlyUsers(monthInfo: MonthInfo) {
@@ -315,6 +341,7 @@ export class DbmanagerService {
 		this.updateMonthlyUserAttendanceCount(monthlyUser);
 	}
 
+	// todo: set async and await
 	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers) {
 
 		if (!this.isWeekend())
