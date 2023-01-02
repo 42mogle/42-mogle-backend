@@ -145,8 +145,12 @@ export class DbmanagerService {
 	}
 
 	async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
-		const monthInfo = await this.monthInfoRepository.findOne({ where: { month, year } });
-
+		const monthInfo = await this.monthInfoRepository.findOne({
+			where: {
+				month,
+				year,
+			}
+		});
 		return monthInfo;
 	}
 
@@ -271,6 +275,28 @@ export class DbmanagerService {
 	 * todo: set in DbMonthlyUsersManager
 	 */
 
+	async getAllMonthlyUsersInMonth(monthInfo: MonthInfo) {
+		const monthlyUsersInTheMonth = this.monthlyUsersRepository.find({
+			select: {
+				userInfo: {
+					intraId: true,
+				},
+				totalPerfectCount: true,
+				isPerfect: true,
+				attendanceCount: true
+			},
+			relations: {
+				userInfo: true,
+			},
+			where: {
+				monthInfo,
+			},
+			//select: ['userInfo','totalPerfectCount','isPerfect'],
+		});
+		return monthlyUsersInTheMonth;
+		
+	}
+
 	async getCountOfTotalThisMonthlyUsers(monthInfo: MonthInfo) {
 		const countOfTotalThisMonthlyUsers = await this.monthlyUsersRepository.count({
 			where: {
@@ -324,6 +350,7 @@ export class DbmanagerService {
 		return monthlyUser
 	}
 
+	// todo: set async and await
 	updateMonthlyUser(monthlyUser: MonthlyUsers, date: Date) {
 		this.updateMonthlyUserAttendanceCount(monthlyUser, date);
 	}

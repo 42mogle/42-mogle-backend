@@ -147,9 +147,9 @@ export class OperatorController {
 	}
 
 	/**
-	 * PATCH /operator/this-month-info-property
+	 * PATCH /operator/month-info-property/{year}/{month}
 	 */
-	 @Patch("this-month-info-property")
+	 @Patch("month-info-property/:year/:month")
 	 @UseGuards(JwtAuthGuard)
 	 @ApiBearerAuth('access-token')
 	 @ApiOperation({
@@ -169,14 +169,15 @@ export class OperatorController {
 		 status: 403,
 		 description: 'Forbidden'
 	 })
-	 async updateThisMonthInfoProperty(@GetUserInfo() userInfo: UserInfo) {
-		 console.log("[PATCH /operator/thisMonthInfoProperty] requested.");
-		 this.logger.log("[PATCH /operator/thisMonthInfoProperty] requested.", JSON.stringify(userInfo));
+	 async updateMonthInfoProperty(@GetUserInfo() userInfo: UserInfo, @Param('year') year: number, @Param('month') month: number) {
+		 console.log("[PATCH /operator/month-info-property] requested.");
+		 console.log(`year: ${year}, month: ${month}`);
+		 this.logger.log("[PATCH /operator/month-info-property] requested.", JSON.stringify(userInfo));
 		if (userInfo.isOperator === false) {
 			console.log("Not Operator")
 			throw new UnauthorizedException("Not Operator");
 		}
-		 return (await this.operatorService.updateThisMonthInfoProperty());
+		 return (await this.operatorService.updateMonthInfoProperty(year, month));
 	 }
 
 	@Get('/attendance-list/:year/:month/:intraId')

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
@@ -62,6 +62,18 @@ export class StatisticService {
 		}
 		// todo: save monthlyUsers
 		return ;
+	}
+
+	async getMonthlyUsersInSepcificMonth(year: number, month: number) {
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(month, year);
+		console.log(`year: ${year}, month: ${month}`);
+		if (monthInfo === null) { // todo: considering == or ===
+			throw new NotFoundException('지정된 달의 데이터가 없습니다.');
+		}
+		const monthlyUsersAndCountInAMonth = await this.dbmanagerService.getAllMonthlyUsersInMonth(monthInfo);
+		console.log(`monthlyUsersAndCountInAMonth: `);
+		console.log(monthlyUsersAndCountInAMonth);
+		return monthlyUsersAndCountInAMonth;
 	}
 
 

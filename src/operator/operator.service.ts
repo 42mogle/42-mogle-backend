@@ -76,6 +76,7 @@ export class OperatorService {
 		})
 	}
 
+	// todo: set async and await
 	updatePerfectStatus(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
 		if (monthlyUserInfo.attendanceCount < currentAttendance && monthlyUserInfo.isPerfect === true)
 			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, false);
@@ -147,10 +148,9 @@ export class OperatorService {
 		return ;
 	}
 
-	async updateThisMonthInfoProperty() {
+	async updateMonthInfoProperty(year: number, month: number) {
 		// get month_info
-		const currentDatetime: Date = new Date();
-		let monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(currentDatetime.getMonth() + 1, currentDatetime.getFullYear());
+		let monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(month, year);
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
 
 		// update total_attendance
@@ -159,6 +159,7 @@ export class OperatorService {
 		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
 
 		// update current_attendance
+		const currentDatetime: Date = new Date();
 		let countOfThisMonthCurrentAttendance: number;
 		if (monthInfo.month === currentDatetime.getMonth() + 1
 		&& monthInfo.year === currentDatetime.getFullYear()) {
@@ -167,7 +168,6 @@ export class OperatorService {
 			countOfThisMonthCurrentAttendance = countOfThisMonthTotalAttendance;
 		}
 		console.log(`countOfThisMonthCurrentAttendance: ${countOfThisMonthCurrentAttendance}`);
-		//monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
 
 		// update total_user_count
 		const countOfTotalThisMonthlyUsers: number = await this.dbmanagerService.getCountOfTotalThisMonthlyUsers(monthInfo);
@@ -180,7 +180,7 @@ export class OperatorService {
 		// save updated month_info
 		console.log(`monthInfo(before): ${JSON.stringify(monthInfo)}`);
 
-		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
+		monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
 		monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
 		monthInfo.totalUserCount = countOfTotalThisMonthlyUsers;
 		monthInfo.perfectUserCount = countOfPerfectThisMonthlyUsers;
