@@ -267,7 +267,7 @@ export class OperatorService {
 			else {
 				userInfo.isOperator = true
 			}
-			await this.dbmanagerService.updateUserInfo(userInfo)
+			await this.dbmanagerService.updateUserInfoIsOper(userInfo)
 		}
 		return
 	}
