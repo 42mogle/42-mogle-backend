@@ -54,6 +54,7 @@ const format = winston.format.combine(
     DbmanagerModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
+      envFilePath: ['.env', '.env.api'],
       isGlobal: true,
     }),
   ],
