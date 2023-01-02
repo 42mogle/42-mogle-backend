@@ -28,7 +28,14 @@ export class StatisticService {
 	}
 
 	async updateUserMonthlyProperties(userInfo: UserInfo, monthInfo: MonthInfo) {
-		const monthlyUserInfo = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
+		let monthlyUserInfo: MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
+
+		if (monthlyUserInfo == null) {
+			// if no monthly_user, add new monthlyUser
+			monthlyUserInfo = await this.dbmanagerService.createMonthlyUser(userInfo);
+			console.log(`new monthlyUserInfo: `);
+			console.log(monthlyUserInfo);
+		}
 
 		// update attendanceCount
 		const countFromAttendanceOfUserInMonth = await this.dbmanagerService.getCountFromAttendanceOfUserInMonth(userInfo, monthInfo);
@@ -61,7 +68,7 @@ export class StatisticService {
 			}
 		}
 		// todo: save monthlyUsers
-		return ;
+		return await this.dbmanagerService.saveMonthlyUser(monthlyUserInfo);
 	}
 
 	async getMonthlyUsersInSepcificMonth(year: number, month: number) {

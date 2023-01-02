@@ -23,6 +23,7 @@ export class AttendanceService {
 		return ButtonStatus.AttendanceSuccess;
 	}
 
+	// applyAttendance
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto, userInfo: UserInfo) {
 		const todayWord: string = await this.dbmanagerService.getTodayWord();
 		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
@@ -49,6 +50,19 @@ export class AttendanceService {
 			statusAttendance: 0,
 			errorMsg: "성공적으로 출석 체크를 완료했습니다."
 		})
+	}
+
+	// checkSupplementaryAttendance ?
+	async checkAndReflectSupplementaryAttendance(dayInfo: DayInfo) {
+		
+		if (dayInfo.type === 1) { 			// weekends, 주말출석로직
+			
+
+		} else if (dayInfo.type === 2) {	// the end of month, 월말ㅜ석로직
+			
+		}
+
+		return ;
 	}
 
 	/***********************************

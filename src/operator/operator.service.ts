@@ -142,7 +142,7 @@ export class OperatorService {
 			console.log(`attendance: ${JSON.stringify(attendance)}`);
 		}
 
-		// update status
+		// update monthly user status
 		await this.statisticService.updateUserMonthlyProperties(userInfo, monthInfo);
 
 		return ;
