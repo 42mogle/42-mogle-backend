@@ -13,7 +13,7 @@ import { StatisticService } from 'src/statistic/statistic.service'
 import { DataListDto } from './dto/dataList.dto'
 import { AttendanceData } from './dto/attendnaceData.dto'
 import { Attendance } from '../dbmanager/entities/attendance.entity'
-import { AttendanceService } from 'src/attendance/attendance.service';
+import { OperatorList } from './dto/operatorList.Dto';
 
 @Injectable()
 export class OperatorService {
@@ -256,5 +256,20 @@ export class OperatorService {
 			await this.dbmanagerService.decreaseMonthlyUser(monthlyUser)
 			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
 		}
+	}
+
+	async operatorAddOrDelete(operatorList: OperatorList) {
+		let userInfo: UserInfo
+		for (let i in operatorList.intraIdList) {
+			userInfo = await this.dbmanagerService.getUserInfo(operatorList.intraIdList[i])
+			if (userInfo.isOperator) {
+				userInfo.isOperator = false
+			}
+			else {
+				userInfo.isOperator = true
+			}
+			await this.dbmanagerService.updateUserInfoIsOper(userInfo)
+		}
+		return
 	}
 }

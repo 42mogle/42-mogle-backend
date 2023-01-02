@@ -10,6 +10,7 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
 import { DataListDto } from './dto/dataList.dto';
 import { AttendanceData } from './dto/attendnaceData.dto';
+import { OperatorList } from './dto/operatorList.Dto';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -253,5 +254,32 @@ export class OperatorController {
 			throw new UnauthorizedException()
 		}
 		return await this.operatorService.userAttendanceLogDelete(attendanceData)
+	}
+
+	@Post("/operator-change")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'operator status on/off',
+		description: '유저의 오퍼레이터 권환을 활성화 및 비활성화 하는 기능'
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized'
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'NotFound'
+	})
+	async operatorChange(
+		@Body() operatorlist: OperatorList,
+		@GetUserInfo() userInfo: UserInfo
+	) {
+		this.logger.log('/attendance-delete' + "request Id : " + userInfo.intraId)
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		return await this.operatorService.operatorAddOrDelete(operatorlist)
 	}
 }
