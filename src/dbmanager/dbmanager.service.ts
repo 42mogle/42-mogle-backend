@@ -9,6 +9,7 @@ import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { userInfo } from 'os';
 
 @Injectable()
 export class DbmanagerService {
@@ -431,6 +432,13 @@ export class DbmanagerService {
 			await this.attendanceRepository.delete(attendanceInfo)
 			return true
 		}
+	}
+
+	async updateUserInfo(userInfo: UserInfo) {
+		this.usersRepository.update(userInfo.id, {
+			isOperator: userInfo.isOperator
+		})
+		return
 	}
 
 	/**************************************
