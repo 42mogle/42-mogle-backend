@@ -9,7 +9,7 @@ import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
 import { DataListDto } from './dto/dataList.dto';
-import { IntraIdDto } from '../auth/dto/intraId.dto';
+import { AttendanceData } from './dto/attendnaceData.dto';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -204,4 +204,26 @@ export class OperatorController {
 		return await this.operatorService.findUserAttendanceLog(dataListDto)
 	}
 
+	@Post("/attendance-add")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'Returns the user\'s attendance log',
+		description: '관리자 페이지에서 유저의 출석정보를 추가'
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized'
+	})
+	async UserAttendanceLogAdd(
+		@Body() attendanceData: AttendanceData,
+		@GetUserInfo() userInfo: UserInfo
+	) {
+		this.logger.log('/attendance-add' + "request Id : " + userInfo.intraId, JSON.stringify(attendanceData))
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		return await this.operatorService.userAttendanceLogAdd(attendanceData)
+	}
 }
