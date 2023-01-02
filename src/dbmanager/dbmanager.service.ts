@@ -270,15 +270,6 @@ export class DbmanagerService {
 	 */
 
 	async getAllMonthlyUsersInMonth(monthInfo: MonthInfo) {
-		
-		// Use QueryBuilder
-		// const tmp_monthlys = this.monthlyUsersRepository
-		// 	.createQueryBuilder("monthlyUsers")
-		// 	.leftJoinAndSelect("monthlyUsers.userInfo", "userInfo")
-		// 	.getMany()
-		// return tmp_monthlys;
-
-		// 
 		const monthlyUsersInTheMonth = this.monthlyUsersRepository.find({
 			select: {
 				userInfo: {
