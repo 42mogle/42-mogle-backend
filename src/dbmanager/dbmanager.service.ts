@@ -407,6 +407,7 @@ export class DbmanagerService {
 
 	async updateThisMonthCurrentCount() {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		this.logger.log("currentAttendance = " + monthInfo.currentAttendance)
 		this.monthInfoRepository.update(monthInfo.id, {
 			currentAttendance: monthInfo.currentAttendance + 1
 		})
