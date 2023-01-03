@@ -11,9 +11,13 @@ import { MonthlyUsers } from './entities/monthly_users.entity';
 // todo: Rename to DbManager
 @Module({
   imports: [
-    TypeOrmModule.forFeature(
-      [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
-    ),
+    TypeOrmModule.forFeature([
+      UserInfo,
+      Attendance,
+      DayInfo,
+      MonthInfo,
+      MonthlyUsers
+    ]),
   ],
   controllers: [DbmanagerController],
   providers: [DbmanagerService]

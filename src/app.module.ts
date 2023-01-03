@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { AttendanceModule } from './attendance/attendance.module';
 import { OperatorModule } from './operator/operator.module';
 import { StatisticModule } from './statistic/statistic.module';
-import { typeORMConfig } from './configs/typeorm.config';
+import { typeOrmConfig } from './configs/typeorm.config';
 import { DbmanagerModule } from './dbmanager/dbmanager.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UserInfo } from './dbmanager/entities/user_info.entity';
@@ -17,12 +17,32 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-// import { HttpModule } from '@nestjs/axios';
-//import { BoardsController } from './boards/boards.controller';
+import { utilities, WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
+
+const level = 'silly'
+const format = winston.format.combine(
+  winston.format.timestamp(),
+  utilities.format.nestLike('log', { prettyPrint: true })
+)
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeORMConfig), 
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.Console({
+          level: level,
+          format: format
+        }),
+        new winston.transports.File({
+          dirname: 'Log',
+          filename: 'history.log',
+          level: level,
+          format: format,
+        }),
+      ],
+    }),
+    TypeOrmModule.forRoot(typeOrmConfig),
     TypeOrmModule.forFeature(
       [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
     ),
@@ -34,9 +54,9 @@ import { ConfigModule } from '@nestjs/config';
     DbmanagerModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
+      envFilePath: ['.env', '.env.api'],
       isGlobal: true,
-    }
-    ),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService, DbmanagerService],

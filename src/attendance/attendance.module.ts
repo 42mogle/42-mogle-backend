@@ -9,14 +9,19 @@ import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { AttendanceController } from './attendance.controller';
 import { AttendanceService } from './attendance.service';
 import { OperatorService } from '../operator/operator.service';
+import { StatisticService } from 'src/statistic/statistic.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature(
-      [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
-    ),
+    TypeOrmModule.forFeature([
+      UserInfo,
+      Attendance,
+      DayInfo,
+      MonthInfo,
+      MonthlyUsers
+    ]),
   ],
   controllers: [AttendanceController],
-  providers: [AttendanceService, DbmanagerService, OperatorService]
+  providers: [AttendanceService, DbmanagerService, OperatorService, StatisticService]
 })
 export class AttendanceModule {}

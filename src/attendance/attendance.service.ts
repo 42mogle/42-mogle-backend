@@ -6,11 +6,12 @@ import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { ButtonStatus } from './button.status.enum';
+import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 
 @Injectable()
 export class AttendanceService {
-	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService;
-	@Inject(OperatorService) private readonly operatorService: OperatorService;
+	@Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService
+	@Inject(OperatorService) private readonly operatorService: OperatorService
 
 	async getUserButtonStatus(userInfo: UserInfo): Promise<number> {
 		if (this.isAvailableTime() === false) {
@@ -19,15 +20,14 @@ export class AttendanceService {
 		else if (await this.haveAttendedToday(userInfo)) {
 			return ButtonStatus.AlreadyCheckedAttendance;
 		}
-		// else if (await !this.isSetToDayWord()) {
-		// 	return (3)
-		// }
 		return ButtonStatus.AttendanceSuccess;
 	}
 
+	// applyAttendance
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto, userInfo: UserInfo) {
 		const todayWord: string = await this.dbmanagerService.getTodayWord();
 		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
+		const date = new Date()
 		if (await this.haveAttendedToday(userInfo)) {
 			return ({
 				statusAttendance: 1,
@@ -44,7 +44,7 @@ export class AttendanceService {
 		if (!monthlyUser)
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
 		await this.dbmanagerService.attendanceRegistration(userInfo);
-		await this.dbmanagerService.updateMonthlyUser(monthlyUser);
+		await this.dbmanagerService.updateMonthlyUser(monthlyUser, date);
 		await this.operatorService.updatePerfectStatus(monthlyUser, monthInto.currentAttendance);
 		return ({
 			statusAttendance: 0,
@@ -52,6 +52,18 @@ export class AttendanceService {
 		})
 	}
 
+	// checkSupplementaryAttendance ?
+	async checkAndReflectSupplementaryAttendance(dayInfo: DayInfo) {
+		
+		if (dayInfo.type === 1) { 			// weekends, 주말출석로직
+			
+
+		} else if (dayInfo.type === 2) {	// the end of month, 월말ㅜ석로직
+			
+		}
+
+		return ;
+	}
 
 	/***********************************
      * 			util function list     *
@@ -72,7 +84,7 @@ export class AttendanceService {
 
 	async haveAttendedToday(userInfo: UserInfo): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		const todayAttendanceInfo = await this.dbmanagerService.getAttendanceUserInfo(userInfo, todayInfo);
+		const todayAttendanceInfo = await this.dbmanagerService.getAttendance(userInfo, todayInfo);
 		if (todayAttendanceInfo === null)
 			return false;
 		else
@@ -81,7 +93,7 @@ export class AttendanceService {
 
 	async isTodayWordSet(): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		if (todayInfo.todayWord === "뀨?")
+		if (todayInfo.todayWord === "")
 			return (false);
 		else
 			return (true);

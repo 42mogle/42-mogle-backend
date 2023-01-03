@@ -1,13 +1,15 @@
-import { All, BadRequestException, GatewayTimeoutException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
 import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
+import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { userInfo } from 'os';
 
 @Injectable()
 export class DbmanagerService {
@@ -16,18 +18,66 @@ export class DbmanagerService {
 		@InjectRepository(Attendance) private attendanceRepository: Repository<Attendance>,
 		@InjectRepository(MonthInfo) private monthInfoRepository: Repository<MonthInfo>,
 		@InjectRepository(DayInfo) private dayInfoRepository: Repository<DayInfo>,
-		@InjectRepository(MonthlyUsers) private monthlyUsersRepository: Repository<MonthlyUsers> 
+		@InjectRepository(MonthlyUsers) private monthlyUsersRepository: Repository<MonthlyUsers>,
+		@Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: WinstonLogger,
 	) { }
 
-	// DB table: User
+	/******************************************************
+	 * todo: set in DbUserInfoManager
+	 */
 	async getUserInfo(intraId: string): Promise<UserInfo> {
 		const found = await this.usersRepository.findOne({ where: { intraId } });
-
 		return found;
 	}
 
+	async getAllUsersInfo(): Promise<UserInfo[]> {
+		return await this.usersRepository.find();
+	}
 
-	// DB table: MonthInfo
+	/******************************************************
+	 * todo: set in DbMonthAndDayInfoManager
+	 */
+	async saveMonthInfoTable(monthInfo: MonthInfo) {
+		return (await this.monthInfoRepository.save(monthInfo));
+	}
+
+	async setAllDayInfosInThisMonth(monthInfo: MonthInfo, lastDatetimeInMonth: Date) {
+		let dayType: number;
+		let eachNewDayInfo: DayInfo;
+		const totalDate: number = lastDatetimeInMonth.getDate();
+		for(let eachDate = 1; eachDate <= totalDate; ++eachDate) {
+			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate)); // search: how to be more efficient ?
+			eachNewDayInfo = this.dayInfoRepository.create({
+				day: eachDate,
+				monthInfo: monthInfo,
+				type: dayType,
+				attendUserCount: 0,
+				perfectUserCount: 0,
+				todayWord: process.env.TODAY_WORD, // todo: set In .env
+			})
+			await this.dayInfoRepository.save(eachNewDayInfo);
+		}
+		return ;
+	}
+
+	async setMonthInfoWithDayInfos(monthIndexed: number, year: number) {
+		const lastDatetimeInMonth: Date = new Date(year, monthIndexed, 0);
+		let newMonthInfo: MonthInfo = this.monthInfoRepository.create({
+			month: monthIndexed + 1,
+			year,
+			currentAttendance: 0,
+			totalAttendance: 20,
+			perfectUserCount: 0,
+			totalUserCount: 0,
+		});
+		newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		await this.setAllDayInfosInThisMonth(newMonthInfo, lastDatetimeInMonth);
+		return newMonthInfo;
+	}
+
+	// todo: implement getCountDayTypeWeekdayInThisMonth
+
+	// todo: replace to setMonthInfoWithDayInfos
 	async setMonthInfo() {
 		const now = new Date();
 		const year = now.getFullYear();
@@ -35,7 +85,7 @@ export class DbmanagerService {
 		const totaldate: number = new Date(year, month, 0).getDate(); // todo: consider what 0 means
 		const foundThhisMonthInfo = await this.monthInfoRepository.findOne({ where: { year, month } });
 		if (foundThhisMonthInfo) {
-			throw "이번달 데이터가 이미 있습니다.";
+			throw new BadRequestException("이번달 데이터가 이미 있습니다.")
 		}
 		const monthInfo = this.monthInfoRepository.create({
 			year: year,
@@ -49,6 +99,7 @@ export class DbmanagerService {
 		this.setAllDayInfo(monthInfo, totaldate);
 	}
 
+	// todo: replace to setAllDayInfosInThisMonth
 	async setAllDayInfo(monthInfo: MonthInfo, totaldate: number) {
 		for(let i = 1; i <= totaldate; i++) {
 			const type = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, i));
@@ -72,10 +123,41 @@ export class DbmanagerService {
 		});
 	}
 
-	async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
-		const monthInfo = await this.monthInfoRepository.findOne({ where: { month, year } });
+	async getCountOfThisMonthCurrentAttendance(monthInfo: MonthInfo, currentDate: number): Promise<number> {
+		const countOfThisMonthCurrentAttendance = await this.dayInfoRepository.count({
+			where: {
+				monthInfo,
+				day: LessThanOrEqual(currentDate),
+				type: 0,
+			}
+		});
+		return countOfThisMonthCurrentAttendance;
+	}
 
+	async getCountOfThisMonthTotalAttendance(monthInfo: MonthInfo): Promise<number> {
+		const countOfThisMonthTotalAttendance = await this.dayInfoRepository.count({
+			where: {
+				monthInfo,
+				type: 0,
+			}
+		});
+		return countOfThisMonthTotalAttendance;
+	}
+
+	async getMonthInfo(month: number, year: number): Promise<MonthInfo> {
+		const monthInfo = await this.monthInfoRepository.findOne({
+			where: {
+				month,
+				year,
+			}
+		});
 		return monthInfo;
+	}
+
+	async getDayInfo(day: number, monthInfo: MonthInfo): Promise<DayInfo> {
+		const dayInfo = await this.dayInfoRepository.findOne({ where: { day, monthInfo}});
+
+		return dayInfo;
 	}
 
 	async getTodayInfo() {
@@ -93,6 +175,9 @@ export class DbmanagerService {
 		await this.dayInfoRepository.save(dayInfo)
 	}
 
+	/******************************************************
+	 * todo: set in DbAttendanceManager
+	 */
 	async attendanceRegistration(userInfo: UserInfo) {
 		const now = new Date();
 		const dayInfo: DayInfo = await this.getTodayInfo();
@@ -106,8 +191,17 @@ export class DbmanagerService {
 		return await this.attendanceRepository.save(attendanceinfo);
 	}
 
-	async getAttendanceUserInfo(userInfo: UserInfo, dayInfo: DayInfo): Promise<Attendance> {
+	async getAttendance(userInfo: UserInfo, dayInfo: DayInfo): Promise<Attendance> {
 		return await this.attendanceRepository.findOneBy({ userInfo, dayInfo });
+	}
+
+	async setAttendance(userInfo: UserInfo, dayInfo: DayInfo, datetime: Date) {
+		const attendanceToSet = this.attendanceRepository.create({
+			timelog: datetime,
+			userInfo,
+			dayInfo
+		});
+		return await this.attendanceRepository.save(attendanceToSet);
 	}
 
 	async getTodayWord(): Promise<string> {
@@ -127,6 +221,7 @@ export class DbmanagerService {
 
 	@Cron('0 0 1 1 * *')
 	setTotalMonthcron() {
+		this.logger.debug("setTotalMonthcron test")
 		this.setMonthInfo();
 	}
 
@@ -136,9 +231,102 @@ export class DbmanagerService {
 
 	}
 
+	async getThisMonthDayList(monthInfo: MonthInfo): Promise<DayInfo[]>  {
+		return await this.dayInfoRepository.findBy({monthInfo});
+	}
+
+	async getAttendanceList(userInfo: UserInfo): Promise<Attendance[]> {
+		const monthinfo = await this.getThisMonthInfo();
+		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthinfo);
+		return await this.attendanceRepository.findBy({userInfo, dayInfo})
+	}
+
+	async getAttendanceListByMonthInfo(userInfo: UserInfo, monthInfo: MonthInfo): Promise<Attendance[]> {
+		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthInfo)
+		return await this.attendanceRepository.findBy({userInfo, dayInfo})
+	}
+
+
+	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {
+		return await this.dayInfoRepository.findOneBy({monthInfo, day});
+	}
+
+	async getSpecificMonthInfo(year: number, month: number): Promise<MonthInfo> {
+		return await this.monthInfoRepository.findOneBy({year, month});
+	}
+
+	async getCountFromAttendanceOfUserInMonth(userInfo: UserInfo, monthInfo: MonthInfo) {
+		const countFromAttendanceOfUserInMonth = await this.attendanceRepository.count({
+			relations: {
+				dayInfo: true,
+			},
+			where: {
+				userInfo,
+				dayInfo: {
+					monthInfo,
+					type: 0, // todo: replace to normal_day
+				}
+			}
+		});
+		return countFromAttendanceOfUserInMonth;
+	}
+
+	/******************************************************
+	 * todo: set in DbMonthlyUsersManager
+	 */
+
+	async getAllMonthlyUsersInMonth(monthInfo: MonthInfo) {
+		const monthlyUsersInTheMonth = this.monthlyUsersRepository.find({
+			select: {
+				userInfo: {
+					intraId: true,
+				},
+				totalPerfectCount: true,
+				isPerfect: true,
+				attendanceCount: true
+			},
+			relations: {
+				userInfo: true,
+			},
+			where: {
+				monthInfo,
+			},
+			//select: ['userInfo','totalPerfectCount','isPerfect'],
+		});
+		return monthlyUsersInTheMonth;
+		
+	}
+
+	async getCountOfTotalThisMonthlyUsers(monthInfo: MonthInfo) {
+		const countOfTotalThisMonthlyUsers = await this.monthlyUsersRepository.count({
+			where: {
+				monthInfo,
+			}
+		});
+		return countOfTotalThisMonthlyUsers;
+	}
+
+	async getCountOfPerfectThisMonthlyUsers(monthInfo: MonthInfo) {
+		const countOfTotalThisMonthlyUsers = await this.monthlyUsersRepository.count({
+			where: {
+				monthInfo,
+				isPerfect: true,
+			}
+		});
+		return countOfTotalThisMonthlyUsers;
+	}
+
+	async saveMonthlyUser(monthlyUser: MonthlyUsers): Promise<MonthlyUsers> {
+		return (await this.monthlyUsersRepository.save(monthlyUser));
+	}
+
 	async getThisMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo});
+	}
+
+	async getMonthlyUser(userInfo: UserInfo, monthInfo: MonthInfo) {
+		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo})
 	}
 
 	async createMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
@@ -154,29 +342,36 @@ export class DbmanagerService {
 		return (monthlyUser)
 	}
 
-	async getThisMonthDayList(monthInfo: MonthInfo): Promise<DayInfo[]>  {
-		return await this.dayInfoRepository.findBy({monthInfo});
+	async createMonthlyUserByMonthInfo(userInfo: UserInfo, monthInfo: MonthInfo): Promise<MonthlyUsers> {
+		const monthlyUser = this.monthlyUsersRepository.create({
+			attendanceCount: 0,
+			isPerfect: false,
+			totalPerfectCount: 0,
+			monthInfo: monthInfo,
+			userInfo: userInfo
+		})
+		await this.monthlyUsersRepository.save(monthlyUser)
+		return monthlyUser
 	}
 
-	async getAttendanceList(userInfo: UserInfo): Promise<Attendance[]> {
-		const monthinfo = await this.getThisMonthInfo();
-		const dayInfo: DayInfo[] = await this.getThisMonthDayList(monthinfo);
-		return await this.attendanceRepository.findBy({userInfo, dayInfo})
+	// todo: set async and await
+	updateMonthlyUser(monthlyUser: MonthlyUsers, date: Date) {
+		this.updateMonthlyUserAttendanceCount(monthlyUser, date);
 	}
 
-	updateMonthlyUser(monthlyUser: MonthlyUsers) {
-		this.updateMonthlyUserAttendanceCount(monthlyUser);
+	decreaseMonthlyUser(monthlyUser: MonthlyUsers) {
+		if (monthlyUser.attendanceCount > 0) {
+			this.monthlyUsersRepository.update(monthlyUser.id, {
+				attendanceCount: monthlyUser.attendanceCount - 1
+			})
+		}
 	}
 
-
-
-	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers) {
-
-		if (!this.isWeekend())
+	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers, date: Date) {
+		if (!this.isWeekend(date))
 		{
 			monthlyuser.attendanceCount += 1;
-			// todo: save랑 update 둘 중에 하나만 하기
-			this.monthlyUsersRepository.save(monthlyuser);
+			// todo: save랑 update 둘 중에 하나만 하기 : 일단 save지워봤습니다
 			this.monthlyUsersRepository.update(monthlyuser.id, {
 				attendanceCount: monthlyuser.attendanceCount,
 			});
@@ -187,21 +382,10 @@ export class DbmanagerService {
 		return await this.getThisMonthlyUser(userInfo);
 	}
 
-	async getSpecificDayInfo(monthInfo: MonthInfo, day: number) {
-		return await this.dayInfoRepository.findOneBy({monthInfo, day});
-	}
-
-	async getSpecificMonthInfo(year: number, month: number): Promise<MonthInfo> {
-		return await this.monthInfoRepository.findOneBy({year, month});
-	}
-
 	async getSpecificMonthlyuserInfo(monthInfo: MonthInfo, userInfo: UserInfo): Promise<MonthlyUsers> {
 		return await this.monthlyUsersRepository.findOneBy({monthInfo, userInfo})
 	}
 
-	async getAllUsersInfo(): Promise<UserInfo[]> {
-		return await this.usersRepository.find();
-	}
 
 	// todo: consider for only using MonthInfo
 	async getAllMonthlyUser(allUserInfo: UserInfo[], monthInfo: MonthInfo) {
@@ -215,16 +399,6 @@ export class DbmanagerService {
 		})
 	}
 
-	async updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
-		const timelog = new Date(InfoDto.year, InfoDto.month - 1, InfoDto.day, 8, 30, 0);
-		const userAttendance = this.attendanceRepository.create({
-			userInfo,
-			dayInfo,
-			timelog,
-		});
-		await this.attendanceRepository.save(userAttendance);
-	}
-
 	changeIsPerfect(monthlyUserInfo: MonthlyUsers, status: boolean) {
 		this.monthlyUsersRepository.update(monthlyUserInfo.id, {
 			isPerfect: status
@@ -233,15 +407,46 @@ export class DbmanagerService {
 
 	async updateThisMonthCurrentCount() {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
+		this.logger.log("currentAttendance = " + monthInfo.currentAttendance)
 		this.monthInfoRepository.update(monthInfo.id, {
 			currentAttendance: monthInfo.currentAttendance + 1
 		})
+	}
+
+	async attendanceLogAdd(userInfo: UserInfo, dayInfo: DayInfo, date: Date) {
+		const attendanceInfo = this.attendanceRepository.create(
+			{
+				timelog: date,
+				userInfo,
+				dayInfo
+			}
+		)
+		return await this.attendanceRepository.save(attendanceInfo);
+	}
+
+	async attendanceLogDelete(userInfo: UserInfo, dayInfo: DayInfo): Promise<boolean> {
+		const attendanceInfo = await this.attendanceRepository.findOneBy({userInfo, dayInfo})
+		if (!attendanceInfo) {
+			return false
+		}
+		else {
+			await this.attendanceRepository.delete(attendanceInfo)
+			return true
+		}
+	}
+
+	async updateUserInfoIsOper(userInfo: UserInfo) {
+		this.usersRepository.update(userInfo.id, {
+			isOperator: userInfo.isOperator
+		})
+		return
 	}
 
 	/**************************************
 	 * 			util 함수 목록            *
 	 * ********************************* */
 
+	// todo: to use day_info enum
 	getDayType(now: Date): number {
 		const day: number = now.getDay();
 		if (day !== 0 && day !== 6)
@@ -250,9 +455,8 @@ export class DbmanagerService {
 			return (1);
 	}
 
-	isWeekend(): boolean {
-		const Today = new Date();
-		if (Today.getDay() === 6 || Today.getDay() === 0)
+	isWeekend(date: Date): boolean {
+		if (date.getDay() === 6 || date.getDay() === 0)
 			return true;
 		else
 			return false;
@@ -266,6 +470,17 @@ export class DbmanagerService {
 	/**************************************
 	 * 			test 함수 목록            *
 	 * ********************************* */
+
+	
+	async updateAtendanceInfo(userInfo: UserInfo, dayInfo: DayInfo, InfoDto: UpdateUserAttendanceDto) {
+		const timelog = new Date(InfoDto.year, InfoDto.month - 1, InfoDto.day, 8, 30, 0);
+		const userAttendance = this.attendanceRepository.create({
+			userInfo,
+			dayInfo,
+			timelog,
+		});
+		await this.attendanceRepository.save(userAttendance);
+	}
 
 	async getAllDayInfo(monthInfo: MonthInfo) {
 		return this.dayInfoRepository.findBy({monthInfo})

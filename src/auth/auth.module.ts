@@ -5,10 +5,19 @@ import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { jwtConstants } from './strategy/jwtConstants';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
+import * as config from 'config';
+import * as winston from 'winston';
+import { utilities } from 'nest-winston';
 
+const jwtConfig = config.get('jwt');
+
+const level = process.env.Node_ENV === 'production' ? 'error' : 'silly';
+const format = winston.format.combine(
+  winston.format.timestamp(),
+  utilities.format.nestLike('log', { prettyPrint: true })
+)
 
 @Module({
   imports: [
@@ -16,9 +25,9 @@ import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
     PassportModule,
     TypeOrmModule.forFeature([UserInfo]),
     JwtModule.register({
-      secret: jwtConstants.secret,
+      secret: process.env.JWT_SECRET || jwtConfig.secret,
       signOptions:{
-        expiresIn: 60 * 60 * 60
+        expiresIn: jwtConfig.expiresIn
       }
     })
   ],

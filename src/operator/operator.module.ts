@@ -8,6 +8,8 @@ import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
+import { StatisticService } from 'src/statistic/statistic.service';
+import { AttendanceService } from '../attendance/attendance.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature(
@@ -20,6 +22,6 @@ import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
     ])
   ],
   controllers: [OperatorController],
-  providers: [OperatorService, DbmanagerService]
+  providers: [OperatorService, DbmanagerService, StatisticService, AttendanceService]
 })
 export class OperatorModule {}
