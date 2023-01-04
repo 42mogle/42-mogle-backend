@@ -85,7 +85,7 @@ export class OperatorService {
 			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, true);
 	}
 
-	@Cron('0 0 1 * * 0-6')
+	@Cron('0 0 10 * * 0-6')
 	async updateCurrentCount() {
 		this.logger.log("test", "check updateCurrentCount");
 		const type: number = this.dbmanagerService.getTodayType();
