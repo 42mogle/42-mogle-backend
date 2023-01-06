@@ -80,9 +80,9 @@ export class OperatorService {
 	// todo: set async and await
 	updatePerfectStatus(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
 		if (monthlyUserInfo.attendanceCount < currentAttendance && monthlyUserInfo.isPerfect === true)
-			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, false);
+			this.dbmanagerService.changeMonthlyUserPerfectStatus(monthlyUserInfo, false);
 		else if (monthlyUserInfo.attendanceCount === currentAttendance && monthlyUserInfo.isPerfect === false)
-			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, true);
+			this.dbmanagerService.changeMonthlyUserPerfectStatus(monthlyUserInfo, true);
 	}
 
 	@Cron('0 0 1 * * 0-6')
