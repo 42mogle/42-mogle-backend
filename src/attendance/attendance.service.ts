@@ -52,7 +52,7 @@ export class AttendanceService {
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
 		}
 		await this.dbmanagerService.attendanceRegistration(userInfo, currDatetime);
-		await this.dbmanagerService.increaseMonthlyUserAttendanceCount(monthlyUser, currDatetime);
+		this.dbmanagerService.increaseMonthlyUserAttendanceCount(monthlyUser, currDatetime);
 		this.operatorService.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance);
 		return ({
 			statusAttendance: 0,
