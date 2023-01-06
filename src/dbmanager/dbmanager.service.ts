@@ -9,7 +9,6 @@ import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { userInfo } from 'os';
 
 @Injectable()
 export class DbmanagerService {
@@ -178,6 +177,7 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbAttendanceManager
 	 */
+	//attendanceRegistration
 	async attendanceRegistration(userInfo: UserInfo, currDatetime: Date) {
 		const dayInfo: DayInfo = await this.getTodayInfo();
 		const attendanceinfo = this.attendanceRepository.create({
@@ -334,9 +334,8 @@ export class DbmanagerService {
 			totalPerfectCount: 0,
 			monthInfo: monthInfo,
 			userInfo: userInfo
-		})
-		await this.monthlyUsersRepository.save(monthlyUser);
-		return (monthlyUser)
+		});
+		return (await this.monthlyUsersRepository.save(monthlyUser));
 	}
 
 	async createMonthlyUserByMonthInfo(userInfo: UserInfo, monthInfo: MonthInfo): Promise<MonthlyUsers> {
@@ -351,11 +350,6 @@ export class DbmanagerService {
 		return monthlyUser
 	}
 
-	// todo: set async and await
-	updateMonthlyUser(monthlyUser: MonthlyUsers, date: Date) {
-		this.updateMonthlyUserAttendanceCount(monthlyUser, date);
-	}
-
 	decreaseMonthlyUser(monthlyUser: MonthlyUsers) {
 		if (monthlyUser.attendanceCount > 0) {
 			this.monthlyUsersRepository.update(monthlyUser.id, {
@@ -364,15 +358,15 @@ export class DbmanagerService {
 		}
 	}
 
-	updateMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers, date: Date) {
-		if (!this.isWeekend(date))
-		{
+	async increaseMonthlyUserAttendanceCount(monthlyuser: MonthlyUsers, date: Date) {
+		if (this.isWeekend(date) === false) {
 			monthlyuser.attendanceCount += 1;
-			// todo: save랑 update 둘 중에 하나만 하기 : 일단 save지워봤습니다
-			this.monthlyUsersRepository.update(monthlyuser.id, {
+			await this.monthlyUsersRepository.update(monthlyuser.id, {
 				attendanceCount: monthlyuser.attendanceCount,
 			});
 		}
+		// todo: implement weekend attendance logic
+		return ;
 	}
 
 	async getThisMonthStatus(userInfo: UserInfo) {
@@ -396,10 +390,11 @@ export class DbmanagerService {
 		})
 	}
 
-	changeIsPerfect(monthlyUserInfo: MonthlyUsers, status: boolean) {
+	changeMonthlyUserPerfectStatus(monthlyUserInfo: MonthlyUsers, status: boolean) {
 		this.monthlyUsersRepository.update(monthlyUserInfo.id, {
 			isPerfect: status
 		})
+		return ;
 	}
 
 	async updateThisMonthCurrentCount() {

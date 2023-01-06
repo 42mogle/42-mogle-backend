@@ -52,12 +52,12 @@ export class AttendanceService {
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
 		}
 		await this.dbmanagerService.attendanceRegistration(userInfo, currDatetime);
-		await this.dbmanagerService.updateMonthlyUser(monthlyUser, currDatetime);
-		await this.operatorService.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance);
+		await this.dbmanagerService.increaseMonthlyUserAttendanceCount(monthlyUser, currDatetime);
+		this.operatorService.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance);
 		return ({
 			statusAttendance: 0,
 			errorMsg: "성공적으로 출석 체크를 완료했습니다." // todo: fix for not errorMsg
-		})
+		});
 	}
 
 	// checkSupplementaryAttendance ?
