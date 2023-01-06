@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { LessThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -36,6 +36,21 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbMonthAndDayInfoManager
 	 */
+	async getDayInfoListSameWeek(dayInfo: DayInfo): Promise<DayInfo[]> {
+		const monthInfoThisDay: MonthInfo = dayInfo.monthInfo;
+		const datetimeThisDay = new Date(
+			monthInfoThisDay.year, monthInfoThisDay.month, dayInfo.day, 9, 0, 0
+		);
+		const dayType: number = datetimeThisDay.getDay();
+		let firstDateThisWeek: number = dayInfo.day - (dayType - 1); // 여기서는 월요일을 한주의 시작으로 생각한다.
+		if (firstDateThisWeek < 1) {
+			firstDateThisWeek = 1;
+		}
+		return (await this.dayInfoRepository.findBy({
+			day: Between(firstDateThisWeek, dayInfo.day)
+		}));
+	}
+
 	async saveMonthInfoTable(monthInfo: MonthInfo) {
 		return (await this.monthInfoRepository.save(monthInfo));
 	}
@@ -271,6 +286,11 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbMonthlyUsersManager
 	 */
+	async updateMonthlyUserAttendanceCount(monthlyUser: MonthlyUsers) {
+		await this.monthlyUsersRepository.update(monthlyUser.id, {
+			attendanceCount: monthlyUser.attendanceCount,
+		});
+	}
 
 	async getAllMonthlyUsersInMonth(monthInfo: MonthInfo) {
 		const monthlyUsersInTheMonth = this.monthlyUsersRepository.find({
