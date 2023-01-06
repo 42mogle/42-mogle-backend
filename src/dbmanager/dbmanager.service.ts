@@ -178,16 +178,13 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbAttendanceManager
 	 */
-	async attendanceRegistration(userInfo: UserInfo) {
-		const now = new Date();
+	async attendanceRegistration(userInfo: UserInfo, currDatetime: Date) {
 		const dayInfo: DayInfo = await this.getTodayInfo();
-		const attendanceinfo = this.attendanceRepository.create(
-			{
-				timelog: now,
-				userInfo,
-				dayInfo
-			}
-		)
+		const attendanceinfo = this.attendanceRepository.create({
+			timelog: currDatetime,
+			userInfo,
+			dayInfo
+		});
 		return await this.attendanceRepository.save(attendanceinfo);
 	}
 

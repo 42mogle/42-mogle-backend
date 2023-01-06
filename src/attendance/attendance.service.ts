@@ -51,7 +51,7 @@ export class AttendanceService {
 		if (monthlyUser == null) {
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
 		}
-		await this.dbmanagerService.attendanceRegistration(userInfo); // todo: refactor to set date as arg
+		await this.dbmanagerService.attendanceRegistration(userInfo, currDatetime);
 		await this.dbmanagerService.updateMonthlyUser(monthlyUser, currDatetime);
 		await this.operatorService.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance);
 		return ({
