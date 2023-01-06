@@ -7,4 +7,4 @@ db:
   database: '42mogle-default'
 
 jwt:
-  expiresIn: 216000
+  expiresIn: 1209600
