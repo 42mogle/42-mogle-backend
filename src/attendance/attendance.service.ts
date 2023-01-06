@@ -17,18 +17,19 @@ export class AttendanceService {
 		if (this.isAvailableTime() === false) {
 			return ButtonStatus.NotAvailableTime;
 		}
-		else if (await this.haveAttendedToday(userInfo)) {
+		else if (await this.hasAttendedToday(userInfo)) {
 			return ButtonStatus.AlreadyCheckedAttendance;
 		}
 		return ButtonStatus.AttendanceSuccess;
 	}
 
+	// todo: Refactor
 	// applyAttendance
 	async AttendanceCertification(attendanceinfo: CreateAttendanceDto, userInfo: UserInfo) {
 		const todayWord: string = await this.dbmanagerService.getTodayWord();
 		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
-		const date = new Date()
-		if (await this.haveAttendedToday(userInfo)) {
+		const date = new Date();
+		if (await this.hasAttendedToday(userInfo)) {
 			return ({
 				statusAttendance: 1,
 				errorMsg: "이미 출석 체크 했습니다."
@@ -43,12 +44,12 @@ export class AttendanceService {
 		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(userInfo);
 		if (!monthlyUser)
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
-		await this.dbmanagerService.attendanceRegistration(userInfo);
+		await this.dbmanagerService.attendanceRegistration(userInfo); // todo: refactor to set date as arg
 		await this.dbmanagerService.updateMonthlyUser(monthlyUser, date);
 		await this.operatorService.updatePerfectStatus(monthlyUser, monthInto.currentAttendance);
 		return ({
 			statusAttendance: 0,
-			errorMsg: "성공적으로 출석 체크를 완료했습니다."
+			errorMsg: "성공적으로 출석 체크를 완료했습니다." // todo: fix for not errorMsg
 		})
 	}
 
@@ -82,7 +83,7 @@ export class AttendanceService {
 			return (true);
 	}
 
-	async haveAttendedToday(userInfo: UserInfo): Promise<boolean> {
+	async hasAttendedToday(userInfo: UserInfo): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
 		const todayAttendanceInfo = await this.dbmanagerService.getAttendance(userInfo, todayInfo);
 		if (todayAttendanceInfo === null)
