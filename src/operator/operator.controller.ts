@@ -229,7 +229,7 @@ export class OperatorController {
 		return await this.operatorService.userAttendanceLogAdd(attendanceData)
 	}
 
-	@Delete("/attendance-delete")
+	@Post("/attendance-delete")
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({
