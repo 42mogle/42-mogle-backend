@@ -253,7 +253,14 @@ export class OperatorService {
 		}
 		const monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
 		if ( await this.dbmanagerService.attendanceLogDelete(userInfo, dayInfo)) {
-			await this.dbmanagerService.decreaseMonthlyUser(monthlyUser)
+			const date = new Date(
+				attendanceData.year,
+				attendanceData.month - 1,
+				attendanceData.day,
+				8,
+				30
+			)
+			await this.dbmanagerService.decreaseMonthlyUser(monthlyUser, date)
 			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
 		}
 	}

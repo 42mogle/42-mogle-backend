@@ -359,8 +359,8 @@ export class DbmanagerService {
 		this.updateMonthlyUserAttendanceCount(monthlyUser, date);
 	}
 
-	decreaseMonthlyUser(monthlyUser: MonthlyUsers) {
-		if (monthlyUser.attendanceCount > 0) {
+	decreaseMonthlyUser(monthlyUser: MonthlyUsers, data:Date) {
+		if (monthlyUser.attendanceCount > 0 && !this.isWeekend(Date)) {
 			this.monthlyUsersRepository.update(monthlyUser.id, {
 				attendanceCount: monthlyUser.attendanceCount - 1
 			})
