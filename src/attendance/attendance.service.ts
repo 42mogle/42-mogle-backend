@@ -7,6 +7,7 @@ import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { ButtonStatus } from './button.status.enum';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
+import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 
 @Injectable()
 export class AttendanceService {
@@ -24,29 +25,30 @@ export class AttendanceService {
 	}
 
 	// todo: Refactor
-	// applyAttendance
-	async AttendanceCertification(attendanceinfo: CreateAttendanceDto, userInfo: UserInfo) {
+	// todo: set Dto to return
+	async applyTodayAttendance(attendanceInfo: CreateAttendanceDto, userInfo: UserInfo) {
 		const todayWord: string = await this.dbmanagerService.getTodayWord();
-		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
-		const date = new Date();
-		if (await this.hasAttendedToday(userInfo)) {
+		const monthInfo: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
+		const currDatetime = new Date();
+
+		if (await this.hasAttendedToday(userInfo) === true) {
 			return ({
 				statusAttendance: 1,
 				errorMsg: "이미 출석 체크 했습니다."
 			});
-		}
-		if (attendanceinfo.todayWord !== todayWord) {
+		} else if (attendanceInfo.todayWord !== todayWord) {
 			return ({
 				statusAttendance: 2,
 				errorMsg: "오늘의 단어가 다릅니다."
 			});
 		}
-		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(userInfo);
-		if (!monthlyUser)
+		let monthlyUser: MonthlyUsers = await this.dbmanagerService.getThisMonthlyUser(userInfo);
+		if (monthlyUser == null) {
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
+		}
 		await this.dbmanagerService.attendanceRegistration(userInfo); // todo: refactor to set date as arg
-		await this.dbmanagerService.updateMonthlyUser(monthlyUser, date);
-		await this.operatorService.updatePerfectStatus(monthlyUser, monthInto.currentAttendance);
+		await this.dbmanagerService.updateMonthlyUser(monthlyUser, currDatetime);
+		await this.operatorService.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance);
 		return ({
 			statusAttendance: 0,
 			errorMsg: "성공적으로 출석 체크를 완료했습니다." // todo: fix for not errorMsg
@@ -85,7 +87,7 @@ export class AttendanceService {
 
 	async hasAttendedToday(userInfo: UserInfo): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		const todayAttendanceInfo = await this.dbmanagerService.getAttendance(userInfo, todayInfo);
+		const todayAttendanceInfo: Attendance = await this.dbmanagerService.getAttendance(userInfo, todayInfo);
 		if (todayAttendanceInfo === null)
 			return false;
 		else
