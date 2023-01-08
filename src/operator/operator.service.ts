@@ -233,8 +233,9 @@ export class OperatorService {
 				monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(userInfo, monthInfo)
 			}
 			this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
-			await this.dbmanagerService.increaseOneToMonthlyUserAttendanceCount(monthlyUser, date)
-			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			//await this.dbmanagerService.increaseOneToMonthlyUserAttendanceCount(monthlyUser, date)
+			//await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
 		}
 	}
 
@@ -260,8 +261,9 @@ export class OperatorService {
 				8,
 				30
 			)
-			await this.dbmanagerService.decreaseMonthlyUser(monthlyUser, date)
-			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			// await this.dbmanagerService.decreaseMonthlyUser(monthlyUser, date)
+			// await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
 		}
 	}
 
