@@ -87,7 +87,7 @@ export class OperatorService {
 
 	@Cron('0 0 1 * * 0-6')
 	async updateCurrentCount() {
-		this.logger.log("test", "check updateCurrentCount");
+		this.logger.log("pid = " + process.pid, "check updateCurrentCount");
 		const type: number = this.dbmanagerService.getTodayType();
 		// 0: 일요일
 		// 6: 토요일
@@ -253,7 +253,14 @@ export class OperatorService {
 		}
 		const monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
 		if ( await this.dbmanagerService.attendanceLogDelete(userInfo, dayInfo)) {
-			await this.dbmanagerService.decreaseMonthlyUser(monthlyUser)
+			const date = new Date(
+				attendanceData.year,
+				attendanceData.month - 1,
+				attendanceData.day,
+				8,
+				30
+			)
+			await this.dbmanagerService.decreaseMonthlyUser(monthlyUser, date)
 			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
 		}
 	}

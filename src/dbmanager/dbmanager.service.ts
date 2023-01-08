@@ -485,8 +485,13 @@ export class DbmanagerService {
 		return monthlyUser
 	}
 
-	decreaseMonthlyUser(monthlyUser: MonthlyUsers) {
-		if (monthlyUser.attendanceCount > 0) {
+	// todo: set async and await
+	updateMonthlyUser(monthlyUser: MonthlyUsers, date: Date) {
+		this.increaseOneToMonthlyUserAttendanceCount(monthlyUser, date);
+	}
+
+	decreaseMonthlyUser(monthlyUser: MonthlyUsers, date: Date) {
+		if (monthlyUser.attendanceCount > 0 && !this.isWeekend(date)) {
 			this.monthlyUsersRepository.update(monthlyUser.id, {
 				attendanceCount: monthlyUser.attendanceCount - 1
 			})
@@ -535,7 +540,7 @@ export class DbmanagerService {
 
 	async updateThisMonthCurrentCount() {
 		const monthInfo: MonthInfo = await this.getThisMonthInfo();
-		this.logger.log("currentAttendance = " + monthInfo.currentAttendance)
+		//this.logger.log("currentAttendance = " + monthInfo.currentAttendance)
 		this.monthInfoRepository.update(monthInfo.id, {
 			currentAttendance: monthInfo.currentAttendance + 1
 		})
