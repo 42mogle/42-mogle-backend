@@ -144,7 +144,7 @@ export class OperatorService {
 		}
 
 		// update monthly user status
-		await this.statisticService.updateUserMonthlyProperties(userInfo, monthInfo);
+		await this.statisticService.updateASpecificUserMonthlyProperties(userInfo, monthInfo);
 
 		return ;
 	}
@@ -233,7 +233,7 @@ export class OperatorService {
 				monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(userInfo, monthInfo)
 			}
 			this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
-			await this.dbmanagerService.updateMonthlyUser(monthlyUser, date)
+			await this.dbmanagerService.increaseOneToMonthlyUserAttendanceCount(monthlyUser, date)
 			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
 		}
 	}
