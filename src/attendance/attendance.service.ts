@@ -27,7 +27,8 @@ export class AttendanceService {
 	// todo: Refactor
 	// todo: set Dto to return
 	async applyTodayAttendance(attendanceInfo: CreateAttendanceDto, userInfo: UserInfo) {
-		const todayWord: string = await this.dbmanagerService.getTodayWord();
+		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
+		const todayWord: string = todayInfo.todayWord;
 		const monthInfo: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
 		const currDatetime = new Date();
 
@@ -48,11 +49,14 @@ export class AttendanceService {
 			});
 		}
 		let monthlyUser: MonthlyUsers = await this.dbmanagerService.getThisMonthlyUser(userInfo);
-		if (monthlyUser == null) {
+		if (monthlyUser === null) {
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
 		}
 		await this.dbmanagerService.attendanceRegistration(userInfo, currDatetime);
-		this.dbmanagerService.increaseMonthlyUserAttendanceCount(monthlyUser, currDatetime);
+		if (this.isWeekday(currDatetime) === true) {
+			monthlyUser.attendanceCount += 1;
+		}
+		this.dbmanagerService.updateMonthlyUserAttendanceCount(monthlyUser, monthlyUser.attendanceCount);
 		this.operatorService.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance);
 		return ({
 			statusAttendance: 0,
@@ -60,22 +64,24 @@ export class AttendanceService {
 		});
 	}
 
-	// checkSupplementaryAttendance ?
-	async checkAndReflectSupplementaryAttendance(dayInfo: DayInfo) {
-		
-		if (dayInfo.type === 1) { 			// weekends, 주말출석로직
-			
-
-		} else if (dayInfo.type === 2) {	// the end of month, 월말ㅜ석로직
-			
-		}
-
-		return ;
-	}
-
 	/***********************************
      * 			util function list     *
      ********************************* */
+	isWeekday(date: Date): boolean {
+		const day = date.getDay();
+		if (0 < day && day < 6) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	isWeekend(date: Date): boolean {
+		if (date.getDay() === 6 || date.getDay() === 0)
+			return true;
+		else
+			return false;
+	}
 	
 	isAvailableTime(): Boolean {
 		const now = new Date();
