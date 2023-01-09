@@ -80,9 +80,9 @@ export class OperatorService {
 	// todo: set async and await
 	updatePerfectStatus(monthlyUserInfo: MonthlyUsers, currentAttendance: number) {
 		if (monthlyUserInfo.attendanceCount < currentAttendance && monthlyUserInfo.isPerfect === true)
-			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, false);
+			this.dbmanagerService.changeMonthlyUserPerfectStatus(monthlyUserInfo, false);
 		else if (monthlyUserInfo.attendanceCount === currentAttendance && monthlyUserInfo.isPerfect === false)
-			this.dbmanagerService.changeIsPerfect(monthlyUserInfo, true);
+			this.dbmanagerService.changeMonthlyUserPerfectStatus(monthlyUserInfo, true);
 	}
 
 	@Cron('0 0 1 * * 0-6')
@@ -144,7 +144,7 @@ export class OperatorService {
 		}
 
 		// update monthly user status
-		await this.statisticService.updateUserMonthlyProperties(userInfo, monthInfo);
+		await this.statisticService.updateASpecificUserMonthlyProperties(userInfo, monthInfo);
 
 		return ;
 	}
@@ -233,8 +233,9 @@ export class OperatorService {
 				monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(userInfo, monthInfo)
 			}
 			this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
-			await this.dbmanagerService.updateMonthlyUser(monthlyUser, date)
-			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			//await this.dbmanagerService.increaseOneToMonthlyUserAttendanceCount(monthlyUser, date)
+			//await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
 		}
 	}
 
@@ -260,8 +261,9 @@ export class OperatorService {
 				8,
 				30
 			)
-			await this.dbmanagerService.decreaseMonthlyUser(monthlyUser, date)
-			await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			// await this.dbmanagerService.decreaseMonthlyUser(monthlyUser, date)
+			// await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
 		}
 	}
 
