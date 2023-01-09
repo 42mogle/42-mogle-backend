@@ -219,8 +219,7 @@ export class OperatorService {
 		const attendnaceLog: Attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo)
 		if (attendnaceLog) {
 			throw new BadRequestException("Attendance information already exists")
-		}
-		else {
+		} else {
 			const date = new Date(
 				attendanceData.year,
 				attendanceData.month - 1,
@@ -232,9 +231,7 @@ export class OperatorService {
 			if (!monthlyUser) {
 				monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(userInfo, monthInfo)
 			}
-			this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
-			//await this.dbmanagerService.increaseOneToMonthlyUserAttendanceCount(monthlyUser, date)
-			//await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+			await this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
 			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
 		}
 	}
@@ -253,16 +250,7 @@ export class OperatorService {
 			throw new NotFoundException("dayInfo that dose not exist")
 		}
 		const monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
-		if ( await this.dbmanagerService.attendanceLogDelete(userInfo, dayInfo)) {
-			const date = new Date(
-				attendanceData.year,
-				attendanceData.month - 1,
-				attendanceData.day,
-				8,
-				30
-			)
-			// await this.dbmanagerService.decreaseMonthlyUser(monthlyUser, date)
-			// await this.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance)
+		if (await this.dbmanagerService.attendanceLogDelete(userInfo, dayInfo)) {
 			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
 		}
 	}
