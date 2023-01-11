@@ -1,4 +1,4 @@
-import { Controller, ForbiddenException, Get, Inject, Param, UseGuards } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, Inject, Param, Patch, UseGuards } from '@nestjs/common';
 import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 import { StatisticService } from './statistic.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -81,7 +81,6 @@ export class StatisticController {
 		return await this.statisticService.getUserMonthStatus(userInfo);
 	}
 
-
 	/**
 	 * GET /statistic/monthly-users/{year}/{month}
 	 */
@@ -120,5 +119,45 @@ export class StatisticController {
 		console.log("[GET /statistic/monthly_users/{year}/{month}] requested.");
 		//this.logger.log("[GET /statistic/monthly_users/{year}/{month}] requested.");
 		return (await this.statisticService.getMonthlyUsersInSepcificMonth(year, month));
+	}
+
+	/**
+	 * PATCH /statistic/monthly-users/attendance-info/{year}/{month}
+	 */
+	@Patch("/monthly-users/:year/:month")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'update the monthly users attendance info in a specified month',
+		description: '특정달에 모닝글로리 참여인원들의 출석일수와 상태 업데이트하기'
+	})
+	@ApiParam({
+		name: 'year',
+		type: Number,
+	})
+	@ApiParam({
+		name: 'month',
+		type: Number,
+	})
+	@ApiResponse({
+		status: 201, 
+		description: 'Success', 
+		// todo: type: DTO로 정의하기
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard: No JWT access-token)'
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Forbidden'
+	})
+	async updateMonthlyUsersInASpecificMonth(@GetUserInfo() userInfo: UserInfo, @Param('year') year: number, @Param('month') month: number) {
+		if (userInfo.isOperator === false) {
+			throw new ForbiddenException("오퍼레이터 권한이 없습니다.");
+		}
+		console.log("[PATCH /statistic/monthly-users/attendance-info/{year}/{month}] requested.");
+		//this.logger.log("[GET /statistic/monthly_users/{year}/{month}] requested.");
+		return (await this.statisticService.updateMonthlyUsersInASpecificMonth(year, month));
 	}
 }

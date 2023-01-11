@@ -7,6 +7,7 @@ import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { ButtonStatus } from './button.status.enum';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
+import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 
 @Injectable()
 export class AttendanceService {
@@ -17,57 +18,70 @@ export class AttendanceService {
 		if (this.isAvailableTime() === false) {
 			return ButtonStatus.NotAvailableTime;
 		}
-		else if (await this.haveAttendedToday(userInfo)) {
+		else if (await this.hasAttendedToday(userInfo)) {
 			return ButtonStatus.AlreadyCheckedAttendance;
 		}
 		return ButtonStatus.AttendanceSuccess;
 	}
 
-	// applyAttendance
-	async AttendanceCertification(attendanceinfo: CreateAttendanceDto, userInfo: UserInfo) {
-		const todayWord: string = await this.dbmanagerService.getTodayWord();
-		const monthInto: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
-		const date = new Date()
-		if (await this.haveAttendedToday(userInfo)) {
+	// todo: Refactor
+	// todo: set Dto to return
+	async applyTodayAttendance(attendanceInfo: CreateAttendanceDto, userInfo: UserInfo) {
+		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
+		const todayWord: string = todayInfo.todayWord;
+		const monthInfo: MonthInfo = await this.dbmanagerService.getThisMonthInfo();
+		const currDatetime = new Date();
+
+		if (await this.hasAttendedToday(userInfo) === true) {
 			return ({
 				statusAttendance: 1,
 				errorMsg: "이미 출석 체크 했습니다."
 			});
-		}
-		if (attendanceinfo.todayWord !== todayWord) {
+		} else if (attendanceInfo.todayWord !== todayWord) {
 			return ({
 				statusAttendance: 2,
 				errorMsg: "오늘의 단어가 다릅니다."
 			});
+		} else if (this.isAvailableTime() === false) {
+			return ({
+				statusAttendance: 3,
+				errorMsg: "출석 가능한 시간이 아닙니다."
+			});
 		}
-		let monthlyUser = await this.dbmanagerService.getThisMonthlyUser(userInfo);
-		if (!monthlyUser)
+		let monthlyUser: MonthlyUsers = await this.dbmanagerService.getThisMonthlyUser(userInfo);
+		if (monthlyUser === null) {
 			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
-		await this.dbmanagerService.attendanceRegistration(userInfo);
-		await this.dbmanagerService.updateMonthlyUser(monthlyUser, date);
-		await this.operatorService.updatePerfectStatus(monthlyUser, monthInto.currentAttendance);
+		}
+		await this.dbmanagerService.attendanceRegistration(userInfo, currDatetime);
+		if (this.isWeekday(currDatetime) === true) {
+			monthlyUser.attendanceCount += 1;
+		}
+		this.dbmanagerService.updateMonthlyUserAttendanceCount(monthlyUser, monthlyUser.attendanceCount);
+		this.operatorService.updatePerfectStatus(monthlyUser, monthInfo.currentAttendance);
 		return ({
 			statusAttendance: 0,
-			errorMsg: "성공적으로 출석 체크를 완료했습니다."
-		})
-	}
-
-	// checkSupplementaryAttendance ?
-	async checkAndReflectSupplementaryAttendance(dayInfo: DayInfo) {
-		
-		if (dayInfo.type === 1) { 			// weekends, 주말출석로직
-			
-
-		} else if (dayInfo.type === 2) {	// the end of month, 월말ㅜ석로직
-			
-		}
-
-		return ;
+			errorMsg: "성공적으로 출석 체크를 완료했습니다." // todo: fix for not errorMsg
+		});
 	}
 
 	/***********************************
      * 			util function list     *
      ********************************* */
+	isWeekday(date: Date): boolean {
+		const day = date.getDay();
+		if (0 < day && day < 6) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	isWeekend(date: Date): boolean {
+		if (date.getDay() === 6 || date.getDay() === 0)
+			return true;
+		else
+			return false;
+	}
 	
 	isAvailableTime(): Boolean {
 		const now = new Date();
@@ -82,9 +96,9 @@ export class AttendanceService {
 			return (true);
 	}
 
-	async haveAttendedToday(userInfo: UserInfo): Promise<boolean> {
+	async hasAttendedToday(userInfo: UserInfo): Promise<boolean> {
 		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		const todayAttendanceInfo = await this.dbmanagerService.getAttendance(userInfo, todayInfo);
+		const todayAttendanceInfo: Attendance = await this.dbmanagerService.getAttendance(userInfo, todayInfo);
 		if (todayAttendanceInfo === null)
 			return false;
 		else
