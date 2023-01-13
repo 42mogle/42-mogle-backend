@@ -1,11 +1,12 @@
 import { UserService } from './user.service';
-import { UserInfoDto } from './dto/user-info.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { ApiParam, ApiOperation, ApiTags, ApiResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger'
-import { Controller, Get, Inject, Param, UseGuards } from '@nestjs/common';
+import { ApiParam, ApiOperation, ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
+import { Body, Controller, Get, Inject, UseGuards } from '@nestjs/common';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { UserInfoDto } from './dto/user-info.dto';
+import { PasswordDto } from './dto/password.dto';
 
 @ApiTags('User')
 @Controller('user')
@@ -17,10 +18,13 @@ export class UserController {
 		this.userService = userService;
 	}
 
-	// GET /user/getUserInfo
+	// todo: modify RestAPI name
+	/**
+	 * GET /user/getUserInfo
+	 */
 	@Get('getUserInfo')
 	@UseGuards(JwtAuthGuard)
-	@ApiBearerAuth('access-token') // setting JWT token key
+	@ApiBearerAuth('access-token')
 	@ApiOperation({
 		summary: 'get the user information',
 		description: '유저 정보 요청 API'
@@ -50,5 +54,34 @@ export class UserController {
 			photoUrl: userInfo.photoUrl
 		};
 		return userInfoDto;
+	}
+
+	/**
+	 * PATCH /user/password
+	 */
+	@Get('password')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'Modify user password',
+		description: '유저 비밀번호 변경하기'
+	})
+	@ApiResponse({
+		status: 201, 
+		description: 'Success',
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard: No JWT access-token)'
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Forbidden'
+	})
+	async modifyUserPassword(@GetUserInfo() userInfo: UserInfo, @Body() passwordDto: PasswordDto): Promise<void> {
+		//this.logger.log("[PATCH /user/password] requested.", userInfo.intraId);
+		console.log("[PATCH /user/password] requested.", userInfo.intraId);
+		await this.userService.modifyUserPassword(userInfo, passwordDto);
+		return ;
 	}
 }
