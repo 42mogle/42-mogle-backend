@@ -49,7 +49,7 @@ export class AuthController {
 
   @Get('42oauth/jwt')
   async getJwtBy42OAuthCode(@Query('code') code: string) {
-    console.log("a?");
+    this.logger.log("[ GET /serverAuth/42oauth/jwt ] requested.");
     return await this.authService.getJwtBy42OAuthCode(code);
   }
 
@@ -88,8 +88,6 @@ export class AuthController {
      description: 'Unauthorized'
    })
    async login(@Res() response: Response, @Body() authDto: AuthDto) {
-     console.log("[ POST /serverAuth/login ] requested.");
-     console.log(`authDto.intraId: [${authDto.intraId}]`);
      this.logger.log("[ POST /serverAuth/login ] requested.", authDto.intraId);
      const accessToken = await this.authService.login(authDto);
      response.send({ accessToken });
@@ -110,7 +108,6 @@ export class AuthController {
      description: 'Forbidden'
    })
    logout(@Res() response:Response) {
-     console.log(`[ POST /serverAuth/logout ] requested.`);
      response.send({ message:'로그아웃' });
      this.logger.log("[ POST /serverAuth/logout ] requested.");
      return ;
