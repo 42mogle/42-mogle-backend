@@ -22,6 +22,10 @@ export class AppService {
     private monthlyUsersRepo: Repository<MonthlyUsers>,
   ) {}
 
+  getDefault(): string {
+    return "서버 켜져있어용 ㅎㅎㅎ";
+  }
+
   getHello(): string {
     const str_test = process.env.ENV_TEST;
     console.log(`.env.ENV_TEST: ${str_test}`);
