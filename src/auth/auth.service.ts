@@ -2,10 +2,10 @@ import { AuthDto } from './dto/auth.dto';
 import { IntraIdDto } from './dto/intraId.dto';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+//import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios'
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
+//import { InjectRepository } from '@nestjs/typeorm';
 import { HttpException, HttpStatus, Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { UserBasicInfo } from './dto/userInfo.dto';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
@@ -18,8 +18,8 @@ export class AuthService {
   constructor(
     private readonly httpService: HttpService,
     private jwtService: JwtService,
-    @InjectRepository(UserInfo)
-    private usersRepository: Repository<UserInfo>,
+    //@InjectRepository(UserInfo)
+    //private usersRepository: Repository<UserInfo>,
   ) {}
 
   //42oauth 엑세스 토큰 받아오기
@@ -87,11 +87,7 @@ export class AuthService {
   async firstJoin(code: string): Promise<IntraIdDto> {
     const intraIdAndPhotoUrl = await this.get42IntraIdAndPhotoUrl(code);
     const retIntraIdDto: IntraIdDto = { intraId: intraIdAndPhotoUrl.intraId };
-    const userInfo = await this.usersRepository.findOneBy({
-      intraId: retIntraIdDto.intraId
-    }); // todo: Request to dbManager
-    const defaultImage: string =
-        "https://i.ytimg.com/vi/AwrFPJk_BGU/maxresdefault.jpg";
+    const userInfo = await this.dbmanagerService.getUserInfo(retIntraIdDto.intraId);
 
     console.log(`In AuthService.firstJoin -> retIntraIdDto: `);
     console.log(retIntraIdDto);
@@ -105,15 +101,7 @@ export class AuthService {
       console.log("이전에 회원가입 시도(firstJoin)한 사용자");
     } else {
       console.log("DB user_info table에 사용자 정보 저장");
-      const newUserInfo: UserInfo = this.usersRepository.create({
-        intraId: intraIdAndPhotoUrl.intraId,
-        password: null,
-        isOperator: false,
-        photoUrl: (intraIdAndPhotoUrl.photoUrl === null ? 
-          defaultImage : intraIdAndPhotoUrl.photoUrl),
-        isSignedUp: false,
-      });
-      await this.usersRepository.save(newUserInfo);
+      await this.dbmanagerService.createAndSaveUserInfo(intraIdAndPhotoUrl);
     }
     return (retIntraIdDto);
   }
@@ -135,9 +123,7 @@ export class AuthService {
 
   //회원가입2 유저가 기입한 정보로 회원가입
   async secondJoin(authDto: AuthDto) {
-    let userInfo = await this.usersRepository.findOneBy({
-      intraId: authDto.intraId
-    }) // todo: Request to dbManager
+    let userInfo = await this.dbmanagerService.getUserInfo(authDto.intraId);
 
     if (userInfo === null) {
       console.log("유효하지 않은 인트라 아이디");
@@ -159,7 +145,7 @@ export class AuthService {
       }
       userInfo.password = await bcrypt.hash(authDto.password, saltOrRounds);
       userInfo.isSignedUp = true;
-      this.usersRepository.save(userInfo);
+      this.dbmanagerService.saveUserInfo(userInfo);
     }
     return ; // todo: send success message ?
   }
@@ -171,7 +157,7 @@ export class AuthService {
   }
 
   async login(authDto: AuthDto): Promise<string> {
-    const userInfo = await this.usersRepository.findOneBy({ intraId: authDto.intraId });
+    const userInfo = await this.dbmanagerService.getUserInfo(authDto.intraId);
     if (userInfo === null) {
       console.log("No user -> 401 UNAUTHORIZED")
       throw new HttpException('회원정보가 존재하지 않습니다.', HttpStatus.UNAUTHORIZED);

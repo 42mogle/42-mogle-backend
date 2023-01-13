@@ -6,11 +6,6 @@ import { AuthDto } from './dto/auth.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IntraIdDto } from './dto/intraId.dto';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { UserInfo } from '../dbmanager/entities/user_info.entity';
-import { UserBasicInfo } from './dto/userInfo.dto';
-import { DbmanagerService } from '../dbmanager/dbmanager.service';
-import { GetUserInfo } from '../costom-decorator/get-userInfo.decorator';
-import { userInfo } from 'os';
 
 @ApiTags('Auth')
 @Controller('serverAuth')
