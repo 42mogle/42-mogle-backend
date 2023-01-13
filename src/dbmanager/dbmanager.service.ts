@@ -575,6 +575,12 @@ export class DbmanagerService {
 		return
 	}
 
+	updateUserPhotoUrl(userInfo: UserInfo, photoUrl: string) {
+		this.usersRepository.update(userInfo.id, {
+			photoUrl: photoUrl
+		})
+	}
+
 	/**************************************
 	 * 			util 함수 목록            *
 	 * ********************************* */

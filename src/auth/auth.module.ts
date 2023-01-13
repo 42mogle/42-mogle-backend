@@ -10,6 +10,7 @@ import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import * as config from 'config';
 import * as winston from 'winston';
 import { utilities } from 'nest-winston';
+import { DbmanagerService } from '../dbmanager/dbmanager.service';
 
 const jwtConfig = config.get('jwt');
 
@@ -33,6 +34,6 @@ const format = winston.format.combine(
   ],
 
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy]
+  providers: [AuthService, JwtStrategy, DbmanagerService]
 })
 export class AuthModule {}

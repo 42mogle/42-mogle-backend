@@ -6,10 +6,15 @@ import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios'
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { UserBasicInfo } from './dto/userInfo.dto';
+import { DbmanagerService } from '../dbmanager/dbmanager.service';
 
 @Injectable()
 export class AuthService {
+  
+  @Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService
+  
   constructor(
     private readonly httpService: HttpService,
     private jwtService: JwtService,
@@ -178,4 +183,45 @@ export class AuthService {
     }
     return (this.createJwtAccessToken(authDto.intraId));
   }
+
+  async getJwtBy42OAuthCode(code: string) {
+    const userBasicInfo : UserBasicInfo = await this.getUserInfoByCode(code);
+    const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(userBasicInfo.intraId);
+    if (!userInfo) {
+      throw new NotFoundException("not found user");
+    }
+    else {
+      this.dbmanagerService.updateUserPhotoUrl(userInfo, userBasicInfo.photoUrl);
+      return this.createJwtAccessToken(userBasicInfo.intraId);
+    }
+  }
+
+
+  async getUserInfoByCode(code: string) {
+    const oauthAccessToken = await this.getOauthToken(code);
+    let userBasicInfo: UserBasicInfo;
+
+    await this.httpService.axiosRef
+      .get('https://api.intra.42.fr/v2/me', {
+        headers: {
+          Authorization: `Bearer ${oauthAccessToken}`,
+          'content-type': 'application/json',
+        },
+      })
+      .then((res) => {
+        userBasicInfo = {
+          intraId: res.data.login,
+          photoUrl: res.data.image.link,
+        }
+        console.log("api.intra.42.fr/v2/me 요청 성공");
+      })
+      .catch((err) => {
+        console.log("api.intra.42.fr/v2/me 요청 실패");
+        throw new HttpException({
+          errorMessage: "api.intra.42.fr/v2/me 요청 실패"
+        }, HttpStatus.NOT_FOUND);
+      });
+      return (userBasicInfo);
+  }
+
 }
