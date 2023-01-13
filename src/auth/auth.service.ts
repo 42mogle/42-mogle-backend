@@ -174,7 +174,13 @@ export class AuthService {
     if (!userInfo) {
       throw new NotFoundException("not found user");
     } else {
-      this.dbmanagerService.updateUserPhotoUrl(userInfo, userBasicInfo.photoUrl);
+      const defaultImage: string =
+        "https://i.ytimg.com/vi/AwrFPJk_BGU/maxresdefault.jpg";
+      if (userBasicInfo.photoUrl === null) {
+        this.dbmanagerService.updateUserPhotoUrl(userInfo, defaultImage);
+      } else {
+        this.dbmanagerService.updateUserPhotoUrl(userInfo, userBasicInfo.photoUrl);
+      }
       return this.createJwtAccessToken(userBasicInfo.intraId);
     }
   }
