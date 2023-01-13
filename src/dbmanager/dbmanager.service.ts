@@ -602,6 +602,11 @@ export class DbmanagerService {
 	}
 
 	updateUserPhotoUrl(userInfo: UserInfo, photoUrl: string) {
+		const defaultImage: string =
+			"https://i.ytimg.com/vi/AwrFPJk_BGU/maxresdefault.jpg";
+		if (photoUrl === null)
+			photoUrl = defaultImage;
+		if (!photoUrl)
 		this.usersRepository.update(userInfo.id, {
 			photoUrl: photoUrl
 		})
