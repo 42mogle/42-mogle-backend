@@ -2,10 +2,8 @@ import { AuthDto } from './dto/auth.dto';
 import { IntraIdDto } from './dto/intraId.dto';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import * as bcrypt from 'bcrypt';
-//import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios'
 import { JwtService } from '@nestjs/jwt';
-//import { InjectRepository } from '@nestjs/typeorm';
 import { HttpException, HttpStatus, Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { UserBasicInfo } from './dto/userInfo.dto';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
@@ -22,7 +20,7 @@ export class AuthService {
     //private usersRepository: Repository<UserInfo>,
   ) {}
 
-  //42oauth 엑세스 토큰 받아오기
+  // 42oauth 엑세스 토큰 받아오기
   /**
    *
    * @param code 42OAuthCode
@@ -175,8 +173,7 @@ export class AuthService {
     const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(userBasicInfo.intraId);
     if (!userInfo) {
       throw new NotFoundException("not found user");
-    }
-    else {
+    } else {
       this.dbmanagerService.updateUserPhotoUrl(userInfo, userBasicInfo.photoUrl);
       return this.createJwtAccessToken(userBasicInfo.intraId);
     }

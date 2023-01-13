@@ -69,6 +69,13 @@ export class DbmanagerService {
 		return (await this.usersRepository.save(userInfo));
 	}
 
+	async updateUserInfoPassword(userInfo: UserInfo, encryptedPassword: string) {
+		await this.usersRepository.update(userInfo.id, {
+			password: encryptedPassword,
+		});
+		return userInfo;
+	}
+
 	/******************************************************
 	 * todo: set in DbMonthAndDayInfoManager
 	 */
