@@ -2,7 +2,7 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { ApiParam, ApiOperation, ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
-import { Body, Controller, Get, Inject, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { UserInfoDto } from './dto/user-info.dto';
@@ -59,7 +59,7 @@ export class UserController {
 	/**
 	 * PATCH /user/password
 	 */
-	@Get('password')
+	@Patch('password')
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({
