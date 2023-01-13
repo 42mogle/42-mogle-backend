@@ -10,6 +10,11 @@ import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import * as config from 'config';
 import * as winston from 'winston';
 import { utilities } from 'nest-winston';
+import { DbmanagerService } from '../dbmanager/dbmanager.service';
+import { Attendance } from 'src/dbmanager/entities/attendance.entity';
+import { DayInfo } from 'src/dbmanager/entities/day_info.entity';
+import { MonthInfo } from 'src/dbmanager/entities/month_info.entity';
+import { MonthlyUsers } from 'src/dbmanager/entities/monthly_users.entity';
 
 const jwtConfig = config.get('jwt');
 
@@ -23,7 +28,7 @@ const format = winston.format.combine(
   imports: [
     HttpModule,
     PassportModule,
-    TypeOrmModule.forFeature([UserInfo]),
+    TypeOrmModule.forFeature([UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || jwtConfig.secret,
       signOptions:{
@@ -33,6 +38,6 @@ const format = winston.format.combine(
   ],
 
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy]
+  providers: [AuthService, JwtStrategy, DbmanagerService]
 })
 export class AuthModule {}

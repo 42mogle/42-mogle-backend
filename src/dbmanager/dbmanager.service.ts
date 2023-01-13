@@ -9,6 +9,7 @@ import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { UserBasicInfo } from 'src/auth/dto/userInfo.dto';
 
 @Injectable()
 export class DbmanagerService {
@@ -24,6 +25,20 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbUserInfoManager
 	 */
+	async createAndSaveUserInfo(intraIdAndPhotoUrl: UserBasicInfo) {
+		const defaultImage: string =
+			"https://i.ytimg.com/vi/AwrFPJk_BGU/maxresdefault.jpg";
+		const newUserInfo: UserInfo = this.usersRepository.create({
+		  intraId: intraIdAndPhotoUrl.intraId,
+		  password: null,
+		  isOperator: false,
+		  photoUrl: (intraIdAndPhotoUrl.photoUrl === null ? 
+			defaultImage : intraIdAndPhotoUrl.photoUrl),
+		  isSignedUp: false,
+		});
+		return (await this.usersRepository.save(newUserInfo));
+	}
+
 	async getUserInfo(intraId: string): Promise<UserInfo> {
 		const found = await this.usersRepository.findOne({ where: { intraId } });
 		return found;
@@ -46,6 +61,17 @@ export class DbmanagerService {
 			where: {
 				id: joinedMonthlyUserWithUserInfo.userInfo.id,
 			}
+		});
+		return userInfo;
+	}
+
+	async saveUserInfo(userInfo: UserInfo) {
+		return (await this.usersRepository.save(userInfo));
+	}
+
+	async updateUserInfoPassword(userInfo: UserInfo, encryptedPassword: string) {
+		await this.usersRepository.update(userInfo.id, {
+			password: encryptedPassword,
 		});
 		return userInfo;
 	}
@@ -573,6 +599,12 @@ export class DbmanagerService {
 			isOperator: userInfo.isOperator
 		})
 		return
+	}
+
+	updateUserPhotoUrl(userInfo: UserInfo, photoUrl: string) {
+		this.usersRepository.update(userInfo.id, {
+			photoUrl: photoUrl
+		})
 	}
 
 	/**************************************

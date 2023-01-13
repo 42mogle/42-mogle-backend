@@ -10,6 +10,11 @@ export class AppController {
     	private dbm_serv: DbmanagerService
     ) {}
 
+	@Get('/')
+	getDefault(): string {
+		return (this.appService.getDefault());
+	}
+
 	@Get('/test')
 	testGet() {
 		console.log(`get test requested`);
