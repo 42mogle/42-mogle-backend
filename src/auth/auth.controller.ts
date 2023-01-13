@@ -49,7 +49,7 @@ export class AuthController {
 
   @Get('42oauth/jwt')
   async getJwtBy42OAuthCode(@Query('code') code: string) {
-    
+    console.log("a?");
     return await this.authService.getJwtBy42OAuthCode(code);
   }
 
