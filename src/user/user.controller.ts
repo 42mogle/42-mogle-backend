@@ -79,8 +79,7 @@ export class UserController {
 		description: 'Forbidden'
 	})
 	async modifyUserPassword(@GetUserInfo() userInfo: UserInfo, @Body() passwordDto: PasswordDto): Promise<void> {
-		//this.logger.log("[PATCH /user/password] requested.", userInfo.intraId);
-		console.log("[PATCH /user/password] requested.", userInfo.intraId);
+		this.logger.log("[PATCH /user/password] requested.", userInfo.intraId);
 		await this.userService.modifyUserPassword(userInfo, passwordDto);
 		return ;
 	}
