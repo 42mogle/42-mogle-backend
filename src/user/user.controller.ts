@@ -2,7 +2,7 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { ApiParam, ApiOperation, ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
-import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Patch, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { UserInfoDto } from './dto/user-info.dto';
@@ -83,4 +83,17 @@ export class UserController {
 		await this.userService.modifyUserPassword(userInfo, passwordDto);
 		return ;
 	}
+
+	@Get('operatorStatus')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	getUsersOperatorStatus(@GetUserInfo() userInfo: UserInfo) {
+		this.logger.log("[GET] /user/operatorStatus", userInfo.intraId)
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		return this.userService.getAllUsersOperatorInfo();
+	}
 }
+

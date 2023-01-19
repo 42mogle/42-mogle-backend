@@ -3,6 +3,7 @@ import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { PasswordDto } from './dto/password.dto';
 import * as bcrypt from 'bcrypt';
+import { UserOperatorInfo } from './dto/userOperatorInfo.dto';
 
 @Injectable()
 export class UserService {
@@ -33,5 +34,18 @@ export class UserService {
 		userInfo.password = await bcrypt.hash(passwordDto.password, saltOrRounds);
 		await this.dbmanagerService.updateUserInfoPassword(userInfo, userInfo.password);
 		return ;
+	}
+
+	async getAllUsersOperatorInfo() {
+		const usersInfo: UserInfo[] = await this.dbmanagerService.getAllUsersInfo();
+		let usersOperatorInfo: UserOperatorInfo[] = [];
+		for (const userInfo of usersInfo) {
+			const userOperatorInfo: UserOperatorInfo = {
+				intraId: userInfo.intraId,
+				isOperator: userInfo.isOperator
+			}
+			usersOperatorInfo.push(userOperatorInfo);
+		}
+		return usersOperatorInfo;
 	}
 }
