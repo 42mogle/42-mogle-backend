@@ -594,9 +594,9 @@ export class DbmanagerService {
 		}
 	}
 
-	async updateUserInfoIsOper(userInfo: UserInfo) {
+	async updateUserInfoIsOper(userInfo: UserInfo, isOperator: boolean) {
 		this.usersRepository.update(userInfo.id, {
-			isOperator: userInfo.isOperator
+			isOperator: isOperator
 		})
 		return
 	}

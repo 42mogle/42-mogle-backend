@@ -13,7 +13,6 @@ import { StatisticService } from 'src/statistic/statistic.service'
 import { DataListDto } from './dto/dataList.dto'
 import { AttendanceData } from './dto/attendnaceData.dto'
 import { Attendance } from '../dbmanager/entities/attendance.entity'
-import { OperatorList } from './dto/operatorList.Dto';
 
 @Injectable()
 export class OperatorService {
@@ -255,18 +254,19 @@ export class OperatorService {
 		}
 	}
 
-	async operatorAddOrDelete(operatorList: OperatorList) {
-		let userInfo: UserInfo
-		for (let i in operatorList.intraIdList) {
-			userInfo = await this.dbmanagerService.getUserInfo(operatorList.intraIdList[i])
-			if (userInfo.isOperator) {
-				userInfo.isOperator = false
-			}
-			else {
-				userInfo.isOperator = true
-			}
-			await this.dbmanagerService.updateUserInfoIsOper(userInfo)
+	async addOperator(intraId: string) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId)
+		if (!userInfo) {
+			throw new NotFoundException("Not Found User")
 		}
-		return
+		this.dbmanagerService.updateUserInfoIsOper(userInfo, true)
+	}
+
+	async deleteOperator(intraId: string) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId)
+		if (!userInfo) {
+			throw new NotFoundException("Not Found User");
+		}
+		this.dbmanagerService.updateUserInfoIsOper(userInfo, false)
 	}
 }
