@@ -7,6 +7,7 @@ import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
 import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { UserInfoDto } from './dto/user-info.dto';
 import { PasswordDto } from './dto/password.dto';
+import { userInfo } from 'os';
 
 @ApiTags('User')
 @Controller('user')
@@ -94,6 +95,14 @@ export class UserController {
 			throw new UnauthorizedException()
 		}
 		return this.userService.getAllUsersOperatorInfo();
+	}
+
+	@Get('operator-check')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	async getUserOperatorStatus(@GetUserInfo() userInfo: UserInfo) {
+		this.logger.log("[GET] /user/operator-check", userInfo.intraId)
+		return this.userService.getUserOperatorStatus(userInfo.intraId)
 	}
 }
 
