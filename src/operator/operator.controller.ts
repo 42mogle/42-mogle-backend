@@ -103,7 +103,7 @@ export class OperatorController {
 	/**
 	 * POST /operator/update/currentAttendanceCount
 	 */
-	@Patch("/update/currentAttendanceCount/") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
+	@Patch("/update/this-month/current-attendance/") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'update month currrent attendance count'})
@@ -115,11 +115,13 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateCurrentAttendanceCount(
+	updateThisMonthCurrentAttendanceCount(
 		@GetUserInfo() userInfo: UserInfo
 	) {
-		console.log(` [ POST /operator/update/currentAttendanceCount ] requested.`)
-		this.operatorService.updateCurrentCount();
+		console.log(` [ POST /operator/update/this-month/current-attendance ] requested.`)
+		if (userInfo.isOperator === false)
+			throw new UnauthorizedException("Not Operator");
+		this.operatorService.updateThisMonthCurrentAttendance();
 	}
 
 
