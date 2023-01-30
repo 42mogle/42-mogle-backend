@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Between, LessThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThan, LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -424,6 +424,13 @@ export class DbmanagerService {
 		return monthlyUser;
 	}
 
+	updateMonthlyUserTotalPerfectCount(monthlyUser: MonthlyUsers, totalPerfectCount: number) {
+		this.monthlyUsersRepository.update(monthlyUser.id, {
+			totalPerfectCount,
+		});
+		return ;
+	}
+
 	async getAllMonthlyUsersInAMonth(monthInfo: MonthInfo): Promise<MonthlyUsers[]> {
 		const allMonthlyUsersInAMonth: MonthlyUsers[] = await this.monthlyUsersRepository.find({
 			where: {
@@ -452,7 +459,36 @@ export class DbmanagerService {
 			//select: ['userInfo','totalPerfectCount','isPerfect'],
 		});
 		return monthlyUsersInTheMonth;
-		
+	}
+
+	async getMonthlylUsersOfAUserInLastMonthes(userInfo: UserInfo, currMonthInfo: MonthInfo) {
+		const lastYearMonthlyUser = await this.monthlyUsersRepository.find({
+			relations: {
+				//userInfo: true,
+				monthInfo: true,
+			},
+			where: {
+				userInfo: userInfo,
+				monthInfo: {
+					year: LessThan(currMonthInfo.year),
+				}
+			}
+		});
+		const lastMonthSameYearMonthlyUser = await this.monthlyUsersRepository.find({
+			relations: {
+				//userInfo: true,
+				monthInfo: true,
+			},
+			where: {
+				userInfo: userInfo,
+				monthInfo: {
+					year: currMonthInfo.year,
+					month: LessThan(currMonthInfo.month),
+				}
+			}
+		});
+		const ret = lastYearMonthlyUser.concat(lastMonthSameYearMonthlyUser);
+		return ret;
 	}
 
 	async getCountOfTotalThisMonthlyUsers(monthInfo: MonthInfo) {
@@ -563,6 +599,8 @@ export class DbmanagerService {
 		})
 		return ;
 	}
+
+	// buff
 
 	async updateMonthInfoCurrentAttendance(monthInfo: MonthInfo, currentAttendance: number) {
 		this.monthInfoRepository.update(monthInfo.id, {
