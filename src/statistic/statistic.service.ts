@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
@@ -82,6 +82,9 @@ export class StatisticService {
 	}
 
 	async updateMonthlyUsersInASpecificMonth(year: number, month: number) {
+		if (year === 2022 && month === 11) {
+			throw new NotAcceptableException('forbidden to update 2022.11');
+		}
 		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(month, year);
 		const monthlyUsers: MonthlyUsers[] = await this.dbmanagerService.getAllMonthlyUsersInAMonth(monthInfo);
 		monthlyUsers.forEach(async (monthlyUser) => {
