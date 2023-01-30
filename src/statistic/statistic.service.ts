@@ -86,6 +86,7 @@ export class StatisticService {
 		const monthlyUsers: MonthlyUsers[] = await this.dbmanagerService.getAllMonthlyUsersInAMonth(monthInfo);
 		monthlyUsers.forEach(async (monthlyUser) => {
 			await this.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
+			await this.updateMonthlyUserTotalPerfectCount(monthlyUser, monthInfo);
 			// TODO: replace to updateMonthlyUserProperties()
 		});
 		return monthlyUsers;
@@ -147,5 +148,24 @@ export class StatisticService {
 		}
 		await this.dbmanagerService.updateMonthlyUserPerfectStatus(monthlyUser, monthlyUser.isPerfect);
 		return monthlyUser;
+	}
+
+	async updateMonthlyUserTotalPerfectCount(monthlyUser: MonthlyUsers, monthInfo: MonthInfo) {
+		const userInfo = await this.dbmanagerService.getUserInfoByMonthlyUser(monthlyUser);
+		const lastMonthlyUsersOfAUser = await this.dbmanagerService.getMonthlylUsersOfAUserInLastMonthes(userInfo, monthInfo);
+		if (lastMonthlyUsersOfAUser.length === 0) {
+			monthlyUser.totalPerfectCount = 0;
+		} else {
+			let maximumTotalPerfectCountLastMonthes = 0;
+			lastMonthlyUsersOfAUser.forEach((lastMonthlyUser) => {
+				if (lastMonthlyUser.totalPerfectCount > maximumTotalPerfectCountLastMonthes) {
+					maximumTotalPerfectCountLastMonthes = lastMonthlyUser.totalPerfectCount;
+				}
+			});
+			monthlyUser.totalPerfectCount = maximumTotalPerfectCountLastMonthes;
+		}
+		if (monthlyUser.isPerfect === true)
+			monthlyUser.totalPerfectCount += 1;
+		this.dbmanagerService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthlyUser.totalPerfectCount);
 	}
 }
