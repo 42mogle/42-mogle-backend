@@ -230,7 +230,7 @@ export class DbmanagerService {
 				attendUserCount: 0,
 				type: type,
 				perfectUserCount: 0,
-				todayWord: "뀨?",
+				todayWord: "뀨?", // TODO: modify
 			})
 			await this.dayInfoRepository.save(dayInfo);
 		}
@@ -564,11 +564,9 @@ export class DbmanagerService {
 		return ;
 	}
 
-	async updateThisMonthCurrentCount() {
-		const monthInfo: MonthInfo = await this.getThisMonthInfo();
-		//this.logger.log("currentAttendance = " + monthInfo.currentAttendance)
+	async updateMonthInfoCurrentAttendance(monthInfo: MonthInfo, currentAttendance: number) {
 		this.monthInfoRepository.update(monthInfo.id, {
-			currentAttendance: monthInfo.currentAttendance + 1
+			currentAttendance: currentAttendance,
 		})
 	}
 
@@ -612,8 +610,8 @@ export class DbmanagerService {
 	 * ********************************* */
 
 	// todo: to use day_info enum
-	getDayType(now: Date): number {
-		const day: number = now.getDay();
+	getDayType(date: Date): number {
+		const day: number = date.getDay();
 		if (day !== 0 && day !== 6)
 			return (0);
 		else

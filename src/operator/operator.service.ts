@@ -85,13 +85,14 @@ export class OperatorService {
 	}
 
 	@Cron('0 0 1 * * 0-6')
-	async updateCurrentCount() {
+	async updateThisMonthCurrentAttendance() {
 		this.logger.log("pid = " + process.pid, "check updateCurrentCount");
-		const type: number = this.dbmanagerService.getTodayType();
-		// 0: 일요일
-		// 6: 토요일
-		if (type !== 0 && type !== 6)
-			this.dbmanagerService.updateThisMonthCurrentCount();
+		const thisTime: Date = new Date();
+		const thisMonthInfo: MonthInfo = await this.dbmanagerService.getSpecificMonthInfo(thisTime.getFullYear(), thisTime.getMonth() + 1);
+		const currentAttendanceThisMonth = await this.dbmanagerService.getCountOfThisMonthCurrentAttendance(thisMonthInfo, thisTime.getDate());
+		const typeOfToday: number = thisTime.getDay();
+		if (typeOfToday !== 0 && typeOfToday !== 6) // 0: Sunday, 6: Saturday
+			this.dbmanagerService.updateMonthInfoCurrentAttendance(thisMonthInfo, currentAttendanceThisMonth);
 	}
 
 	// implementing...
