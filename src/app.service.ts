@@ -27,10 +27,12 @@ export class AppService {
   }
 
   getHello(): string {
-    const str_test = process.env.ENV_TEST;
-    console.log(`.env.ENV_TEST: ${str_test}`);
-    const test_env_api = process.env.PAYLOAD_CLIENT_ID;
-    console.log(`.env.api: ${test_env_api}`);
+    const str_test = process.env.ENV_TEST || null;
+    //console.log(`.env.ENV_TEST: ${str_test}`);
+    //const test_env_api = process.env.PAYLOAD_CLIENT_ID;
+    //console.log(`.env.api: ${test_env_api}`);
+    //const test_today_word = process.env.TODAY_WORD;
+    //console.log(`.env.TODAY_WORD: ${test_today_word}`);
     return str_test;
   }
 }

@@ -230,7 +230,7 @@ export class DbmanagerService {
 				attendUserCount: 0,
 				type: type,
 				perfectUserCount: 0,
-				todayWord: "뀨?", // TODO: modify
+				todayWord: process.env.TODAY_WORD || "뀨?",
 			})
 			await this.dayInfoRepository.save(dayInfo);
 		}
