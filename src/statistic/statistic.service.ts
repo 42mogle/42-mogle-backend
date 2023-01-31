@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
@@ -82,10 +82,14 @@ export class StatisticService {
 	}
 
 	async updateMonthlyUsersInASpecificMonth(year: number, month: number) {
+		if (year === 2022 && month === 11) {
+			throw new NotAcceptableException('forbidden to update 2022.11');
+		}
 		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(month, year);
 		const monthlyUsers: MonthlyUsers[] = await this.dbmanagerService.getAllMonthlyUsersInAMonth(monthInfo);
 		monthlyUsers.forEach(async (monthlyUser) => {
 			await this.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
+			await this.updateMonthlyUserTotalPerfectCount(monthlyUser, monthInfo);
 			// TODO: replace to updateMonthlyUserProperties()
 		});
 		return monthlyUsers;
@@ -147,5 +151,24 @@ export class StatisticService {
 		}
 		await this.dbmanagerService.updateMonthlyUserPerfectStatus(monthlyUser, monthlyUser.isPerfect);
 		return monthlyUser;
+	}
+
+	async updateMonthlyUserTotalPerfectCount(monthlyUser: MonthlyUsers, monthInfo: MonthInfo) {
+		const userInfo = await this.dbmanagerService.getUserInfoByMonthlyUser(monthlyUser);
+		const lastMonthlyUsersOfAUser = await this.dbmanagerService.getMonthlylUsersOfAUserInLastMonthes(userInfo, monthInfo);
+		if (lastMonthlyUsersOfAUser.length === 0) {
+			monthlyUser.totalPerfectCount = 0;
+		} else {
+			let maximumTotalPerfectCountLastMonthes = 0;
+			lastMonthlyUsersOfAUser.forEach((lastMonthlyUser) => {
+				if (lastMonthlyUser.totalPerfectCount > maximumTotalPerfectCountLastMonthes) {
+					maximumTotalPerfectCountLastMonthes = lastMonthlyUser.totalPerfectCount;
+				}
+			});
+			monthlyUser.totalPerfectCount = maximumTotalPerfectCountLastMonthes;
+		}
+		if (monthlyUser.isPerfect === true)
+			monthlyUser.totalPerfectCount += 1;
+		this.dbmanagerService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthlyUser.totalPerfectCount);
 	}
 }
