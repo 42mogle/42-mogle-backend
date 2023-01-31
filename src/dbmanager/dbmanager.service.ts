@@ -167,6 +167,15 @@ export class DbmanagerService {
 		let eachNewDayInfo: DayInfo;
 		const totalDate: number = lastDatetimeInMonth.getDate();
 		for(let eachDate = 1; eachDate <= totalDate; ++eachDate) {
+			eachNewDayInfo = await this.dayInfoRepository.findOne({
+				where: {
+					day: eachDate,
+					monthInfo: monthInfo,
+				}
+			});
+			if (eachNewDayInfo) {
+				continue ;
+			}
 			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate));
 			eachNewDayInfo = this.dayInfoRepository.create({
 				day: eachDate,
@@ -182,15 +191,23 @@ export class DbmanagerService {
 	}
 
 	async setMonthInfoWithDayInfos(monthNotIndexed: number, year: number) {
-		let newMonthInfo: MonthInfo = this.monthInfoRepository.create({
-			month: monthNotIndexed,
-			year,
-			currentAttendance: 0,
-			totalAttendance: 20,
-			perfectUserCount: 0,
-			totalUserCount: 0,
+		let newMonthInfo: MonthInfo = await this.monthInfoRepository.findOne({
+			where: {
+				year,
+				month: monthNotIndexed,
+			}
 		});
-		newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		if (newMonthInfo === null) {
+			newMonthInfo = this.monthInfoRepository.create({
+				month: monthNotIndexed,
+				year,
+				currentAttendance: 0,
+				totalAttendance: 20,
+				perfectUserCount: 0,
+				totalUserCount: 0,
+			});
+			newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		}
 		const lastDatetimeInMonth: Date = new Date(year, monthNotIndexed, 0);
 		await this.setAllDayInfosInThisMonth(newMonthInfo, lastDatetimeInMonth);
 		return newMonthInfo;
