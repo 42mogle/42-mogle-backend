@@ -523,7 +523,7 @@ export class DbmanagerService {
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo})
 	}
 
-	async createMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
+	async createMonthlyUserInThisMonth(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo = await this.getThisMonthInfo();
 		const monthlyUser = this.monthlyUsersRepository.create({
 			attendanceCount: 0,
