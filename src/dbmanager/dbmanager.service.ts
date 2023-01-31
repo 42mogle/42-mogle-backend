@@ -167,7 +167,7 @@ export class DbmanagerService {
 		let eachNewDayInfo: DayInfo;
 		const totalDate: number = lastDatetimeInMonth.getDate();
 		for(let eachDate = 1; eachDate <= totalDate; ++eachDate) {
-			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate)); // search: how to be more efficient ?
+			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate));
 			eachNewDayInfo = this.dayInfoRepository.create({
 				day: eachDate,
 				monthInfo: monthInfo,
@@ -359,8 +359,8 @@ export class DbmanagerService {
 	@Cron('0 1 0 1 * *')
 	setTotalMonthcron() {
 		//this.logger.debug("setTotalMonthcron test")
+		//this.setMonthInfo();
 		this.logger.log("pid = " + process.pid, "check setTotalMonthCron");
-		this.setMonthInfo();
 		const currDatetime = new Date();
 		let monthNotIndexed = currDatetime.getMonth() + 1;
 		const year = currDatetime.getFullYear();
