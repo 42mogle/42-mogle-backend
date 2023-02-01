@@ -13,7 +13,7 @@ import { StatisticService } from 'src/statistic/statistic.service'
 import { DataListDto } from './dto/dataList.dto'
 import { AttendanceData } from './dto/attendnaceData.dto'
 import { Attendance } from '../dbmanager/entities/attendance.entity'
-import { OperatorList } from './dto/operatorList.Dto';
+import { GsheetTotalPerfectCount } from './dto/gsheetTotalPerfectCount.dto';
 
 @Injectable()
 export class OperatorService {
@@ -58,7 +58,7 @@ export class OperatorService {
 			await this.dbmanagerService.updateAtendanceInfo(userInfo, dayInfo, updateUserAttendanceDto);
 			let monthlyUserInfo : MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
 			if (!monthlyUserInfo)
-				monthlyUserInfo = await this.dbmanagerService.createMonthlyUser(userInfo);
+				monthlyUserInfo = await this.dbmanagerService.createMonthlyUserInThisMonth(userInfo);
 			await this.dbmanagerService.updateAttendanceCountThisMonth(monthlyUserInfo)
 			return "출석체크 완료";
 		} else {
@@ -86,16 +86,16 @@ export class OperatorService {
 	}
 
 	@Cron('0 0 1 * * 0-6')
-	async updateCurrentCount() {
+	async updateThisMonthCurrentAttendance() {
 		this.logger.log("pid = " + process.pid, "check updateCurrentCount");
-		const type: number = this.dbmanagerService.getTodayType();
-		// 0: 일요일
-		// 6: 토요일
-		if (type !== 0 && type !== 6)
-			this.dbmanagerService.updateThisMonthCurrentCount();
+		const thisTime: Date = new Date();
+		const thisMonthInfo: MonthInfo = await this.dbmanagerService.getSpecificMonthInfo(thisTime.getFullYear(), thisTime.getMonth() + 1);
+		const currentAttendanceThisMonth = await this.dbmanagerService.getCountOfThisMonthCurrentAttendance(thisMonthInfo, thisTime.getDate());
+		const typeOfToday: number = thisTime.getDay();
+		if (typeOfToday !== 0 && typeOfToday !== 6) // 0: Sunday, 6: Saturday
+			this.dbmanagerService.updateMonthInfoCurrentAttendance(thisMonthInfo, currentAttendanceThisMonth);
 	}
 
-	// implementing...
 	async addAttendanceFromGsheet(commanderInfo: UserInfo, gsheetAttendanceDto: GsheetAttendanceDto) {
 		if (commanderInfo.isOperator === false) {
 			throw new UnauthorizedException("Not Operator");
@@ -114,12 +114,12 @@ export class OperatorService {
 		console.log(`uesr_info: ${JSON.stringify(userInfo.intraId)}`);
 
 		// get month_info_id and if not existing set month_info
-		let monthIndexed = datetime.getMonth();
+		let monthNotIndexed = datetime.getMonth() + 1;
 		const year = datetime.getFullYear();
-		let monthInfo = await this.dbmanagerService.getMonthInfo(monthIndexed + 1, year);
+		let monthInfo = await this.dbmanagerService.getMonthInfo(monthNotIndexed, year);
 		if (monthInfo === null) {
 			console.log('no month_info');
-			monthInfo = await this.dbmanagerService.setMonthInfoWithDayInfos(monthIndexed, year); // todo: getMonthInfo
+			monthInfo = await this.dbmanagerService.setMonthInfoWithDayInfos(monthNotIndexed, year); // todo: getMonthInfo
 			// updateCurrentAttendanceInThisMonthInfo();
 		}
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);
@@ -147,6 +147,30 @@ export class OperatorService {
 		await this.statisticService.updateASpecificUserMonthlyProperties(userInfo, monthInfo);
 
 		return ;
+	}
+
+	async addTotalPerfectCountFromGsheet(commanderInfo: UserInfo, gsheetTotalPerfectCount: GsheetTotalPerfectCount) {
+		if (commanderInfo.isOperator === false) {
+			throw new UnauthorizedException("Not Operator");
+		}
+		// Check userInfo existed
+		const targetUserInfo: UserInfo = await this.dbmanagerService.getUserInfo(gsheetTotalPerfectCount.intraId);
+		if (targetUserInfo === null) {
+			throw new NotFoundException('UserInfo가 등록되어 있지 않음');
+		}
+		// Get 2022.11 month_info
+		const monthInfoOf20221100 = await this.dbmanagerService.getMonthInfo(11, 2022);
+		if (monthInfoOf20221100 === null) {
+			throw new NotFoundException('2022.11 MonthInfo가 존재하지 않음');
+		}
+		// Make monthlyUser if not existed with totalPerfectCount
+		let monthlyUser = await this.dbmanagerService.getMonthlyUser(targetUserInfo, monthInfoOf20221100);
+		if (monthlyUser === null) {
+			monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(targetUserInfo, monthInfoOf20221100);	
+		}
+		monthlyUser.totalPerfectCount = gsheetTotalPerfectCount.totalPerfectCount;
+		this.dbmanagerService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthlyUser.totalPerfectCount);
+		return monthlyUser;
 	}
 
 	async updateMonthInfoProperty(year: number, month: number) {
@@ -255,18 +279,19 @@ export class OperatorService {
 		}
 	}
 
-	async operatorAddOrDelete(operatorList: OperatorList) {
-		let userInfo: UserInfo
-		for (let i in operatorList.intraIdList) {
-			userInfo = await this.dbmanagerService.getUserInfo(operatorList.intraIdList[i])
-			if (userInfo.isOperator) {
-				userInfo.isOperator = false
-			}
-			else {
-				userInfo.isOperator = true
-			}
-			await this.dbmanagerService.updateUserInfoIsOper(userInfo)
+	async addOperator(intraId: string) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId)
+		if (!userInfo) {
+			throw new NotFoundException("Not Found User")
 		}
-		return
+		this.dbmanagerService.updateUserInfoIsOper(userInfo, true)
+	}
+
+	async deleteOperator(intraId: string) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId)
+		if (!userInfo) {
+			throw new NotFoundException("Not Found User");
+		}
+		this.dbmanagerService.updateUserInfoIsOper(userInfo, false)
 	}
 }

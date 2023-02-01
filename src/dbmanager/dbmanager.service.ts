@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Between, LessThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThan, LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -9,6 +9,7 @@ import { DayInfo } from './entities/day_info.entity';
 import { MonthlyUsers } from './entities/monthly_users.entity';
 import { UpdateUserAttendanceDto } from '../operator/dto/updateUserAttendance.dto';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { UserBasicInfo } from 'src/auth/dto/userInfo.dto';
 
 @Injectable()
 export class DbmanagerService {
@@ -24,6 +25,20 @@ export class DbmanagerService {
 	/******************************************************
 	 * todo: set in DbUserInfoManager
 	 */
+	async createAndSaveUserInfo(intraIdAndPhotoUrl: UserBasicInfo) {
+		const defaultImage: string =
+			"https://i.ytimg.com/vi/AwrFPJk_BGU/maxresdefault.jpg";
+		const newUserInfo: UserInfo = this.usersRepository.create({
+		  intraId: intraIdAndPhotoUrl.intraId,
+		  password: null,
+		  isOperator: false,
+		  photoUrl: (intraIdAndPhotoUrl.photoUrl === null ? 
+			defaultImage : intraIdAndPhotoUrl.photoUrl),
+		  isSignedUp: false,
+		});
+		return (await this.usersRepository.save(newUserInfo));
+	}
+
 	async getUserInfo(intraId: string): Promise<UserInfo> {
 		const found = await this.usersRepository.findOne({ where: { intraId } });
 		return found;
@@ -46,6 +61,17 @@ export class DbmanagerService {
 			where: {
 				id: joinedMonthlyUserWithUserInfo.userInfo.id,
 			}
+		});
+		return userInfo;
+	}
+
+	async saveUserInfo(userInfo: UserInfo) {
+		return (await this.usersRepository.save(userInfo));
+	}
+
+	async updateUserInfoPassword(userInfo: UserInfo, encryptedPassword: string) {
+		await this.usersRepository.update(userInfo.id, {
+			password: encryptedPassword,
 		});
 		return userInfo;
 	}
@@ -141,31 +167,48 @@ export class DbmanagerService {
 		let eachNewDayInfo: DayInfo;
 		const totalDate: number = lastDatetimeInMonth.getDate();
 		for(let eachDate = 1; eachDate <= totalDate; ++eachDate) {
-			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate)); // search: how to be more efficient ?
+			eachNewDayInfo = await this.dayInfoRepository.findOne({
+				where: {
+					day: eachDate,
+					monthInfo: monthInfo,
+				}
+			});
+			if (eachNewDayInfo) {
+				continue ;
+			}
+			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate));
 			eachNewDayInfo = this.dayInfoRepository.create({
 				day: eachDate,
 				monthInfo: monthInfo,
 				type: dayType,
 				attendUserCount: 0,
 				perfectUserCount: 0,
-				todayWord: process.env.TODAY_WORD, // todo: set In .env
+				todayWord: process.env.TODAY_WORD || "뀨?",
 			})
 			await this.dayInfoRepository.save(eachNewDayInfo);
 		}
 		return ;
 	}
 
-	async setMonthInfoWithDayInfos(monthIndexed: number, year: number) {
-		const lastDatetimeInMonth: Date = new Date(year, monthIndexed, 0);
-		let newMonthInfo: MonthInfo = this.monthInfoRepository.create({
-			month: monthIndexed + 1,
-			year,
-			currentAttendance: 0,
-			totalAttendance: 20,
-			perfectUserCount: 0,
-			totalUserCount: 0,
+	async setMonthInfoWithDayInfos(monthNotIndexed: number, year: number) {
+		let newMonthInfo: MonthInfo = await this.monthInfoRepository.findOne({
+			where: {
+				year,
+				month: monthNotIndexed,
+			}
 		});
-		newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		if (newMonthInfo === null) {
+			newMonthInfo = this.monthInfoRepository.create({
+				month: monthNotIndexed,
+				year,
+				currentAttendance: 0,
+				totalAttendance: 20,
+				perfectUserCount: 0,
+				totalUserCount: 0,
+			});
+			newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		}
+		const lastDatetimeInMonth: Date = new Date(year, monthNotIndexed, 0);
 		await this.setAllDayInfosInThisMonth(newMonthInfo, lastDatetimeInMonth);
 		return newMonthInfo;
 	}
@@ -204,7 +247,7 @@ export class DbmanagerService {
 				attendUserCount: 0,
 				type: type,
 				perfectUserCount: 0,
-				todayWord: "뀨?",
+				todayWord: process.env.TODAY_WORD || "뀨?",
 			})
 			await this.dayInfoRepository.save(dayInfo);
 		}
@@ -330,10 +373,15 @@ export class DbmanagerService {
 		this.setMonthInfo();
 	}
 
-	@Cron('0 0 1 1 * *')
+	@Cron('0 1 0 1 * *')
 	setTotalMonthcron() {
-		this.logger.debug("setTotalMonthcron test")
-		this.setMonthInfo();
+		//this.logger.debug("setTotalMonthcron test")
+		//this.setMonthInfo();
+		this.logger.log("pid = " + process.pid, "check setTotalMonthCron");
+		const currDatetime = new Date();
+		let monthNotIndexed = currDatetime.getMonth() + 1;
+		const year = currDatetime.getFullYear();
+		this.setMonthInfoWithDayInfos(monthNotIndexed, year);
 	}
 
 	async getThisMonthInfo() {
@@ -398,6 +446,13 @@ export class DbmanagerService {
 		return monthlyUser;
 	}
 
+	updateMonthlyUserTotalPerfectCount(monthlyUser: MonthlyUsers, totalPerfectCount: number) {
+		this.monthlyUsersRepository.update(monthlyUser.id, {
+			totalPerfectCount,
+		});
+		return ;
+	}
+
 	async getAllMonthlyUsersInAMonth(monthInfo: MonthInfo): Promise<MonthlyUsers[]> {
 		const allMonthlyUsersInAMonth: MonthlyUsers[] = await this.monthlyUsersRepository.find({
 			where: {
@@ -426,7 +481,36 @@ export class DbmanagerService {
 			//select: ['userInfo','totalPerfectCount','isPerfect'],
 		});
 		return monthlyUsersInTheMonth;
-		
+	}
+
+	async getMonthlylUsersOfAUserInLastMonthes(userInfo: UserInfo, currMonthInfo: MonthInfo) {
+		const lastYearMonthlyUser = await this.monthlyUsersRepository.find({
+			relations: {
+				//userInfo: true,
+				monthInfo: true,
+			},
+			where: {
+				userInfo: userInfo,
+				monthInfo: {
+					year: LessThan(currMonthInfo.year),
+				}
+			}
+		});
+		const lastMonthSameYearMonthlyUser = await this.monthlyUsersRepository.find({
+			relations: {
+				//userInfo: true,
+				monthInfo: true,
+			},
+			where: {
+				userInfo: userInfo,
+				monthInfo: {
+					year: currMonthInfo.year,
+					month: LessThan(currMonthInfo.month),
+				}
+			}
+		});
+		const ret = lastYearMonthlyUser.concat(lastMonthSameYearMonthlyUser);
+		return ret;
 	}
 
 	async getCountOfTotalThisMonthlyUsers(monthInfo: MonthInfo) {
@@ -461,7 +545,7 @@ export class DbmanagerService {
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo})
 	}
 
-	async createMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
+	async createMonthlyUserInThisMonth(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo = await this.getThisMonthInfo();
 		const monthlyUser = this.monthlyUsersRepository.create({
 			attendanceCount: 0,
@@ -538,11 +622,11 @@ export class DbmanagerService {
 		return ;
 	}
 
-	async updateThisMonthCurrentCount() {
-		const monthInfo: MonthInfo = await this.getThisMonthInfo();
-		//this.logger.log("currentAttendance = " + monthInfo.currentAttendance)
+	// buff
+
+	async updateMonthInfoCurrentAttendance(monthInfo: MonthInfo, currentAttendance: number) {
 		this.monthInfoRepository.update(monthInfo.id, {
-			currentAttendance: monthInfo.currentAttendance + 1
+			currentAttendance: currentAttendance,
 		})
 	}
 
@@ -568,11 +652,17 @@ export class DbmanagerService {
 		}
 	}
 
-	async updateUserInfoIsOper(userInfo: UserInfo) {
+	async updateUserInfoIsOper(userInfo: UserInfo, isOperator: boolean) {
 		this.usersRepository.update(userInfo.id, {
-			isOperator: userInfo.isOperator
+			isOperator: isOperator
 		})
 		return
+	}
+
+	updateUserPhotoUrl(userInfo: UserInfo, photoUrl: string) {
+		this.usersRepository.update(userInfo.id, {
+			photoUrl: photoUrl
+		})
 	}
 
 	/**************************************
@@ -580,8 +670,8 @@ export class DbmanagerService {
 	 * ********************************* */
 
 	// todo: to use day_info enum
-	getDayType(now: Date): number {
-		const day: number = now.getDay();
+	getDayType(date: Date): number {
+		const day: number = date.getDay();
 		if (day !== 0 && day !== 6)
 			return (0);
 		else

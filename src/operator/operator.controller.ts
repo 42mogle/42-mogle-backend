@@ -10,7 +10,8 @@ import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
 import { DataListDto } from './dto/dataList.dto';
 import { AttendanceData } from './dto/attendnaceData.dto';
-import { OperatorList } from './dto/operatorList.Dto';
+import { IntraIdDto } from './dto/intraIdDto';
+import { GsheetTotalPerfectCount } from './dto/gsheetTotalPerfectCount.dto';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -103,7 +104,7 @@ export class OperatorController {
 	/**
 	 * POST /operator/update/currentAttendanceCount
 	 */
-	@Patch("/update/currentAttendanceCount/") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
+	@Patch("/update/this-month/current-attendance/") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
 	@ApiOperation({summary: 'update month currrent attendance count'})
@@ -115,11 +116,13 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateCurrentAttendanceCount(
+	updateThisMonthCurrentAttendanceCount(
 		@GetUserInfo() userInfo: UserInfo
 	) {
-		console.log(` [ POST /operator/update/currentAttendanceCount ] requested.`)
-		this.operatorService.updateCurrentCount();
+		console.log(` [ POST /operator/update/this-month/current-attendance ] requested.`)
+		if (userInfo.isOperator === false)
+			throw new UnauthorizedException("Not Operator");
+		this.operatorService.updateThisMonthCurrentAttendance();
 	}
 
 
@@ -145,6 +148,32 @@ export class OperatorController {
 		) {
 		console.log("[ POST /operator/gsheet-attendance ] requested.");
 		return (await this.operatorService.addAttendanceFromGsheet(userInfo, gsheetAttendanceDto));
+	}
+
+	/**
+	 * POST /operator/total-perfect-count
+	 */
+	@Post("/gsheet/total-perfect-count") // 유저의 출석데이터를 임의로 추가함 보류
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({summary: 'add a user attendance from gsheet'})
+	@ApiResponse({
+		status: 201, 
+		description: 'Success', 
+		// todo: Set type using dto
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
+	})
+	async addTotalPerfectCountFromGsheet(
+		@GetUserInfo() userInfo: UserInfo,
+		@Body() gsheetTotalPerfectCountDto: GsheetTotalPerfectCount,
+		) {
+		if (userInfo.isOperator === false)
+			throw new UnauthorizedException("Not Operator");
+		console.log("[ POST /operator/total-perfect-count ] requested.");
+		return (await this.operatorService.addTotalPerfectCountFromGsheet(userInfo, gsheetTotalPerfectCountDto));
 	}
 
 	/**
@@ -256,30 +285,33 @@ export class OperatorController {
 		return await this.operatorService.userAttendanceLogDelete(attendanceData)
 	}
 
-	@Post("/operator-change")
+	@Post("/add-operator")
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth('access-token')
-	@ApiOperation({
-		summary: 'operator status on/off',
-		description: '유저의 오퍼레이터 권환을 활성화 및 비활성화 하는 기능'
-	})
-	@ApiResponse({
-		status: 401,
-		description: 'Unauthorized'
-	})
-	@ApiResponse({
-		status: 404,
-		description: 'NotFound'
-	})
-	async operatorChange(
-		@Body() operatorlist: OperatorList,
-		@GetUserInfo() userInfo: UserInfo
+	addOperator(
+		@GetUserInfo() userInfo: UserInfo,
+		@Body() intraId: IntraIdDto
 	) {
-		this.logger.log('/attendance-delete' + "request Id : " + userInfo.intraId)
+		this.logger.log('/add-operator' + "request Id : ", userInfo.intraId)
 		if (!userInfo.isOperator) {
 			this.logger.log(userInfo.intraId + " is not operator")
 			throw new UnauthorizedException()
 		}
-		return await this.operatorService.operatorAddOrDelete(operatorlist)
+		this.operatorService.addOperator(intraId.intraId)
+	}
+
+	@Post("/delete-operator")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	deleteOperator(
+		@GetUserInfo() userInfo: UserInfo,
+		@Body() intraId: IntraIdDto
+	) {
+		this.logger.log('/delete-operator' + "request Id : ", userInfo.intraId)
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		this.operatorService.deleteOperator(intraId.intraId)
 	}
 }
