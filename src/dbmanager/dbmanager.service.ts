@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Between, LessThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThan, LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -167,31 +167,48 @@ export class DbmanagerService {
 		let eachNewDayInfo: DayInfo;
 		const totalDate: number = lastDatetimeInMonth.getDate();
 		for(let eachDate = 1; eachDate <= totalDate; ++eachDate) {
-			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate)); // search: how to be more efficient ?
+			eachNewDayInfo = await this.dayInfoRepository.findOne({
+				where: {
+					day: eachDate,
+					monthInfo: monthInfo,
+				}
+			});
+			if (eachNewDayInfo) {
+				continue ;
+			}
+			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate));
 			eachNewDayInfo = this.dayInfoRepository.create({
 				day: eachDate,
 				monthInfo: monthInfo,
 				type: dayType,
 				attendUserCount: 0,
 				perfectUserCount: 0,
-				todayWord: process.env.TODAY_WORD, // todo: set In .env
+				todayWord: process.env.TODAY_WORD || "뀨?",
 			})
 			await this.dayInfoRepository.save(eachNewDayInfo);
 		}
 		return ;
 	}
 
-	async setMonthInfoWithDayInfos(monthIndexed: number, year: number) {
-		const lastDatetimeInMonth: Date = new Date(year, monthIndexed, 0);
-		let newMonthInfo: MonthInfo = this.monthInfoRepository.create({
-			month: monthIndexed + 1,
-			year,
-			currentAttendance: 0,
-			totalAttendance: 20,
-			perfectUserCount: 0,
-			totalUserCount: 0,
+	async setMonthInfoWithDayInfos(monthNotIndexed: number, year: number) {
+		let newMonthInfo: MonthInfo = await this.monthInfoRepository.findOne({
+			where: {
+				year,
+				month: monthNotIndexed,
+			}
 		});
-		newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		if (newMonthInfo === null) {
+			newMonthInfo = this.monthInfoRepository.create({
+				month: monthNotIndexed,
+				year,
+				currentAttendance: 0,
+				totalAttendance: 20,
+				perfectUserCount: 0,
+				totalUserCount: 0,
+			});
+			newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		}
+		const lastDatetimeInMonth: Date = new Date(year, monthNotIndexed, 0);
 		await this.setAllDayInfosInThisMonth(newMonthInfo, lastDatetimeInMonth);
 		return newMonthInfo;
 	}
@@ -230,7 +247,7 @@ export class DbmanagerService {
 				attendUserCount: 0,
 				type: type,
 				perfectUserCount: 0,
-				todayWord: "뀨?", // TODO: modify
+				todayWord: process.env.TODAY_WORD || "뀨?",
 			})
 			await this.dayInfoRepository.save(dayInfo);
 		}
@@ -356,10 +373,15 @@ export class DbmanagerService {
 		this.setMonthInfo();
 	}
 
-	@Cron('0 0 1 1 * *')
+	@Cron('0 1 0 1 * *')
 	setTotalMonthcron() {
-		this.logger.debug("setTotalMonthcron test")
-		this.setMonthInfo();
+		//this.logger.debug("setTotalMonthcron test")
+		//this.setMonthInfo();
+		this.logger.log("pid = " + process.pid, "check setTotalMonthCron");
+		const currDatetime = new Date();
+		let monthNotIndexed = currDatetime.getMonth() + 1;
+		const year = currDatetime.getFullYear();
+		this.setMonthInfoWithDayInfos(monthNotIndexed, year);
 	}
 
 	async getThisMonthInfo() {
@@ -424,6 +446,13 @@ export class DbmanagerService {
 		return monthlyUser;
 	}
 
+	updateMonthlyUserTotalPerfectCount(monthlyUser: MonthlyUsers, totalPerfectCount: number) {
+		this.monthlyUsersRepository.update(monthlyUser.id, {
+			totalPerfectCount,
+		});
+		return ;
+	}
+
 	async getAllMonthlyUsersInAMonth(monthInfo: MonthInfo): Promise<MonthlyUsers[]> {
 		const allMonthlyUsersInAMonth: MonthlyUsers[] = await this.monthlyUsersRepository.find({
 			where: {
@@ -452,7 +481,36 @@ export class DbmanagerService {
 			//select: ['userInfo','totalPerfectCount','isPerfect'],
 		});
 		return monthlyUsersInTheMonth;
-		
+	}
+
+	async getMonthlylUsersOfAUserInLastMonthes(userInfo: UserInfo, currMonthInfo: MonthInfo) {
+		const lastYearMonthlyUser = await this.monthlyUsersRepository.find({
+			relations: {
+				//userInfo: true,
+				monthInfo: true,
+			},
+			where: {
+				userInfo: userInfo,
+				monthInfo: {
+					year: LessThan(currMonthInfo.year),
+				}
+			}
+		});
+		const lastMonthSameYearMonthlyUser = await this.monthlyUsersRepository.find({
+			relations: {
+				//userInfo: true,
+				monthInfo: true,
+			},
+			where: {
+				userInfo: userInfo,
+				monthInfo: {
+					year: currMonthInfo.year,
+					month: LessThan(currMonthInfo.month),
+				}
+			}
+		});
+		const ret = lastYearMonthlyUser.concat(lastMonthSameYearMonthlyUser);
+		return ret;
 	}
 
 	async getCountOfTotalThisMonthlyUsers(monthInfo: MonthInfo) {
@@ -487,7 +545,7 @@ export class DbmanagerService {
 		return await this.monthlyUsersRepository.findOneBy({userInfo, monthInfo})
 	}
 
-	async createMonthlyUser(userInfo: UserInfo): Promise<MonthlyUsers> {
+	async createMonthlyUserInThisMonth(userInfo: UserInfo): Promise<MonthlyUsers> {
 		const monthInfo = await this.getThisMonthInfo();
 		const monthlyUser = this.monthlyUsersRepository.create({
 			attendanceCount: 0,
@@ -563,6 +621,8 @@ export class DbmanagerService {
 		})
 		return ;
 	}
+
+	// buff
 
 	async updateMonthInfoCurrentAttendance(monthInfo: MonthInfo, currentAttendance: number) {
 		this.monthInfoRepository.update(monthInfo.id, {

@@ -48,4 +48,9 @@ export class UserService {
 		}
 		return usersOperatorInfo;
 	}
+
+	async getUserOperatorStatus(intraId: string) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId)
+		return userInfo.isOperator
+	}
 }

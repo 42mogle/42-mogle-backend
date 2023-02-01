@@ -11,6 +11,7 @@ import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';
 import { DataListDto } from './dto/dataList.dto';
 import { AttendanceData } from './dto/attendnaceData.dto';
 import { IntraIdDto } from './dto/intraIdDto';
+import { GsheetTotalPerfectCount } from './dto/gsheetTotalPerfectCount.dto';
 
 @ApiTags('Operator')
 @Controller('operator')
@@ -148,6 +149,32 @@ export class OperatorController {
 		) {
 		console.log("[ POST /operator/gsheet-attendance ] requested.");
 		return (await this.operatorService.addAttendanceFromGsheet(userInfo, gsheetAttendanceDto));
+	}
+
+	/**
+	 * POST /operator/total-perfect-count
+	 */
+	@Post("/gsheet/total-perfect-count") // 유저의 출석데이터를 임의로 추가함 보류
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({summary: 'add a user attendance from gsheet'})
+	@ApiResponse({
+		status: 201, 
+		description: 'Success', 
+		// todo: Set type using dto
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
+	})
+	async addTotalPerfectCountFromGsheet(
+		@GetUserInfo() userInfo: UserInfo,
+		@Body() gsheetTotalPerfectCountDto: GsheetTotalPerfectCount,
+		) {
+		if (userInfo.isOperator === false)
+			throw new UnauthorizedException("Not Operator");
+		console.log("[ POST /operator/total-perfect-count ] requested.");
+		return (await this.operatorService.addTotalPerfectCountFromGsheet(userInfo, gsheetTotalPerfectCountDto));
 	}
 
 	/**

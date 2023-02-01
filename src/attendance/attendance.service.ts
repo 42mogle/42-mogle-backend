@@ -50,7 +50,7 @@ export class AttendanceService {
 		}
 		let monthlyUser: MonthlyUsers = await this.dbmanagerService.getThisMonthlyUser(userInfo);
 		if (monthlyUser === null) {
-			monthlyUser = await this.dbmanagerService.createMonthlyUser(userInfo);
+			monthlyUser = await this.dbmanagerService.createMonthlyUserInThisMonth(userInfo);
 		}
 		await this.dbmanagerService.attendanceRegistration(userInfo, currDatetime);
 		if (this.isWeekday(currDatetime) === true) {

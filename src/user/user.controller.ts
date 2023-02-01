@@ -95,5 +95,13 @@ export class UserController {
 		}
 		return this.userService.getAllUsersOperatorInfo();
 	}
+
+	@Get('operator-check')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	async getUserOperatorStatus(@GetUserInfo() userInfo: UserInfo) {
+		this.logger.log("[GET] /user/operator-check", userInfo.intraId)
+		return this.userService.getUserOperatorStatus(userInfo.intraId)
+	}
 }
 
