@@ -101,7 +101,7 @@ export class OperatorController {
 	}
 
 	/**
-	 * POST /operator/update/currentAttendanceCount
+	 * PATCH /operator/update/this-month/current-attendance
 	 */
 	@Patch("/update/this-month/current-attendance/") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
 	@UseGuards(JwtAuthGuard)
@@ -115,13 +115,14 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateThisMonthCurrentAttendanceCount(
+	async updateThisMonthCurrentAttendanceCount(
 		@GetUserInfo() userInfo: UserInfo
 	) {
-		console.log(` [ POST /operator/update/this-month/current-attendance ] requested.`)
+		console.log(` [ PATCH /operator/update/this-month/current-attendance ] requested.`)
 		if (userInfo.isOperator === false)
 			throw new UnauthorizedException("Not Operator");
-		this.operatorService.updateThisMonthCurrentAttendance();
+		const monthInfo = await this.operatorService.updateThisMonthCurrentAttendance();
+		return monthInfo;
 	}
 
 
