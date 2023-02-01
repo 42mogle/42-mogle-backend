@@ -114,12 +114,12 @@ export class OperatorService {
 		console.log(`uesr_info: ${JSON.stringify(userInfo.intraId)}`);
 
 		// get month_info_id and if not existing set month_info
-		let monthIndexed = datetime.getMonth();
+		let monthNotIndexed = datetime.getMonth() + 1;
 		const year = datetime.getFullYear();
-		let monthInfo = await this.dbmanagerService.getMonthInfo(monthIndexed + 1, year);
+		let monthInfo = await this.dbmanagerService.getMonthInfo(monthNotIndexed, year);
 		if (monthInfo === null) {
 			console.log('no month_info');
-			monthInfo = await this.dbmanagerService.setMonthInfoWithDayInfos(monthIndexed, year); // todo: getMonthInfo
+			monthInfo = await this.dbmanagerService.setMonthInfoWithDayInfos(monthNotIndexed, year); // todo: getMonthInfo
 			// updateCurrentAttendanceInThisMonthInfo();
 		}
 		console.log(`monthInfo: ${JSON.stringify(monthInfo)}`);

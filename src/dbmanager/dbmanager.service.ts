@@ -167,31 +167,48 @@ export class DbmanagerService {
 		let eachNewDayInfo: DayInfo;
 		const totalDate: number = lastDatetimeInMonth.getDate();
 		for(let eachDate = 1; eachDate <= totalDate; ++eachDate) {
-			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate)); // search: how to be more efficient ?
+			eachNewDayInfo = await this.dayInfoRepository.findOne({
+				where: {
+					day: eachDate,
+					monthInfo: monthInfo,
+				}
+			});
+			if (eachNewDayInfo) {
+				continue ;
+			}
+			dayType = this.getDayType(new Date(monthInfo.year, monthInfo.month - 1, eachDate));
 			eachNewDayInfo = this.dayInfoRepository.create({
 				day: eachDate,
 				monthInfo: monthInfo,
 				type: dayType,
 				attendUserCount: 0,
 				perfectUserCount: 0,
-				todayWord: process.env.TODAY_WORD, // todo: set In .env
+				todayWord: process.env.TODAY_WORD || "뀨?",
 			})
 			await this.dayInfoRepository.save(eachNewDayInfo);
 		}
 		return ;
 	}
 
-	async setMonthInfoWithDayInfos(monthIndexed: number, year: number) {
-		const lastDatetimeInMonth: Date = new Date(year, monthIndexed, 0);
-		let newMonthInfo: MonthInfo = this.monthInfoRepository.create({
-			month: monthIndexed + 1,
-			year,
-			currentAttendance: 0,
-			totalAttendance: 20,
-			perfectUserCount: 0,
-			totalUserCount: 0,
+	async setMonthInfoWithDayInfos(monthNotIndexed: number, year: number) {
+		let newMonthInfo: MonthInfo = await this.monthInfoRepository.findOne({
+			where: {
+				year,
+				month: monthNotIndexed,
+			}
 		});
-		newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		if (newMonthInfo === null) {
+			newMonthInfo = this.monthInfoRepository.create({
+				month: monthNotIndexed,
+				year,
+				currentAttendance: 0,
+				totalAttendance: 20,
+				perfectUserCount: 0,
+				totalUserCount: 0,
+			});
+			newMonthInfo = await this.monthInfoRepository.save(newMonthInfo);
+		}
+		const lastDatetimeInMonth: Date = new Date(year, monthNotIndexed, 0);
 		await this.setAllDayInfosInThisMonth(newMonthInfo, lastDatetimeInMonth);
 		return newMonthInfo;
 	}
@@ -356,10 +373,15 @@ export class DbmanagerService {
 		this.setMonthInfo();
 	}
 
-	@Cron('0 0 1 1 * *')
+	@Cron('0 1 0 1 * *')
 	setTotalMonthcron() {
-		this.logger.debug("setTotalMonthcron test")
-		this.setMonthInfo();
+		//this.logger.debug("setTotalMonthcron test")
+		//this.setMonthInfo();
+		this.logger.log("pid = " + process.pid, "check setTotalMonthCron");
+		const currDatetime = new Date();
+		let monthNotIndexed = currDatetime.getMonth() + 1;
+		const year = currDatetime.getFullYear();
+		this.setMonthInfoWithDayInfos(monthNotIndexed, year);
 	}
 
 	async getThisMonthInfo() {
