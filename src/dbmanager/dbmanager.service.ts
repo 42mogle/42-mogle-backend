@@ -162,6 +162,11 @@ export class DbmanagerService {
 		return (await this.monthInfoRepository.save(monthInfo));
 	}
 
+	async updateMonthInfo(monthInfo: MonthInfo) {
+		const ret = await this.monthInfoRepository.update(monthInfo.id, monthInfo);
+		return ret;
+	}
+
 	async setAllDayInfosInThisMonth(monthInfo: MonthInfo, lastDatetimeInMonth: Date) {
 		let dayType: number;
 		let eachNewDayInfo: DayInfo;
@@ -628,6 +633,7 @@ export class DbmanagerService {
 		this.monthInfoRepository.update(monthInfo.id, {
 			currentAttendance: currentAttendance,
 		})
+		return ;
 	}
 
 	async attendanceLogAdd(userInfo: UserInfo, dayInfo: DayInfo, date: Date) {
