@@ -314,4 +314,27 @@ export class OperatorController {
 		}
 		this.operatorService.deleteOperator(intraId.intraId)
 	}
+
+	@Get('/today-word')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'Returns the today\'s word',
+		description: '오늘의 단어를 반환한다. 만약, 오늘의 단어가 설정되어 있지 않다면 null을 반환한다.'
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized'
+	})
+	async getTodayWord(
+		@GetUserInfo()
+		userInfo: UserInfo
+	) {
+		this.logger.log('/operator/today-word/', userInfo.intraId)
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		return await this.operatorService.getTodayWord();
+	}
 }
