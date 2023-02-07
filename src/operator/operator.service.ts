@@ -294,4 +294,10 @@ export class OperatorService {
 		}
 		this.dbmanagerService.updateUserInfoIsOper(userInfo, false)
 	}
+
+	async getTodayWord() {
+		const datetimeOfToday: Date = new Date();
+		const todayWord = await this.dbmanagerService.getTodayWordByDatetime(datetimeOfToday);
+		return todayWord;
+	}
 }
