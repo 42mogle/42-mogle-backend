@@ -409,7 +409,7 @@ export class DbmanagerService {
 		this.setMonthInfo();
 	}
 
-	@Cron('0 1 0 1 * *')
+	@Cron('45 6 0 1 * *')
 	setTotalMonthcron() {
 		//this.logger.debug("setTotalMonthcron test")
 		//this.setMonthInfo();
