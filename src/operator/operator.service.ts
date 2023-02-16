@@ -85,10 +85,7 @@ export class OperatorService {
 			this.dbmanagerService.changeMonthlyUserPerfectStatus(monthlyUserInfo, true);
 	}
 
-	// @Cron(CronExpression.EVERY_SECOND) // for test
-	// @Cron(CronExpression.EVERY_5_SECONDS) // for test
-	// @Cron(CronExpression.MONDAY_TO_FRIDAY_AT_1AM)
-	@Cron(CronExpression.EVERY_DAY_AT_1AM)
+	@Cron(CronExpression.EVERY_DAY_AT_7AM)
 	async cronUpdateThismonthProperties() {
 		this.logger.log("pid = " + process.pid, "cronUpdateThismonthProperties");
 		const currentDatetime: Date = new Date();
