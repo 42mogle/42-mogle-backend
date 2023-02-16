@@ -26,6 +26,10 @@ export class AppService {
     return "서버 켜져있어용 ㅎㅎㅎ";
   }
 
+  getServerStatus(): string {
+    return "Server is running.";
+  }
+
   getHello(): string {
     const str_test = process.env.ENV_TEST || null;
     //console.log(`.env.ENV_TEST: ${str_test}`);
