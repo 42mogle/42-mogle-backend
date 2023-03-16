@@ -279,6 +279,7 @@ export class OperatorService {
 			}
 			await this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
 			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
+			await this.statisticService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthInfo);
 		}
 	}
 
@@ -298,6 +299,7 @@ export class OperatorService {
 		const monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
 		if (await this.dbmanagerService.attendanceLogDelete(userInfo, dayInfo)) {
 			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
+			await this.statisticService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthInfo);
 		}
 	}
 
