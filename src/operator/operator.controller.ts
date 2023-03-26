@@ -119,7 +119,7 @@ export class OperatorController {
 	async updateThisMonthCurrentAttendanceCount(
 		@GetUserInfo() userInfo: UserInfo
 	) {
-		console.log(` [ PATCH /operator/update/this-month/current-attendance ] requested.`)
+		console.log(` [ PATCH /operator/update/this-month/current-attendance ] requested.`);
 		if (userInfo.isOperator === false)
 			throw new UnauthorizedException("Not Operator");
 		const monthInfo = await this.operatorService.updateThisMonthCurrentAttendance();
@@ -205,7 +205,7 @@ export class OperatorController {
 		 console.log(`year: ${year}, month: ${month}`);
 		 this.logger.log("[PATCH /operator/month-info-property] requested.", JSON.stringify(userInfo));
 		if (userInfo.isOperator === false) {
-			console.log("Not Operator")
+			console.log("Not Operator");
 			throw new UnauthorizedException("Not Operator");
 		}
 		 return (await this.operatorService.updateMonthInfoProperty(year, month));
@@ -228,12 +228,12 @@ export class OperatorController {
 		@GetUserInfo()
 		userInfo: UserInfo
 	) {
-		this.logger.log('/attendance-list/:year/:month/:day/:intraId', JSON.stringify(dataListDto) + " " + userInfo.intraId)
+		this.logger.log('/attendance-list/:year/:month/:day/:intraId', JSON.stringify(dataListDto) + " " + userInfo.intraId);
 		if (!userInfo.isOperator) {
-			this.logger.log(userInfo.intraId + " is not operator")
-			throw new UnauthorizedException()
+			this.logger.log(userInfo.intraId + " is not operator");
+			throw new UnauthorizedException();
 		}
-		return await this.operatorService.findUserAttendanceLog(dataListDto)
+		return await this.operatorService.findUserAttendanceLog(dataListDto);
 	}
 
 	@Post("/attendance-add")
@@ -251,12 +251,12 @@ export class OperatorController {
 		@Body() attendanceData: AttendanceData,
 		@GetUserInfo() userInfo: UserInfo
 	) {
-		this.logger.log('/attendance-add' + "request Id : " + userInfo.intraId, JSON.stringify(attendanceData))
+		this.logger.log('/attendance-add' + "request Id : " + userInfo.intraId, JSON.stringify(attendanceData));
 		if (!userInfo.isOperator) {
-			this.logger.log(userInfo.intraId + " is not operator")
-			throw new UnauthorizedException()
+			this.logger.log(userInfo.intraId + " is not operator");
+			throw new UnauthorizedException();
 		}
-		return await this.operatorService.userAttendanceLogAdd(attendanceData)
+		return await this.operatorService.userAttendanceLogAdd(attendanceData);
 	}
 
 	@Post("/attendance-delete")
@@ -278,12 +278,12 @@ export class OperatorController {
 		@Body() attendanceData: AttendanceData,
 		@GetUserInfo() userInfo: UserInfo
 	) {
-		this.logger.log('/attendance-delete' + "request Id : " + userInfo.intraId, JSON.stringify(attendanceData))
+		this.logger.log('/attendance-delete' + "request Id : " + userInfo.intraId, JSON.stringify(attendanceData));
 		if (!userInfo.isOperator) {
-			this.logger.log(userInfo.intraId + " is not operator")
-			throw new UnauthorizedException()
+			this.logger.log(userInfo.intraId + " is not operator");
+			throw new UnauthorizedException();
 		}
-		return await this.operatorService.userAttendanceLogDelete(attendanceData)
+		return await this.operatorService.userAttendanceLogDelete(attendanceData);
 	}
 
 	@Post("/add-operator")
@@ -295,10 +295,10 @@ export class OperatorController {
 	) {
 		this.logger.log('/add-operator' + "request Id : ", userInfo.intraId)
 		if (!userInfo.isOperator) {
-			this.logger.log(userInfo.intraId + " is not operator")
-			throw new UnauthorizedException()
+			this.logger.log(userInfo.intraId + " is not operator");
+			throw new UnauthorizedException();
 		}
-		this.operatorService.addOperator(intraId.intraId)
+		this.operatorService.addOperator(intraId.intraId);
 	}
 
 	@Post("/delete-operator")
@@ -310,10 +310,10 @@ export class OperatorController {
 	) {
 		this.logger.log('/delete-operator' + "request Id : ", userInfo.intraId)
 		if (!userInfo.isOperator) {
-			this.logger.log(userInfo.intraId + " is not operator")
-			throw new UnauthorizedException()
+			this.logger.log(userInfo.intraId + " is not operator");
+			throw new UnauthorizedException();
 		}
-		this.operatorService.deleteOperator(intraId.intraId)
+		this.operatorService.deleteOperator(intraId.intraId);
 	}
 
 	@Get('/today-word')
@@ -331,10 +331,10 @@ export class OperatorController {
 		@GetUserInfo()
 		userInfo: UserInfo
 	) {
-		this.logger.log('/operator/today-word/', userInfo.intraId)
+		this.logger.log('/operator/today-word/', userInfo.intraId);
 		if (!userInfo.isOperator) {
-			this.logger.log(userInfo.intraId + " is not operator")
-			throw new UnauthorizedException()
+			this.logger.log(userInfo.intraId + " is not operator");
+			throw new UnauthorizedException();
 		}
 		return await this.operatorService.getTodayWord();
 	}
