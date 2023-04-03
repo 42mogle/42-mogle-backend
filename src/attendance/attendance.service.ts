@@ -37,17 +37,19 @@ export class AttendanceService {
 				statusAttendance: 1,
 				errorMsg: "이미 출석 체크 했습니다."
 			});
-		} else if (attendanceInfo.todayWord !== todayWord) {
+		}
+		else if (attendanceInfo.todayWord !== todayWord) {
 			return ({
 				statusAttendance: 2,
 				errorMsg: "오늘의 단어가 다릅니다."
 			});
-		} else if (this.isAvailableTime() === false) {
-			return ({
-				statusAttendance: 3,
-				errorMsg: "출석 가능한 시간이 아닙니다."
-			});
 		}
+		// else if (this.isAvailableTime() === false) {
+		// 	return ({
+		// 		statusAttendance: 3,
+		// 		errorMsg: "출석 가능한 시간이 아닙니다."
+		// 	});
+		// }
 		let monthlyUser: MonthlyUsers = await this.dbmanagerService.getThisMonthlyUser(userInfo);
 		if (monthlyUser === null) {
 			monthlyUser = await this.dbmanagerService.createMonthlyUserInThisMonth(userInfo);
