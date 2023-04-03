@@ -15,12 +15,12 @@ export class AttendanceService {
 	@Inject(OperatorService) private readonly operatorService: OperatorService
 
 	async getUserButtonStatus(userInfo: UserInfo): Promise<number> {
-		if (this.isAvailableTime() === false) {
-			return ButtonStatus.NotAvailableTime;
-		}
-		else if (await this.hasAttendedToday(userInfo)) {
+		if (await this.hasAttendedToday(userInfo)) {
 			return ButtonStatus.AlreadyCheckedAttendance;
 		}
+		// else if (this.isAvailableTime() === false) {
+		// 	return ButtonStatus.NotAvailableTime;
+		// }
 		return ButtonStatus.AttendanceSuccess;
 	}
 
