@@ -18,9 +18,9 @@ export class AttendanceService {
 		if (await this.hasAttendedToday(userInfo)) {
 			return ButtonStatus.AlreadyCheckedAttendance;
 		}
-		// else if (this.isAvailableTime() === false) {
-		// 	return ButtonStatus.NotAvailableTime;
-		// }
+		else if (this.isAvailableTime() === false) {
+			return ButtonStatus.NotAvailableTime;
+		}
 		return ButtonStatus.AttendanceSuccess;
 	}
 
@@ -44,12 +44,12 @@ export class AttendanceService {
 				errorMsg: "오늘의 단어가 다릅니다."
 			});
 		}
-		// else if (this.isAvailableTime() === false) {
-		// 	return ({
-		// 		statusAttendance: 3,
-		// 		errorMsg: "출석 가능한 시간이 아닙니다."
-		// 	});
-		// }
+		else if (this.isAvailableTime() === false) {
+			return ({
+				statusAttendance: 3,
+				errorMsg: "출석 가능한 시간이 아닙니다."
+			});
+		}
 		let monthlyUser: MonthlyUsers = await this.dbmanagerService.getThisMonthlyUser(userInfo);
 		if (monthlyUser === null) {
 			monthlyUser = await this.dbmanagerService.createMonthlyUserInThisMonth(userInfo);
