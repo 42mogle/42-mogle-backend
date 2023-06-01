@@ -84,14 +84,14 @@ export class AttendanceService {
 		else
 			return false;
 	}
-	
+
 	isAvailableTime(): Boolean {
 		const now = new Date();
 		const start = new Date();
 		const end = new Date();
-		
-		start.setHours(8, 30, 0);
-		end.setHours(9, 0, 0);
+
+		start.setHours(9, 42, 0);
+		end.setHours(10, 12, 0);
 		if (now < start || now > end)
 			return (false);
 		else
