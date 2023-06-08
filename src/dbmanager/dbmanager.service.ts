@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { Between, LessThan, LessThanOrEqual, Repository } from 'typeorm';
@@ -162,6 +162,11 @@ export class DbmanagerService {
 		return (await this.monthInfoRepository.save(monthInfo));
 	}
 
+	async updateMonthInfo(monthInfo: MonthInfo) {
+		const ret = await this.monthInfoRepository.update(monthInfo.id, monthInfo);
+		return ret;
+	}
+
 	async setAllDayInfosInThisMonth(monthInfo: MonthInfo, lastDatetimeInMonth: Date) {
 		let dayType: number;
 		let eachNewDayInfo: DayInfo;
@@ -303,8 +308,15 @@ export class DbmanagerService {
 		const day = now.getDate();
 		const month = now.getMonth() + 1;
 		const year = now.getFullYear();
-		const monthInfo: MonthInfo = await this.getMonthInfo(month, year); // todo: check null
-		return await this.dayInfoRepository.findOneBy({ day, monthInfo }) // todo: check null
+		const monthInfo: MonthInfo = await this.getMonthInfo(month, year);
+		if (monthInfo === null) {
+			throw new NotFoundException('특정 datetime의 monthInfo가 존재하지 않습니다.');
+		}
+		const dayInfo: DayInfo = await this.dayInfoRepository.findOneBy({ day, monthInfo });
+		if (dayInfo === null) {
+			throw new NotFoundException('특정 datetime의 dayInfo가 존재하지 않습니다.');
+		}
+		return dayInfo;
 	}
 
 	async setTodayWord(toDayWord: string) {
@@ -364,6 +376,30 @@ export class DbmanagerService {
 		return retTodayWord;
 	}
 
+	async getDayInfoByDatetime(datetime: Date) {
+		const day = datetime.getDate();
+		const month = datetime.getMonth() + 1;
+		const year = datetime.getFullYear();
+		const monthInfo: MonthInfo = await this.getMonthInfo(month, year);
+		if (monthInfo === null) {
+			throw new NotFoundException('특정 datetime의 monthInfo가 존재하지 않습니다.');
+		}
+		const dayInfo: DayInfo = await this.dayInfoRepository.findOneBy({ day, monthInfo });
+		if (dayInfo === null) {
+			throw new NotFoundException('특정 datetime의 dayInfo가 존재하지 않습니다.');
+		}
+		return dayInfo;
+	}
+
+	async getTodayWordByDatetime(datetime: Date) {
+		const dayInfo: DayInfo = await this.getDayInfoByDatetime(datetime);
+		let retTodayWord: string = dayInfo.todayWord;
+		if (retTodayWord === process.env.TODAY_WORD) {
+			retTodayWord = null;
+		}
+		return retTodayWord;
+	}
+
 	//setTotalMonthInfo
 	async setTotalMonthInfo(userInfo: UserInfo) {
 		if (userInfo.isOperator === false) {
@@ -373,7 +409,7 @@ export class DbmanagerService {
 		this.setMonthInfo();
 	}
 
-	@Cron('0 1 0 1 * *')
+	@Cron('0 45 6 1 * *')
 	setTotalMonthcron() {
 		//this.logger.debug("setTotalMonthcron test")
 		//this.setMonthInfo();
@@ -628,6 +664,7 @@ export class DbmanagerService {
 		this.monthInfoRepository.update(monthInfo.id, {
 			currentAttendance: currentAttendance,
 		})
+		return ;
 	}
 
 	async attendanceLogAdd(userInfo: UserInfo, dayInfo: DayInfo, date: Date) {

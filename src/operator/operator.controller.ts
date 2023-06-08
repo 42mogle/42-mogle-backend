@@ -102,7 +102,7 @@ export class OperatorController {
 	}
 
 	/**
-	 * POST /operator/update/currentAttendanceCount
+	 * PATCH /operator/update/this-month/current-attendance
 	 */
 	@Patch("/update/this-month/current-attendance/") // 현재까지 개근 가능한 출석일수를 갱신 //크론으로 대체
 	@UseGuards(JwtAuthGuard)
@@ -116,13 +116,14 @@ export class OperatorController {
 		status: 401,
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
-	updateThisMonthCurrentAttendanceCount(
+	async updateThisMonthCurrentAttendanceCount(
 		@GetUserInfo() userInfo: UserInfo
 	) {
-		console.log(` [ POST /operator/update/this-month/current-attendance ] requested.`)
+		console.log(` [ PATCH /operator/update/this-month/current-attendance ] requested.`)
 		if (userInfo.isOperator === false)
 			throw new UnauthorizedException("Not Operator");
-		this.operatorService.updateThisMonthCurrentAttendance();
+		const monthInfo = await this.operatorService.updateThisMonthCurrentAttendance();
+		return monthInfo;
 	}
 
 
@@ -313,5 +314,28 @@ export class OperatorController {
 			throw new UnauthorizedException()
 		}
 		this.operatorService.deleteOperator(intraId.intraId)
+	}
+
+	@Get('/today-word')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'Returns the today\'s word',
+		description: '오늘의 단어를 반환한다. 만약, 오늘의 단어가 설정되어 있지 않다면 null을 반환한다.'
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized'
+	})
+	async getTodayWord(
+		@GetUserInfo()
+		userInfo: UserInfo
+	) {
+		this.logger.log('/operator/today-word/', userInfo.intraId)
+		if (!userInfo.isOperator) {
+			this.logger.log(userInfo.intraId + " is not operator")
+			throw new UnauthorizedException()
+		}
+		return await this.operatorService.getTodayWord();
 	}
 }

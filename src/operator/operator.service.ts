@@ -6,7 +6,7 @@ import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER} from 'nest-winston'
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto'
 import { StatisticService } from 'src/statistic/statistic.service'
@@ -85,15 +85,23 @@ export class OperatorService {
 			this.dbmanagerService.changeMonthlyUserPerfectStatus(monthlyUserInfo, true);
 	}
 
-	@Cron('0 0 1 * * 0-6')
+	@Cron(CronExpression.EVERY_DAY_AT_7AM)
+	async cronUpdateThismonthProperties() {
+		this.logger.log("pid = " + process.pid, "cronUpdateThismonthProperties");
+		const currentDatetime: Date = new Date();
+		const thisMonthInfo: MonthInfo = await this.updateMonthInfoProperty(currentDatetime.getFullYear(), currentDatetime.getMonth() + 1);
+		return thisMonthInfo;
+	}
+
+	// tmp: deprecated
+	// @Cron(CronExpression.MONDAY_TO_FRIDAY_AT_1AM)
 	async updateThisMonthCurrentAttendance() {
-		this.logger.log("pid = " + process.pid, "check updateCurrentCount");
 		const thisTime: Date = new Date();
+		this.logger.log("pid = " + process.pid, "check updateCurrentCount");
 		const thisMonthInfo: MonthInfo = await this.dbmanagerService.getSpecificMonthInfo(thisTime.getFullYear(), thisTime.getMonth() + 1);
 		const currentAttendanceThisMonth = await this.dbmanagerService.getCountOfThisMonthCurrentAttendance(thisMonthInfo, thisTime.getDate());
-		const typeOfToday: number = thisTime.getDay();
-		if (typeOfToday !== 0 && typeOfToday !== 6) // 0: Sunday, 6: Saturday
-			this.dbmanagerService.updateMonthInfoCurrentAttendance(thisMonthInfo, currentAttendanceThisMonth);
+		await this.dbmanagerService.updateMonthInfoCurrentAttendance(thisMonthInfo, currentAttendanceThisMonth);
+		return currentAttendanceThisMonth;
 	}
 
 	async addAttendanceFromGsheet(commanderInfo: UserInfo, gsheetAttendanceDto: GsheetAttendanceDto) {
@@ -181,7 +189,6 @@ export class OperatorService {
 		// update total_attendance
 		const countOfThisMonthTotalAttendance: number = await this.dbmanagerService.getCountOfThisMonthTotalAttendance(monthInfo);
 		console.log(`countOfThisMonthTotalAttendance: ${countOfThisMonthTotalAttendance}`);
-		//monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
 
 		// update current_attendance
 		const currentDatetime: Date = new Date();
@@ -206,12 +213,27 @@ export class OperatorService {
 		console.log(`monthInfo(before): ${JSON.stringify(monthInfo)}`);
 
 		monthInfo.totalAttendance = countOfThisMonthTotalAttendance;
-		monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
+		
+		// NOTICE: 알 수 없는 이유로 currentAttendance가 0으로 설정되는 현상이 있기에 처절한 조건문을 추가했다.
+		/*
+			보통 NestJS의 Cron 데코레이터 기능을 이용해서 이 로직을 구동한다.
+			그런데 Cron이 돌 때, 4개 정도의 스레드가 동시에 돌아가는 것을 확인했다.
+			가끔 마지막 스레드에서 currentAttendance의 값을 0으로 찾아와서 업데이트하는 현상을 발견했다.
+			정말.. 원인을 찾고싶지만 이걸 적는 현재까지 찾지 못했다.
+			원인을 파악하려면 NestJS를 좀 더 깊게 학습하고 조사해야할 필요성을 느낀다.
+			그래서 정확한 원인을 파악하기 전에 이렇게 임시로 currentAttendance가 0일 때는 update하지 많는 조건문을 추가했다.
+		*/
+		if (countOfThisMonthCurrentAttendance) {
+			monthInfo.currentAttendance = countOfThisMonthCurrentAttendance;
+		}
+			
 		monthInfo.totalUserCount = countOfTotalThisMonthlyUsers;
 		monthInfo.perfectUserCount = countOfPerfectThisMonthlyUsers;
-		console.log(`monthInfo(after): `);
-		monthInfo = await this.dbmanagerService.saveMonthInfoTable(monthInfo);
-		console.log(monthInfo);
+		
+		await this.dbmanagerService.updateMonthInfo(monthInfo);
+		monthInfo = await this.dbmanagerService.getMonthInfo(month, year);
+
+		console.log(`monthInfo(after): ${JSON.stringify(monthInfo)}`);
 		return monthInfo;
 	}
 
@@ -257,6 +279,7 @@ export class OperatorService {
 			}
 			await this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
 			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
+			await this.statisticService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthInfo);
 		}
 	}
 
@@ -276,6 +299,7 @@ export class OperatorService {
 		const monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
 		if (await this.dbmanagerService.attendanceLogDelete(userInfo, dayInfo)) {
 			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
+			await this.statisticService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthInfo);
 		}
 	}
 
@@ -293,5 +317,11 @@ export class OperatorService {
 			throw new NotFoundException("Not Found User");
 		}
 		this.dbmanagerService.updateUserInfoIsOper(userInfo, false)
+	}
+
+	async getTodayWord() {
+		const datetimeOfToday: Date = new Date();
+		const todayWord = await this.dbmanagerService.getTodayWordByDatetime(datetimeOfToday);
+		return todayWord;
 	}
 }

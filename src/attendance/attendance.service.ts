@@ -15,11 +15,11 @@ export class AttendanceService {
 	@Inject(OperatorService) private readonly operatorService: OperatorService
 
 	async getUserButtonStatus(userInfo: UserInfo): Promise<number> {
-		if (this.isAvailableTime() === false) {
-			return ButtonStatus.NotAvailableTime;
-		}
-		else if (await this.hasAttendedToday(userInfo)) {
+		if (await this.hasAttendedToday(userInfo)) {
 			return ButtonStatus.AlreadyCheckedAttendance;
+		}
+		else if (this.isAvailableTime() === false) {
+			return ButtonStatus.NotAvailableTime;
 		}
 		return ButtonStatus.AttendanceSuccess;
 	}
@@ -37,12 +37,14 @@ export class AttendanceService {
 				statusAttendance: 1,
 				errorMsg: "이미 출석 체크 했습니다."
 			});
-		} else if (attendanceInfo.todayWord !== todayWord) {
+		}
+		else if (attendanceInfo.todayWord !== todayWord) {
 			return ({
 				statusAttendance: 2,
 				errorMsg: "오늘의 단어가 다릅니다."
 			});
-		} else if (this.isAvailableTime() === false) {
+		}
+		else if (this.isAvailableTime() === false) {
 			return ({
 				statusAttendance: 3,
 				errorMsg: "출석 가능한 시간이 아닙니다."
@@ -82,14 +84,14 @@ export class AttendanceService {
 		else
 			return false;
 	}
-	
+
 	isAvailableTime(): Boolean {
 		const now = new Date();
 		const start = new Date();
 		const end = new Date();
-		
-		start.setHours(8, 30, 0);
-		end.setHours(9, 0, 0);
+
+		start.setHours(9, 42, 0);
+		end.setHours(10, 12, 0);
 		if (now < start || now > end)
 			return (false);
 		else
