@@ -4,7 +4,7 @@ server:
 db:
   type: 'postgres'
   port: 5432
-  database: '42mogle-default'
+  database: '42mogle_default'
 
 jwt:
   expiresIn: 1209600
