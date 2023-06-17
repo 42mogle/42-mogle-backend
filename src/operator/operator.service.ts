@@ -59,7 +59,7 @@ export class OperatorService {
 			let monthlyUserInfo : MonthlyUsers = await this.dbmanagerService.getSpecificMonthlyuserInfo(monthInfo, userInfo);
 			if (!monthlyUserInfo)
 				monthlyUserInfo = await this.dbmanagerService.createMonthlyUserInThisMonth(userInfo);
-			await this.dbmanagerService.updateAttendanceCountThisMonth(monthlyUserInfo)
+			await this.dbmanagerService.updateAttendanceCountThisMonth(monthlyUserInfo);
 			return "출석체크 완료";
 		} else {
 			return "이미 출석체크가 되었습니다."
@@ -136,7 +136,7 @@ export class OperatorService {
 		const dayInfo = await this.dbmanagerService.getDayInfo(datetime.getDate(), monthInfo);
 		if (dayInfo === null) {
 			console.log('no day_info');
-			throw new NotFoundException('MonthInfo가 생겼으면 있어야 한다.')
+			throw new NotFoundException('MonthInfo가 생겼으면 있어야 한다.');
 		}
 		console.log(`dayInfo: ${JSON.stringify(dayInfo)}`);
 
@@ -238,33 +238,33 @@ export class OperatorService {
 	}
 
 	async findUserAttendanceLog(dataList: DataListDto) {
-		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(dataList.intraId)
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(dataList.intraId);
 		if (!userInfo) {
-			throw new NotFoundException("userInfo that does not exist")
+			throw new NotFoundException("userInfo that does not exist");
 		}
-		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(dataList.month, dataList.year)
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(dataList.month, dataList.year);
 		if (!monthInfo) {
-			throw new NotFoundException("monthInfo that dose not exist")
+			throw new NotFoundException("monthInfo that dose not exist");
 		}
-		return await this.dbmanagerService.getAttendanceListByMonthInfo(userInfo, monthInfo)
+		return await this.dbmanagerService.getAttendanceListByMonthInfo(userInfo, monthInfo);
 	}
 
 	async userAttendanceLogAdd(attendanceData: AttendanceData) {
-		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(attendanceData.intraId)
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(attendanceData.intraId);
 		if (!userInfo) {
-			throw new NotFoundException("userInfo that does not exist")
+			throw new NotFoundException("userInfo that does not exist");
 		}
-		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(attendanceData.month, attendanceData.year)
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(attendanceData.month, attendanceData.year);
 		if (!monthInfo) {
-			throw new NotFoundException("monthInfo that dose not exist")
+			throw new NotFoundException("monthInfo that dose not exist");
 		}
-		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo(attendanceData.day, monthInfo)
+		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo(attendanceData.day, monthInfo);
 		if (!dayInfo) {
-			throw new NotFoundException("dayInfo that dose not exist")
+			throw new NotFoundException("dayInfo that dose not exist");
 		}
-		const attendnaceLog: Attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo)
+		const attendnaceLog: Attendance = await this.dbmanagerService.getAttendance(userInfo, dayInfo);
 		if (attendnaceLog) {
-			throw new BadRequestException("Attendance information already exists")
+			throw new BadRequestException("Attendance information already exists");
 		} else {
 			const date = new Date(
 				attendanceData.year,
@@ -272,31 +272,31 @@ export class OperatorService {
 				attendanceData.day,
 				8,
 				30
-			)
-			let monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
+			);
+			let monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo);
 			if (!monthlyUser) {
-				monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(userInfo, monthInfo)
+				monthlyUser = await this.dbmanagerService.createMonthlyUserByMonthInfo(userInfo, monthInfo);
 			}
-			await this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date)
+			await this.dbmanagerService.attendanceLogAdd(userInfo, dayInfo, date);
 			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
 			await this.statisticService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthInfo);
 		}
 	}
 
 	async userAttendanceLogDelete(attendanceData: AttendanceData) {
-		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(attendanceData.intraId)
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(attendanceData.intraId);
 		if (!userInfo) {
-			throw new NotFoundException("userInfo that does not exist")
+			throw new NotFoundException("userInfo that does not exist");
 		}
-		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(attendanceData.month, attendanceData.year)
+		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(attendanceData.month, attendanceData.year);
 		if (!monthInfo) {
-			throw new NotFoundException("monthInfo that dose not exist")
+			throw new NotFoundException("monthInfo that dose not exist");
 		}
-		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo(attendanceData.day, monthInfo)
+		const dayInfo: DayInfo = await this.dbmanagerService.getDayInfo(attendanceData.day, monthInfo);
 		if (!dayInfo) {
 			throw new NotFoundException("dayInfo that dose not exist")
 		}
-		const monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo)
+		const monthlyUser: MonthlyUsers = await this.dbmanagerService.getMonthlyUser(userInfo, monthInfo);
 		if (await this.dbmanagerService.attendanceLogDelete(userInfo, dayInfo)) {
 			await this.statisticService.updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser, monthInfo);
 			await this.statisticService.updateMonthlyUserTotalPerfectCount(monthlyUser, monthInfo);
@@ -304,19 +304,19 @@ export class OperatorService {
 	}
 
 	async addOperator(intraId: string) {
-		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId)
-		if (!userInfo) {
-			throw new NotFoundException("Not Found User")
-		}
-		this.dbmanagerService.updateUserInfoIsOper(userInfo, true)
-	}
-
-	async deleteOperator(intraId: string) {
-		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId)
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId);
 		if (!userInfo) {
 			throw new NotFoundException("Not Found User");
 		}
-		this.dbmanagerService.updateUserInfoIsOper(userInfo, false)
+		this.dbmanagerService.updateUserInfoIsOper(userInfo, true);
+	}
+
+	async deleteOperator(intraId: string) {
+		const userInfo: UserInfo = await this.dbmanagerService.getUserInfo(intraId);
+		if (!userInfo) {
+			throw new NotFoundException("Not Found User");
+		}
+		this.dbmanagerService.updateUserInfoIsOper(userInfo, false);
 	}
 
 	async getTodayWord() {
