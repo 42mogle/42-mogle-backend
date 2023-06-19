@@ -9,7 +9,7 @@ RUN npm run build
 # Stage 2: Run the application
 FROM node:latest
 WORKDIR /app
-COPY package*.json ./
+COPY --from=builder /app/package*.json ./
 RUN npm install --only=production
 COPY --from=builder /app/config ./config
 COPY --from=builder /app/dist ./dist
