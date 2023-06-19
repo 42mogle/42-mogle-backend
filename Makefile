@@ -35,11 +35,16 @@ clean:
 fclean:
 	$(DC) -f $(DC_FILE_PROD) down -v --rmi all --remove-orphans
 
+build-testing:
+	$(DC) -f $(DC_FILE_TEST) build
 
-test:
-	$(DC) -f $(DC_FILE_TEST) up -d
+testing:
+	$(DC) -f $(DC_FILE_TEST) up --abort-on-container-exit
+	$(DC) -f $(DC_FILE_TEST) logs -f &
+	wait $!
+	$(DC) -f $(DC_FILE_TEST) down
 
-test down:
+down-testing:
 	$(DC) -f $(DC_FILE_TEST) down
 
 .PHONY: all down re logs ps restart clean fclean
