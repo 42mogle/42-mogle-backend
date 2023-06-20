@@ -9,7 +9,7 @@ import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER} from 'nest-winston'
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto'
-import { StatisticService } from 'src/statistic/statistic.service'
+import { StatisticService } from '../statistic/statistic.service'
 import { DataListDto } from './dto/dataList.dto'
 import { AttendanceData } from './dto/attendnaceData.dto'
 import { Attendance } from '../dbmanager/entities/attendance.entity'

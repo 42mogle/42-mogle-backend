@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
+import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
 import { PasswordDto } from './dto/password.dto';
 import * as bcrypt from 'bcrypt';
@@ -7,8 +7,10 @@ import { UserOperatorInfo } from './dto/userOperatorInfo.dto';
 
 @Injectable()
 export class UserService {
-	@Inject(DbmanagerService)
-	private readonly dbmanagerService: DbmanagerService;
+	constructor(
+		@Inject(DbmanagerService)
+		private readonly dbmanagerService: DbmanagerService
+	) {}
 
 	// todo: replace same function in AuthService to remove duplicated
 	checkPasswordValid(pwd: string): boolean {

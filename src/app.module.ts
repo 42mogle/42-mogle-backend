@@ -43,9 +43,6 @@ const format = winston.format.combine(
       ],
     }),
     TypeOrmModule.forRoot(typeOrmConfig),
-    TypeOrmModule.forFeature(
-      [UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]
-    ),
     AuthModule,
     UserModule, 
     AttendanceModule, 
@@ -59,6 +56,6 @@ const format = winston.format.combine(
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, DbmanagerService],
+  providers: [AppService],
 })
 export class AppModule {}

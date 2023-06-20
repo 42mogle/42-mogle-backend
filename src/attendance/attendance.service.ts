@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
+import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
@@ -7,7 +7,7 @@ import { OperatorService } from '../operator/operator.service';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { ButtonStatus } from './button.status.enum';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
-import { Attendance } from 'src/dbmanager/entities/attendance.entity';
+import { Attendance } from '../dbmanager/entities/attendance.entity';
 
 @Injectable()
 export class AttendanceService {

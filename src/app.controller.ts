@@ -1,14 +1,11 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { get } from 'http';
 import { AppService } from './app.service';
-import { DbmanagerService } from './dbmanager/dbmanager.service';
 
 @Controller()
 export class AppController {
   constructor(
     	private readonly appService: AppService,
-    	private dbm_serv: DbmanagerService
     ) {}
 
 	@Get('/')

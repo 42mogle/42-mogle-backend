@@ -9,18 +9,6 @@ import { UserInfo } from './dbmanager/entities/user_info.entity';
 
 @Injectable()
 export class AppService {
-  constructor(
-    @InjectRepository(UserInfo)
-    private userInfoRepo: Repository<UserInfo>,
-    @InjectRepository(Attendance)
-    private attendanceRepo: Repository<Attendance>,
-    @InjectRepository(DayInfo)
-    private dayInfoRepo: Repository<DayInfo>,
-    @InjectRepository(MonthInfo)
-    private monthInfoRepo: Repository<MonthInfo>,
-    @InjectRepository(MonthlyUsers)
-    private monthlyUsersRepo: Repository<MonthlyUsers>,
-  ) {}
 
   getDefault(): string {
     return "서버 켜져있어용 ㅎㅎㅎ";

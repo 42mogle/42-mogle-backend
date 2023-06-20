@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
+import { UserInfo } from './entities/user_info.entity';
 import { Between, LessThan, LessThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';

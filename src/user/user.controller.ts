@@ -1,9 +1,9 @@
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
+import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { ApiParam, ApiOperation, ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { Body, Controller, Get, Inject, Patch, UseGuards, UnauthorizedException } from '@nestjs/common';
-import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { GetUserInfo } from '../costom-decorator/get-userInfo.decorator'; // TODO: rename to custom
 import { WinstonLogger, WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { UserInfoDto } from './dto/user-info.dto';
 import { PasswordDto } from './dto/password.dto';
