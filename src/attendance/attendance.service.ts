@@ -85,8 +85,7 @@ export class AttendanceService {
 			return false;
 	}
 
-	isAvailableTime(): Boolean {
-		const now = new Date();
+	isAvailableTime(now = new Date()): Boolean {
 		const start = new Date();
 		const end = new Date();
 
