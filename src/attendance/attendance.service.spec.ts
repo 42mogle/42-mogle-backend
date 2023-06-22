@@ -29,17 +29,30 @@ describe('AttendanceService', () => {
   });
   
   describe('isWeekday', () => {
-    it('isWeekday() should return true in a weekday', () => {
+    it('should return true in a weekday', () => {
       let date: Date = new Date(2023, 5, 22);
       const result: Boolean = true;
       expect(attendanceService.isWeekday(date)).toBe(result);
     });
-    it('isWeekday() should return false in a weekend', () => {
+    it('should return false in a weekend', () => {
       let date: Date = new Date(2023, 5, 24);
       const result: Boolean = false;
       expect(attendanceService.isWeekday(date)).toBe(result);
     });
-  })
+  });
+
+  describe('isWeekend', () => {
+    it('should return true in a weekend', () => {
+      let date: Date = new Date(2023, 5, 24);
+      const result: Boolean = true;
+      expect(attendanceService.isWeekend(date)).toBe(result);
+    });
+    it('should return false in a weekday', () => {
+      let date: Date = new Date(2023, 5, 22);
+      const result: Boolean = false;
+      expect(attendanceService.isWeekend(date)).toBe(result);
+    });
+  });
 
   // Add more tests here
 });
