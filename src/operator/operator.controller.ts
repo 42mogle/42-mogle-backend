@@ -4,7 +4,7 @@ import { SetTodayWordDto } from './dto/today_Word.dto';
 import { UpdateUserAttendanceDto } from './dto/updateUserAttendance.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { GetUserInfo } from '../costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { GsheetAttendanceDto } from './dto/gsheetAttendance.dto';

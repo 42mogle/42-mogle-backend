@@ -11,6 +11,6 @@ import { DbmanagerService } from '../dbmanager/dbmanager.service';
     DbmanagerModule
   ],
   controllers: [AttendanceController],
-  providers: [AttendanceService, DbmanagerService, OperatorService, StatisticService]
+  providers: [AttendanceService, OperatorService, StatisticService]
 })
 export class AttendanceModule {}

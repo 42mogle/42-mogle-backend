@@ -8,7 +8,7 @@ import { DayInfo } from '../dbmanager/entities/day_info.entity';
 import { MonthInfo } from '../dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
-import { AttendanceService } from 'src/attendance/attendance.service';
+import { AttendanceService } from '../attendance/attendance.service';
 import { OperatorService } from '../operator/operator.service';
 
 @Module({

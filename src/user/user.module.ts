@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { DbmanagerModule } from 'src/dbmanager/dbmanager.module';
+import { DbmanagerModule } from '../dbmanager/dbmanager.module';
 
 @Module({
   imports: [

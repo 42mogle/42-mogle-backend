@@ -1,9 +1,9 @@
 import { Controller, ForbiddenException, Get, Inject, Param, Patch, UseGuards } from '@nestjs/common';
-import { Attendance } from 'src/dbmanager/entities/attendance.entity';
+import { Attendance } from '../dbmanager/entities/attendance.entity';
 import { StatisticService } from './statistic.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { GetUserInfo } from '../costom-decorator/get-userInfo.decorator';
 import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 

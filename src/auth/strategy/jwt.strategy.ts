@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
+import { UserInfo } from '../../dbmanager/entities/user_info.entity';
 import * as config from 'config';
 
 @Injectable()
