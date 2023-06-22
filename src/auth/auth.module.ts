@@ -6,15 +6,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
+import { UserInfo } from '../dbmanager/entities/user_info.entity';
 import * as config from 'config';
 import * as winston from 'winston';
 import { utilities } from 'nest-winston';
 import { DbmanagerService } from '../dbmanager/dbmanager.service';
-import { Attendance } from 'src/dbmanager/entities/attendance.entity';
-import { DayInfo } from 'src/dbmanager/entities/day_info.entity';
-import { MonthInfo } from 'src/dbmanager/entities/month_info.entity';
-import { MonthlyUsers } from 'src/dbmanager/entities/monthly_users.entity';
+import { Attendance } from '../dbmanager/entities/attendance.entity';
+import { DayInfo } from '../dbmanager/entities/day_info.entity';
+import { MonthInfo } from '../dbmanager/entities/month_info.entity';
+import { MonthlyUsers } from '../dbmanager/entities/monthly_users.entity';
 
 const jwtConfig = config.get('jwt');
 

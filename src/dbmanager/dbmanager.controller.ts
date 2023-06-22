@@ -3,7 +3,7 @@ import { DbmanagerService } from './dbmanager.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserInfo } from './entities/user_info.entity';
-import { GetUserInfo } from 'src/costom-decorator/get-userInfo.decorator';
+import { GetUserInfo } from '../costom-decorator/get-userInfo.decorator';
 import { WinstonLogger, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @ApiTags('DbManager')
