@@ -42,7 +42,7 @@ testing:
 	$(DC) -f $(DC_FILE_TEST) up --abort-on-container-exit
 # $(DC) -f $(DC_FILE_TEST) logs -f &
 # wait $!
-# $(DC) -f $(DC_FILE_TEST) down
+	$(DC) -f $(DC_FILE_TEST) down
 
 down-testing:
 	$(DC) -f $(DC_FILE_TEST) down

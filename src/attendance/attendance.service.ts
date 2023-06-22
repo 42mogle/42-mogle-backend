@@ -105,12 +105,4 @@ export class AttendanceService {
 		else
 			return true;
 	}
-
-	async isTodayWordSet(): Promise<boolean> {
-		const todayInfo: DayInfo = await this.dbmanagerService.getTodayInfo();
-		if (todayInfo.todayWord === "")
-			return (false);
-		else
-			return (true);
-	}
 }
