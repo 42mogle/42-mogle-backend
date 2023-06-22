@@ -30,27 +30,50 @@ describe('AttendanceService', () => {
   
   describe('isWeekday', () => {
     it('should return true in a weekday', () => {
-      let date: Date = new Date(2023, 5, 22);
       const result: Boolean = true;
+      let date: Date = new Date(2023, 5, 22);
       expect(attendanceService.isWeekday(date)).toBe(result);
     });
     it('should return false in a weekend', () => {
-      let date: Date = new Date(2023, 5, 24);
       const result: Boolean = false;
+      let date: Date = new Date(2023, 5, 24);
       expect(attendanceService.isWeekday(date)).toBe(result);
     });
   });
 
   describe('isWeekend', () => {
     it('should return true in a weekend', () => {
-      let date: Date = new Date(2023, 5, 24);
       const result: Boolean = true;
+      let date: Date = new Date(2023, 5, 24);
       expect(attendanceService.isWeekend(date)).toBe(result);
     });
     it('should return false in a weekday', () => {
-      let date: Date = new Date(2023, 5, 22);
       const result: Boolean = false;
+      let date: Date = new Date(2023, 5, 22);
       expect(attendanceService.isWeekend(date)).toBe(result);
+    });
+  });
+
+  describe('isAvailableTime', () => {
+    it('should return true when available time', () => {
+      const result: Boolean = true;
+      const fixedDate = new Date();
+      fixedDate.setHours(10, 0, 0)
+      expect(attendanceService.isAvailableTime(fixedDate)).toBe(result);
+      fixedDate.setHours(9, 42, 0)
+      expect(attendanceService.isAvailableTime(fixedDate)).toBe(result);
+      fixedDate.setHours(10, 12, 0)
+      expect(attendanceService.isAvailableTime(fixedDate)).toBe(result);
+    });
+    it('should return false when not available time', () => {
+      const result: Boolean = false;
+      const fixedDate = new Date();
+      fixedDate.setHours(12, 0, 0)
+      expect(attendanceService.isAvailableTime(fixedDate)).toBe(result);
+      fixedDate.setHours(9, 41, 0)
+      expect(attendanceService.isAvailableTime(fixedDate)).toBe(result);
+      fixedDate.setHours(10, 13, 0)
+      expect(attendanceService.isAvailableTime(fixedDate)).toBe(result);
     });
   });
 
