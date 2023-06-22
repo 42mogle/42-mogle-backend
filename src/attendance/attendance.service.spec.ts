@@ -4,7 +4,7 @@ import { DbmanagerService } from '../dbmanager/dbmanager.service';
 import { AttendanceService } from './attendance.service';
 
 describe('AttendanceService', () => {
-  let service: AttendanceService;
+  let attendanceService: AttendanceService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,12 +21,25 @@ describe('AttendanceService', () => {
       ],
     }).compile();
 
-    service = module.get<AttendanceService>(AttendanceService);
+    attendanceService = module.get<AttendanceService>(AttendanceService);
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(attendanceService).toBeDefined();
   });
+  
+  describe('isWeekday', () => {
+    it('isWeekday() should return true in a weekday', () => {
+      let date: Date = new Date(2023, 5, 22);
+      const result: Boolean = true;
+      expect(attendanceService.isWeekday(date)).toBe(result);
+    });
+    it('isWeekday() should return false in a weekend', () => {
+      let date: Date = new Date(2023, 5, 24);
+      const result: Boolean = false;
+      expect(attendanceService.isWeekday(date)).toBe(result);
+    });
+  })
 
   // Add more tests here
 });
