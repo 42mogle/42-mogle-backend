@@ -11,7 +11,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
 	port: process.env.POSTGRES_PORT || dbConfig.port,
 	username: process.env.POSTGRES_USER || dbConfig.username,
 	password: process.env.POSTGRES_PASSWORD || dbConfig.password,
-	database: process.env.POSTGRES_DB_NAME || dbConfig.database,
+	database: process.env.POSTGRES_DB || dbConfig.database,
 	entities: [
 		__dirname + '/../**/*.entity.{js,ts}'
 	],
