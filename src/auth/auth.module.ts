@@ -15,6 +15,7 @@ import { Attendance } from 'src/dbmanager/entities/attendance.entity';
 import { DayInfo } from 'src/dbmanager/entities/day_info.entity';
 import { MonthInfo } from 'src/dbmanager/entities/month_info.entity';
 import { MonthlyUsers } from 'src/dbmanager/entities/monthly_users.entity';
+import { DbmanagerModule } from 'src/dbmanager/dbmanager.module';
 
 const jwtConfig = config.get('jwt');
 
@@ -28,7 +29,7 @@ const format = winston.format.combine(
   imports: [
     HttpModule,
     PassportModule,
-    TypeOrmModule.forFeature([UserInfo, Attendance, DayInfo, MonthInfo, MonthlyUsers]),
+    DbmanagerModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || jwtConfig.secret,
       signOptions:{
@@ -38,6 +39,6 @@ const format = winston.format.combine(
   ],
 
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, DbmanagerService]
+  providers: [AuthService, JwtStrategy]
 })
 export class AuthModule {}
