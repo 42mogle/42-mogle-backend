@@ -20,6 +20,7 @@ import { MonthlyUsers } from './entities/monthly_users.entity';
     ]),
   ],
   controllers: [DbmanagerController],
-  providers: [DbmanagerService]
+  providers: [DbmanagerService],
+  exports: [TypeOrmModule, DbmanagerService]
 })
 export class DbmanagerModule {}
