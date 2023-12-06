@@ -59,6 +59,6 @@ const format = winston.format.combine(
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, DbmanagerService],
+  providers: [AppService],
 })
 export class AppModule {}

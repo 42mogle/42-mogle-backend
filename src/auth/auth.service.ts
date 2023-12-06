@@ -10,9 +10,9 @@ import { DbmanagerService } from '../dbmanager/dbmanager.service';
 
 @Injectable()
 export class AuthService {
-  
+
   @Inject(DbmanagerService) private readonly dbmanagerService: DbmanagerService
-  
+
   constructor(
     private readonly httpService: HttpService,
     private jwtService: JwtService,
@@ -32,7 +32,7 @@ export class AuthService {
       grant_type: 'authorization_code',
       client_id: process.env.PAYLOAD_CLIENT_ID,
       client_secret: process.env.PAYLOAD_CLIENT_SECRET,
-      redirect_uri: 'https://42mogle.com/auth',
+      redirect_uri: process.env.REDIRECT_URI,
       code
     };
 
@@ -105,7 +105,7 @@ export class AuthService {
   }
 
   checkPasswordValid(pwd: string): boolean {
-    const ruleRegex = 
+    const ruleRegex =
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\d\sa-zA-Z])[\S]{8,20}$/;
     // Explain : 비밀번호 길이는 8자 ~ 20자 사이
     if (pwd.length < 8 && 20 < pwd.length) {
