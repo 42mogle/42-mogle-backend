@@ -111,10 +111,10 @@ export class StatisticService {
 
 	async updateMonthlyUserPerfectStatus(monthlyUser: MonthlyUsers, monthInfo: MonthInfo) {
 		//let monthInfo: MonthInfo = monthlyUser.monthInfo;
-		if (monthlyUser.attendanceCount === monthInfo.currentAttendance) {
-			monthlyUser.isPerfect = true;
-		} else if (monthlyUser.attendanceCount < monthInfo.currentAttendance) {
+		if (monthlyUser.attendanceCount < monthInfo.currentAttendance) {
 			monthlyUser.isPerfect = false;
+		} else {
+			monthlyUser.isPerfect = true;
 		}
 		await this.dbmanagerService.updateMonthlyUserPerfectStatus(monthlyUser, monthlyUser.isPerfect);
 		return monthlyUser;
