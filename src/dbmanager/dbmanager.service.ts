@@ -361,6 +361,42 @@ export class DbmanagerService {
 		return countOfWeekdayAttendancesOfAUserInAMonth;
 	}
 
+	async getCountOfWeekendAttendancesOfAUserInAMonth(monthlyUser: MonthlyUsers): Promise<number> {
+		const userInfo: UserInfo = await this.getUserInfoByMonthlyUser(monthlyUser);
+		const monthInfo: MonthInfo = await this.getMonthInfoByMonthlyUser(monthlyUser);
+		const countOfWeekendAttendancesOfAUserInAMonth: number = await this.attendanceRepository.count({
+			relations: {
+				dayInfo: true,
+			},
+			where: {
+				userInfo,
+				dayInfo: {
+					monthInfo,
+					type: 1,
+				}
+			}
+		});
+		return countOfWeekendAttendancesOfAUserInAMonth;
+	}
+
+	async getCountOfHolidayAttendancesOfAUserInAMonth(monthlyUser: MonthlyUsers): Promise<number> {
+		const userInfo: UserInfo = await this.getUserInfoByMonthlyUser(monthlyUser);
+		const monthInfo: MonthInfo = await this.getMonthInfoByMonthlyUser(monthlyUser);
+		const countOfHolidayAttendancesOfAUserInAMonth: number = await this.attendanceRepository.count({
+			relations: {
+				dayInfo: true,
+			},
+			where: {
+				userInfo,
+				dayInfo: {
+					monthInfo,
+					type: 2,
+				}
+			}
+		});
+		return countOfHolidayAttendancesOfAUserInAMonth;
+	}
+
 	async setAttendance(userInfo: UserInfo, dayInfo: DayInfo, datetime: Date) {
 		const attendanceToSet = this.attendanceRepository.create({
 			timelog: datetime,

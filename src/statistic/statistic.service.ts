@@ -96,58 +96,25 @@ export class StatisticService {
 	}
 
 	async updateMonthlyUserAttendanceCountAndPerfectStatus(monthlyUser: MonthlyUsers, monthInfo: MonthInfo) {
-		await this.updateMonthlyUserAttendanceCount(monthlyUser, monthInfo);
+		await this.updateMonthlyUserAttendanceCount(monthlyUser);
 		await this.updateMonthlyUserPerfectStatus(monthlyUser, monthInfo);
 		return monthlyUser;
 	}
 
-	async updateMonthlyUserAttendanceCount(monthlyUser: MonthlyUsers, monthInfo: MonthInfo) {
+	async updateMonthlyUserAttendanceCount(monthlyUser: MonthlyUsers) {
 		monthlyUser.attendanceCount = await this.dbmanagerService.getCountOfWeekdayAttendancesOfAUserInAMonth(monthlyUser);
-		// reflect weekend supplementary attendances
-		let dayInfoOfEachWeek: DayInfo = await this.dbmanagerService.getFirstWeekdayDayInfoInAMonth(monthInfo);
-		for (let i: number = 0; (i < 5) && (dayInfoOfEachWeek !== null); ++i) {
-			monthlyUser = await this.reflectWeekendSupplementaryAttendanceInAWeek(dayInfoOfEachWeek, monthlyUser);
-			dayInfoOfEachWeek = await this.dbmanagerService.getADayInfoHavingSpecificDay(monthInfo, dayInfoOfEachWeek.day + 7);
-		}
-		// update monthlyUser attendance count
+		monthlyUser.attendanceCount += await this.dbmanagerService.getCountOfWeekendAttendancesOfAUserInAMonth(monthlyUser);
+		monthlyUser.attendanceCount += await this.dbmanagerService.getCountOfHolidayAttendancesOfAUserInAMonth(monthlyUser);
 		await this.dbmanagerService.updateMonthlyUserAttendanceCount(monthlyUser, monthlyUser.attendanceCount);
-		return monthlyUser;
-	}
-
-	/*
-		주말 2일 연속으로 출석 시,
-		그 주 평일에 하루 빠졌다면 attendanceCount를 1 증가시킨다.
-	*/
-	async reflectWeekendSupplementaryAttendanceInAWeek(dayInfo: DayInfo, monthlyUser: MonthlyUsers) {	
-		const userInfo: UserInfo = await this.dbmanagerService.getUserInfoByMonthlyUser(monthlyUser);
-		// 1. 같은 달에서 같은 주일의 DayInfo list 가져오기
-		const dayInfoListSameMonthWeek: DayInfo[] = await this.dbmanagerService.getDayInfoListSameMonthWeek(dayInfo);
-		const lenOfDayList = dayInfoListSameMonthWeek.length;
-
-		if (lenOfDayList > 2 
-		&& dayInfoListSameMonthWeek[lenOfDayList - 1].type === DayType.WEEKEND 
-		&& dayInfoListSameMonthWeek[lenOfDayList - 2].type === DayType.WEEKEND) {
-			// 2. 주말 2일 연속 출석 확인
-			if (await this.dbmanagerService.getAttendance(userInfo, dayInfoListSameMonthWeek[lenOfDayList - 1]) !== null
-			&& await this.dbmanagerService.getAttendance(userInfo, dayInfoListSameMonthWeek[lenOfDayList - 2]) !== null) {
-				// 3. 그 주에 빠진 평일 하루 확인
-				for (let idx: number = 0; idx < lenOfDayList - 2; ++idx) {
-					if (await this.dbmanagerService.getAttendance(userInfo, dayInfoListSameMonthWeek[idx]) === null) {
-						monthlyUser.attendanceCount += 1;
-						break ;
-					}
-				}
-			}
-		}
 		return monthlyUser;
 	}
 
 	async updateMonthlyUserPerfectStatus(monthlyUser: MonthlyUsers, monthInfo: MonthInfo) {
 		//let monthInfo: MonthInfo = monthlyUser.monthInfo;
-		if (monthlyUser.attendanceCount === monthInfo.currentAttendance) {
-			monthlyUser.isPerfect = true;
-		} else if (monthlyUser.attendanceCount < monthInfo.currentAttendance) {
+		if (monthlyUser.attendanceCount < monthInfo.currentAttendance) {
 			monthlyUser.isPerfect = false;
+		} else {
+			monthlyUser.isPerfect = true;
 		}
 		await this.dbmanagerService.updateMonthlyUserPerfectStatus(monthlyUser, monthlyUser.isPerfect);
 		return monthlyUser;
