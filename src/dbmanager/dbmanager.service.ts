@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Between, LessThan, LessThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThan, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -551,6 +551,30 @@ export class DbmanagerService {
 				monthInfo,
 			},
 			//select: ['userInfo','totalPerfectCount','isPerfect'],
+		});
+		return monthlyUsersInTheMonth;
+	}
+
+	async getMonthlyUsersAttendedMoreThanOrEqualCount(monthInfo: MonthInfo, count: number) {
+		if (!Number.isInteger(count)) {
+			throw new Error('count must be an integer');
+		}
+		const monthlyUsersInTheMonth = this.monthlyUsersRepository.find({
+			select: {
+				userInfo: {
+					intraId: true,
+				},
+				totalPerfectCount: true,
+				isPerfect: true,
+				attendanceCount: true
+			},
+			relations: {
+				userInfo: true,
+			},
+			where: {
+				monthInfo,
+				attendanceCount: MoreThanOrEqual(count)
+			},
 		});
 		return monthlyUsersInTheMonth;
 	}
