@@ -44,7 +44,7 @@ export class OperatorController {
 		console.log(`[ PATCH /operator/setTodayWord ] requested.`);
 		console.log(`setTodayWordDto.intraId: [${userInfo.intraId}]`);
 		console.log(`setTodayWordDto.todayWord: [${todayWordDto.todayWord}]`);
-		this.logger.log(`[ PATCH /operator/setTodayWord ] requested.`, JSON.stringify(userInfo) + JSON.stringify(todayWordDto));
+		this.logger.log(`[ PATCH /operator/setTodayWord ] requested.`, JSON.stringify(userInfo.intraId) + ' ' + JSON.stringify(todayWordDto));
 		this.operatorService.setTodayWord(todayWordDto, userInfo);
 	}
 
@@ -95,7 +95,7 @@ export class OperatorController {
 		description: 'Error: Unauthorized (Blocked by JwtAuthGuard)'
 	})
 	updateAllUsersAttendanceInfo(@GetUserInfo() userInfo: UserInfo) {
-		this.logger.log(`[ POST /operator/update/user/attendance ] requested.`, JSON.stringify(userInfo));
+		this.logger.log(`[ POST /operator/update/user/attendance ] requested.`, JSON.stringify(userInfo.intraId));
 		if (userInfo.isOperator === false)
 			throw new UnauthorizedException("Not Operator");
 		this.operatorService.updateUsersAttendanceInfo();
@@ -203,7 +203,7 @@ export class OperatorController {
 	 async updateMonthInfoProperty(@GetUserInfo() userInfo: UserInfo, @Param('year') year: number, @Param('month') month: number) {
 		 console.log("[PATCH /operator/month-info-property] requested.");
 		 console.log(`year: ${year}, month: ${month}`);
-		 this.logger.log("[PATCH /operator/month-info-property] requested.", JSON.stringify(userInfo));
+		 this.logger.log("[PATCH /operator/month-info-property] requested.", JSON.stringify(userInfo.intraId));
 		if (userInfo.isOperator === false) {
 			console.log("Not Operator")
 			throw new UnauthorizedException("Not Operator");

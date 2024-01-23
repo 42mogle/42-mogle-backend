@@ -47,7 +47,7 @@ export class UserController {
 		description: 'Forbidden'
 	})
 	getUserInfo(@GetUserInfo() userInfo: UserInfo): UserInfoDto {
-		this.logger.log("[GET /user/getUserInfo] requested.", JSON.stringify(userInfo));
+		this.logger.log("[GET /user/getUserInfo] requested.", userInfo.intraId);
 		const userInfoDto: UserInfoDto = {
 			intraId: userInfo.intraId,
 			isOperator: userInfo.isOperator,

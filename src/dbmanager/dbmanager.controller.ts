@@ -29,7 +29,7 @@ export class DbmanagerController {
 	})
 	setTotalMonthInfo(@GetUserInfo() userInfo: UserInfo) {
 		console.log(`[ POST /dbmanager/set/totalMonthInfo ]`);
-		this.logger.log(`[ POST /dbmanager/set/totalMonthInfo ]`, JSON.stringify(userInfo));
+		this.logger.log(`[ POST /dbmanager/set/totalMonthInfo ]`, userInfo.intraId);
 		return this.dbmanagerService.setTotalMonthInfo(userInfo);
 	}
 	
