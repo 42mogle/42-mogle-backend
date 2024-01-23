@@ -43,8 +43,7 @@ export class StatisticController {
 		description: 'Forbidden'
 	})
 	async getUserAttendanceList(@GetUserInfo() userInfo: UserInfo): Promise<Attendance[]> {
-		console.log("[GET /statistic/userAttendanceList] requested.");
-		this.logger.log("[GET /statistic/userAttendanceList] requested.", JSON.stringify(userInfo));
+		this.logger.log("[GET /statistic/userAttendanceList] requested.", userInfo.intraId);
 		return await this.statisticService.getAttendanceList(userInfo);
 	}
 
@@ -76,8 +75,7 @@ export class StatisticController {
 		description: 'Forbidden'
 	})
 	async getUserAttendanceState(@GetUserInfo() userInfo: UserInfo) {
-		console.log("[GET /statistic/userAttendanceState] requested.");
-		this.logger.log("[GET /statistic/userAttendanceState] requested.", JSON.stringify(userInfo));
+		this.logger.log("[GET /statistic/userAttendanceState] requested.", userInfo.intraId);
 		return await this.statisticService.getUserMonthStatus(userInfo);
 	}
 
@@ -112,13 +110,59 @@ export class StatisticController {
 		status: 403,
 		description: 'Forbidden'
 	})
-	async getMonthlyUsersInSpecificMonth(@GetUserInfo() userInfo: UserInfo, @Param('year') year: number, @Param('month') month: number) {
+	async getMonthlyUsersInSpecificMonth(
+		@GetUserInfo() userInfo: UserInfo, 
+		@Param('year') year: number, 
+		@Param('month') month: number
+	) {
 		if (userInfo.isOperator === false) {
 			throw new ForbiddenException("오퍼레이터 권한이 없습니다.");
 		}
-		console.log("[GET /statistic/monthly_users/{year}/{month}] requested.");
-		//this.logger.log("[GET /statistic/monthly_users/{year}/{month}] requested.");
+		this.logger.log(`[GET /statistic/monthly_users/${year}/${month}] requested.`);
 		return (await this.statisticService.getMonthlyUsersInSepcificMonth(year, month));
+	}
+
+	/**
+	 * GET /statistic/monthly-users/half-perfect/{year}/{month}
+	 */
+	@Get("/monthly-users/half-perfect/:year/:month")
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('access-token')
+	@ApiOperation({
+		summary: 'get the monthly users in specified month',
+		description: '특정달에 1/2 개근자 목록 가져오기'
+	})
+	@ApiParam({
+		name: 'year',
+		type: Number,
+	})
+	@ApiParam({
+		name: 'month',
+		type: Number,
+	})
+	@ApiResponse({
+		status: 200, 
+		description: 'Success', 
+		// todo: type: DTO로 정의하기
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Error: Unauthorized (Blocked by JwtAuthGuard: No JWT access-token)'
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Forbidden'
+	})
+	async getMonthlyHalfPerfectUsersInSpecificMonth(
+		@GetUserInfo() userInfo: UserInfo, 
+		@Param('year') year: number, 
+		@Param('month') month: number
+	) {
+		if (userInfo.isOperator === false) {
+			throw new ForbiddenException("오퍼레이터 권한이 없습니다.");
+		}
+		this.logger.log(`[GET /statistic/monthly_users/half-perfect/${year}/${month}] requested.`);
+		return (await this.statisticService.getMonthlyHalfPerfectUsersInSepcificMonth(year, month));
 	}
 
 	/**
@@ -156,8 +200,7 @@ export class StatisticController {
 		if (userInfo.isOperator === false) {
 			throw new ForbiddenException("오퍼레이터 권한이 없습니다.");
 		}
-		console.log("[PATCH /statistic/monthly-users/attendance-info/{year}/{month}] requested.");
-		//this.logger.log("[GET /statistic/monthly_users/{year}/{month}] requested.");
+		this.logger.log(`[PATCH /statistic/monthly-users/attendance-info/${year}/${month}] requested.`);
 		return (await this.statisticService.updateMonthlyUsersInASpecificMonth(year, month));
 	}
 }
