@@ -82,24 +82,22 @@ export class StatisticService {
 	}
 
 	async getMonthlyHalfPerfectUsersInSepcificMonth(year: number, month: number) {
-		let retHalfPerfectUserIntraIds: string[] = [];
-		const monthInfo: MonthInfo = await this.dbmanagerService.getMonthInfo(month, year);
+		const monthInfo: MonthInfo | null = await this.dbmanagerService.getMonthInfo(month, year);
 		if (monthInfo === null) {
-			throw new NotFoundException('지정된 달의 데이터가 없습니다.');
+		  throw new NotFoundException('지정된 달의 데이터가 없습니다.');
 		}
-		const halfAttendanceCount: number = Math.ceil(monthInfo.totalAttendance / 2);
-		const halfAttendedMonthlyUsers: MonthlyUsers[] = await this.dbmanagerService
-			.getMonthlyUsersAttendedMoreThanOrEqualCount(monthInfo, halfAttendanceCount);
-		halfAttendedMonthlyUsers.forEach((monthlyUser) => {
-			if (monthlyUser.attendanceCount >= halfAttendanceCount) {
-				if (monthlyUser.isPerfect === false
-				|| (monthlyUser.isPerfect === true && monthlyUser.totalPerfectCount > 5)) {
-					retHalfPerfectUserIntraIds.push(monthlyUser.userInfo.intraId);
-				}
-			}
-		});
-		return retHalfPerfectUserIntraIds;
-	}
+	
+		const halfAttendanceCount = Math.ceil(monthInfo.totalAttendance / 2);
+		const halfAttendedMonthlyUsers = await this.dbmanagerService
+		  .getMonthlyUsersAttendedMoreThanOrEqualCount(monthInfo, halfAttendanceCount);
+	
+		return halfAttendedMonthlyUsers.filter((monthlyUser) => {
+		  return (
+			monthlyUser.attendanceCount >= halfAttendanceCount &&
+			(monthlyUser.isPerfect === false || monthlyUser.totalPerfectCount > 5)
+		  )
+		})
+	  }
 
 	async updateMonthlyUsersInASpecificMonth(year: number, month: number) {
 		if (year === 2022 && month === 11) {
