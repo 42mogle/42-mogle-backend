@@ -81,6 +81,24 @@ export class StatisticService {
 		return monthlyUsersInAMonth;
 	}
 
+	async getMonthlyHalfPerfectUsersInSepcificMonth(year: number, month: number) {
+		const monthInfo: MonthInfo | null = await this.dbmanagerService.getMonthInfo(month, year);
+		if (monthInfo === null) {
+		  throw new NotFoundException('지정된 달의 데이터가 없습니다.');
+		}
+	
+		const halfAttendanceCount = Math.ceil(monthInfo.totalAttendance / 2);
+		const halfAttendedMonthlyUsers = await this.dbmanagerService
+		  .getMonthlyUsersAttendedMoreThanOrEqualCount(monthInfo, halfAttendanceCount);
+	
+		return halfAttendedMonthlyUsers.filter((monthlyUser) => {
+		  return (
+			monthlyUser.attendanceCount >= halfAttendanceCount &&
+			(monthlyUser.isPerfect === false || monthlyUser.totalPerfectCount > 5)
+		  )
+		})
+	  }
+
 	async updateMonthlyUsersInASpecificMonth(year: number, month: number) {
 		if (year === 2022 && month === 11) {
 			throw new NotAcceptableException('forbidden to update 2022.11');
