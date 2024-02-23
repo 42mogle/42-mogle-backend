@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DbmanagerService } from 'src/dbmanager/dbmanager.service';
 import { Attendance } from 'src/dbmanager/entities/attendance.entity';
@@ -10,18 +10,14 @@ import { AttendanceController } from './attendance.controller';
 import { AttendanceService } from './attendance.service';
 import { OperatorService } from '../operator/operator.service';
 import { StatisticService } from 'src/statistic/statistic.service';
+import { DbmanagerModule } from 'src/dbmanager/dbmanager.module';
+import { OperatorModule } from 'src/operator/operator.module';
+import { StatisticModule } from 'src/statistic/statistic.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      UserInfo,
-      Attendance,
-      DayInfo,
-      MonthInfo,
-      MonthlyUsers
-    ]),
-  ],
+  imports: [DbmanagerModule, forwardRef(() => OperatorModule), forwardRef(() => StatisticModule)],
   controllers: [AttendanceController],
-  providers: [AttendanceService, DbmanagerService, OperatorService, StatisticService]
+  providers: [AttendanceService],
+  exports: [AttendanceService]
 })
 export class AttendanceModule {}

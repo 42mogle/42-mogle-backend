@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/dbmanager/entities/user_info.entity';
-import { Between, LessThan, LessThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThan, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Cron } from '@nestjs/schedule';
 import { MonthInfo } from './entities/month_info.entity';
@@ -361,6 +361,42 @@ export class DbmanagerService {
 		return countOfWeekdayAttendancesOfAUserInAMonth;
 	}
 
+	async getCountOfWeekendAttendancesOfAUserInAMonth(monthlyUser: MonthlyUsers): Promise<number> {
+		const userInfo: UserInfo = await this.getUserInfoByMonthlyUser(monthlyUser);
+		const monthInfo: MonthInfo = await this.getMonthInfoByMonthlyUser(monthlyUser);
+		const countOfWeekendAttendancesOfAUserInAMonth: number = await this.attendanceRepository.count({
+			relations: {
+				dayInfo: true,
+			},
+			where: {
+				userInfo,
+				dayInfo: {
+					monthInfo,
+					type: 1,
+				}
+			}
+		});
+		return countOfWeekendAttendancesOfAUserInAMonth;
+	}
+
+	async getCountOfHolidayAttendancesOfAUserInAMonth(monthlyUser: MonthlyUsers): Promise<number> {
+		const userInfo: UserInfo = await this.getUserInfoByMonthlyUser(monthlyUser);
+		const monthInfo: MonthInfo = await this.getMonthInfoByMonthlyUser(monthlyUser);
+		const countOfHolidayAttendancesOfAUserInAMonth: number = await this.attendanceRepository.count({
+			relations: {
+				dayInfo: true,
+			},
+			where: {
+				userInfo,
+				dayInfo: {
+					monthInfo,
+					type: 2,
+				}
+			}
+		});
+		return countOfHolidayAttendancesOfAUserInAMonth;
+	}
+
 	async setAttendance(userInfo: UserInfo, dayInfo: DayInfo, datetime: Date) {
 		const attendanceToSet = this.attendanceRepository.create({
 			timelog: datetime,
@@ -515,6 +551,30 @@ export class DbmanagerService {
 				monthInfo,
 			},
 			//select: ['userInfo','totalPerfectCount','isPerfect'],
+		});
+		return monthlyUsersInTheMonth;
+	}
+
+	async getMonthlyUsersAttendedMoreThanOrEqualCount(monthInfo: MonthInfo, count: number) {
+		if (!Number.isInteger(count)) {
+			throw new Error('count must be an integer');
+		}
+		const monthlyUsersInTheMonth = this.monthlyUsersRepository.find({
+			select: {
+				userInfo: {
+					intraId: true,
+				},
+				totalPerfectCount: true,
+				isPerfect: true,
+				attendanceCount: true
+			},
+			relations: {
+				userInfo: true,
+			},
+			where: {
+				monthInfo,
+				attendanceCount: MoreThanOrEqual(count)
+			},
 		});
 		return monthlyUsersInTheMonth;
 	}
