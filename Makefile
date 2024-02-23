@@ -7,7 +7,7 @@ NC := "\033[0m"
 # COMMANDS
 all:
 	@echo $(BLUE)🐋 Docker containers are starting... $(NC)
-	@docker-compose up --build
+	@docker-compose up --build -d
 	@echo $(GREEN)✅ Successfully started! $(NC)
 .PHONY: all
 
@@ -20,9 +20,32 @@ down:
 	@docker-compose -f ./docker-compose.yml down
 .PHONY: down
 
-re: prune
-	make all
+build:
+	@docker-compose -f ./docker-compose.yml build
+.PHONY: build
+
+re: down build all
 .PHONY: re
+
+logs:
+	@docker-compose -f ./docker-compose.yml logs -f
+.PHONY: logs
+
+ps:
+	@docker-compose -f ./docker-compose.yml ps
+.PHONY: ps
+
+restart:
+	@docker-compose -f ./docker-compose.yml restart
+.PHONY: restart
+
+clean:
+	@docker-compose -f ./docker-compose.yml down --rmi all --remove-orphans
+.PHONY: clean
+
+fclean:
+	@docker-compose -f ./docker-compose.yml down -v --rmi all --remove-orphans
+.PHONY: fclean
 
 prune: stop
 	@echo $(BLUE)"docker system prune will be executed"$(NC)
@@ -37,4 +60,3 @@ stop:
 		echo $(YELLOW)No running containers found. $(NC); \
 	fi
 .PHONY: stop
-

@@ -1,44 +1,48 @@
-version: "3"
+version: "3.8"
 
 services:
-  backend:
-    container_name: backend
+  mogle_backend:
+    container_name: mogle_backend
     build: ./
-    image: backend
+    image: link.42seoul.mogle.backend
     ports:
-      - 3000:3000
+      - 3001:3001
     restart: on-failure:3
     networks:
-      - 42mogle_network
+      - mogle_network
+    volumes:
+      - ./Log:/app/Log
     env_file:
       - .env
       - .env.api
+    environment:
+      TZ: "Asia/Seoul"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - mogle_database
 
-  postgres:
-    container_name: postgres
+  mogle_database:
+    container_name: mogle_database
     image: postgres:14.9-alpine3.18
     restart: on-failure:3
     networks:
-      - 42mogle_network
+      - mogle_network
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file: .env
     environment:
       TZ: "Asia/Seoul"
-    env_file:
-      - .env
+      POSTGRES_DB: ${DATABASE_DBNAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     healthcheck:
-      test: pg_isready -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
       interval: 10s
-      timeout: 30s
-      retries: 20
+      timeout: 5s
+      retries: 5
       start_period: 10s
 
-volumes:
-  postgres_data:
-
 networks:
-  42mogle_network:
+  mogle_network:
     driver: bridge

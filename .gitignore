@@ -56,3 +56,6 @@ yarn-error.log
 .env
 .env.api
 .env.api.copy
+
+./Log
+./postgres_data

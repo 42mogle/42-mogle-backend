@@ -7,13 +7,13 @@ const dbConfig = config.get('db');
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
 	type: dbConfig.type,
-	host: process.env.POSTGRES_HOST || dbConfig.host,
-	port: process.env.POSTGRES_PORT || dbConfig.port,
-	username: process.env.POSTGRES_USER || dbConfig.username,
-	password: process.env.POSTGRES_PASSWORD || dbConfig.password,
-	database: process.env.POSTGRES_DB || dbConfig.database,
+	host: process.env.DATABASE_HOST || dbConfig.host,
+	port: process.env.DATABASE_PORT || dbConfig.port,
+	username: process.env.DATABASE_USERNAME || dbConfig.username,
+	password: process.env.DATABASE_PASSWORD || dbConfig.password,
+	database: process.env.DATABASE_DBNAME || dbConfig.database,
 	entities: [
 		__dirname + '/../**/*.entity.{js,ts}'
 	],
-	synchronize: process.env.DB_SYNC || dbConfig.synchronize
+	synchronize: process.env.DATABASE_SYNC || dbConfig.synchronize
 }

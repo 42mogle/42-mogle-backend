@@ -16,6 +16,6 @@ COPY ["config", "./config"]
 RUN npm run build
 
 # Port to expose
-EXPOSE 3000
+EXPOSE 3001
 
 ENTRYPOINT ["node", "dist/main.js"]
